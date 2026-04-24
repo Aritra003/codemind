@@ -1,5 +1,5 @@
 # Apex — AI-First Engineering Team
-Authors: Ashish Khandelwal, Arup Kolay | MIT License
+Authors: Aritra Sarkhel | MIT License
 Current version: v1.5
 ================================================================================
 
