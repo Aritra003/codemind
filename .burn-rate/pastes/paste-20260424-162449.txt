@@ -1,0 +1,441 @@
+<ide_opened_file>The user opened the file /Users/aritrasarkhel/Desktop/CODEMIND/COMPREHENSIVE-TEST-RESULTS.md in the IDE. This may or may not be related to the current task.</ide_opened_file>
+# CodeMind Bug Fix Sprint 2 — All 8 Bugs
+
+## BUDGET: $0. Every fix below is deterministic. ZERO API calls. Do not call the Anthropic API at any point during this sprint.
+
+## Fix order is critical. Each fix builds on the previous one. Do them in sequence.
+
+---
+
+## FIX 1: BUG-1 (BLOCKER) — MCP server exits immediately
+
+`codemind serve` starts and instantly exits. The MCP server process has no event loop keeping it alive.
+
+Diagnosis: The MCP SDK likely uses stdio transport (not HTTP). The server needs to stay alive listening on stdin/stdout. The process exits because nothing holds the event loop open after setup.
+
+Fix checklist:
+1. Check how the MCP server is initialized. If using `@modelcontextprotocol/sdk`, the standard pattern is:
+
+```typescript
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+
+const server = new McpServer({ name: "codemind", version: "1.0.0" });
+
+// Register tools...
+server.tool("codemind_status", "Check index health", {}, async () => { ... });
+server.tool("codemind_check", "Blast radius analysis", { ... }, async () => { ... });
+// etc.
+
+const transport = new StdioServerTransport();
+await server.connect(transport);
+```
+
+The `server.connect(transport)` call should keep the process alive. If it doesn't:
+- Make sure the transport is `StdioServerTransport`, not a custom one
+- Make sure `connect()` is awaited at the top level
+- Make sure nothing calls `process.exit()` after setup
+- Add a keepalive as fallback: `setInterval(() => {}, 60000);`
+
+2. If the issue is the CJS/ESM resolution problem found earlier (noExternal fix), verify that `tsup.config.ts` still bundles `@modelcontextprotocol/sdk` correctly for the `serve` command entry point.
+
+3. The `codemind serve` command in Commander should NOT return — it should await the server connection:
+
+```typescript
+program
+  .command('serve')
+  .description('Start MCP server for Claude Code integration')
+  .action(async () => {
+    await startMcpServer();  // This must not resolve until server shuts down
+  });
+```
+
+**Test after fix:**
+```bash
+# Start server in background
+codemind serve &
+SERVER_PID=$!
+sleep 3
+
+# Check it's still alive
+if kill -0 $SERVER_PID 2>/dev/null; then
+  echo "PASS: Server stayed alive for 3 seconds"
+else
+  echo "FAIL: Server exited early"
+fi
+
+# Clean up
+kill $SERVER_PID 2>/dev/null
+wait $SERVER_PID 2>/dev/null
+```
+
+Must stay alive for at least 3 seconds. Run the test 3 times to confirm it's stable, not a race condition.
+
+---
+
+## FIX 2: BUG-4 (MAJOR) — Barrel re-exports not traced
+
+`app.ts` imports `{ log }` from `./utils` (which is `./utils/index.ts`). `utils/index.ts` re-exports `{ log }` from `./logger`. CodeMind should see the chain: `app.ts` → `utils/index.ts` → `utils/logger.ts`. Currently, the chain breaks at the barrel file.
+
+The problem: the parser sees `export { log } from './logger'` in `utils/index.ts` but doesn't create a transitive edge from `app.ts` to `utils/logger.ts`. It only sees `app.ts` → `utils/index.ts`.
+
+Two-part fix:
+
+**Part A — Index re-export edges.** When parsing `export { X } from './Y'`, create TWO edges:
+1. `utils/index.ts` --IMPORTS--> `utils/logger.ts` (the re-export source)
+2. `utils/index.ts` --EXPORTS--> `utils/logger.ts` (marking this as a pass-through)
+
+The parser should detect these re-export patterns:
+```typescript
+export { foo } from './module';           // Named re-export
+export { default } from './module';       // Default re-export
+export { foo as bar } from './module';    // Renamed re-export
+export * from './module';                 // Wildcard re-export
+export * as namespace from './module';    // Namespace re-export
+```
+
+**Part B — Transitive resolution during graph construction.** After all edges are built, run a resolution pass:
+- For every IMPORTS edge `A → B` where `B` is a barrel file (has EXPORTS edges):
+  - Find what `A` actually uses from `B` (the imported symbols)
+  - Trace those symbols through `B`'s re-exports to their source files
+  - Add CALLS edges from `A` to the actual source functions
+
+This doesn't need to be perfect — even handling the simple `export { X } from './Y'` pattern covers 90% of real barrel files.
+
+**Test after fix:**
+```bash
+cd ~/test-repos/barrel
+rm -rf .codemind
+codemind index
+codemind check --file utils/logger.ts
+
+# app.ts should now appear as a dependent of utils/logger.ts
+# If it does: PASS
+# If only utils/index.ts appears: PARTIAL (barrel detected but not transitively resolved)
+# If neither appears: FAIL
+```
+
+Also re-test on a real repo that uses barrels heavily:
+```bash
+cd ~/test-repos/trpc
+rm -rf .codemind
+codemind index
+# Compare local completeness before and after fix — barrel resolution should improve it
+```
+
+---
+
+## FIX 3: BUG-3 (MAJOR) — Nonexistent file returns false LOW instead of error
+
+`codemind check --file does/not/exist.ts` currently exits with code 0 and says "LOW risk" — a false result. It should exit with code 1 and a clear error message.
+
+Fix: at the start of the check runner, before any analysis:
+
+```typescript
+async function runCheck(filePath: string | undefined, options: CheckOptions) {
+  // If --file was specified, verify the file exists
+  if (filePath) {
+    const resolvedPath = path.resolve(filePath);
+    if (!fs.existsSync(resolvedPath)) {
+      console.error(`Error: File not found: ${filePath}`);
+      console.error(`Check the path and try again.`);
+      process.exit(1);
+    }
+    
+    // Also verify the file is in the graph
+    const graph = loadGraph();
+    const nodesInFile = graph.getNodesByFile(resolvedPath);
+    if (nodesInFile.length === 0) {
+      console.error(`Error: ${filePath} exists but has no indexed nodes.`);
+      console.error(`It may be in an unsupported language or excluded from indexing.`);
+      console.error(`Run \`codemind index\` to rebuild the graph.`);
+      process.exit(1);
+    }
+  }
+  // ... rest of analysis
+}
+```
+
+**Test after fix:**
+```bash
+cd ~/test-repos/got
+
+# Nonexistent file
+codemind check --file does/not/exist.ts
+echo "Exit code: $?"
+# Expected: error message + exit code 1
+
+# Existing file that's not TS (e.g., README.md)
+codemind check --file README.md
+echo "Exit code: $?"
+# Expected: error about no indexed nodes + exit code 1
+
+# Valid file
+codemind check --file source/core/options.ts
+echo "Exit code: $?"
+# Expected: normal analysis + exit code 0
+```
+
+---
+
+## FIX 4: BUG-2 (MAJOR) — `--json` returns formatted text
+
+The global `--json` flag doesn't propagate to subcommands, so `codemind check --file X --json` still outputs human-formatted text with ANSI colors.
+
+Fix: there are two common approaches. Pick whichever matches the existing Commander setup:
+
+**Approach A — Global option inheritance:**
+```typescript
+program.option('--json', 'Output raw JSON instead of formatted text');
+
+// In each subcommand action, check the parent option:
+.action(async (options) => {
+  const jsonMode = program.opts().json || options.json;
+  // ... pass jsonMode to runner
+});
+```
+
+**Approach B — Per-command option:**
+Add `--json` as an explicit option to every subcommand that supports it:
+```typescript
+program.command('check')
+  .option('--json', 'Output raw JSON')
+  .option('--file <path>', 'File to analyze')
+  .action(async (options) => {
+    const jsonMode = options.json;
+    // ...
+  });
+```
+
+In the runner, when `jsonMode` is true:
+1. Suppress ALL console.log/warn/error that isn't the final JSON
+2. Disable ANSI color codes (set `chalk.level = 0` or use `--no-color`)  
+3. Write warnings/progress to stderr, data to stdout
+4. Output ONLY `JSON.stringify(result, null, 2)` to stdout at the end
+
+**Test after fix:**
+```bash
+cd ~/test-repos/got
+
+# Check JSON validity
+codemind check --file source/core/options.ts --json 2>/dev/null | python3 -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    print('PASS: Valid JSON')
+    print(f'Keys: {list(data.keys())[:6]}')
+except json.JSONDecodeError as e:
+    print(f'FAIL: Invalid JSON at position {e.pos}: {e.msg}')
+"
+
+# Hotspots JSON
+codemind graph --hotspots --json 2>/dev/null | python3 -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    print('PASS: Valid JSON')
+except json.JSONDecodeError as e:
+    print(f'FAIL: {e.msg}')
+"
+
+# Status JSON
+codemind --json 2>/dev/null | python3 -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    print('PASS: Valid JSON')
+except json.JSONDecodeError as e:
+    print(f'FAIL: {e.msg}')
+"
+
+# Verify no ANSI codes in JSON output
+codemind check --file source/core/options.ts --json 2>/dev/null | grep -P '\x1b\[' && echo "FAIL: ANSI codes found" || echo "PASS: No ANSI codes"
+```
+
+---
+
+## FIX 5: BUG-5 (MINOR) — Dynamic imports silently dropped, shows misleading 100%
+
+When the parser encounters `import(\`./plugins/${name}\`)`, it silently skips it. The completeness metric should reflect that an unresolvable import exists.
+
+Fix: when parsing and encountering a dynamic import with a template literal or variable:
+1. Do NOT create an edge (correct — it's unresolvable)
+2. DO increment `ambiguous_local` counter in the graph metadata
+3. Add it to `known_blind_spots` array: `"dynamic import at loader.ts:3"`
+
+```typescript
+// When parsing import() expressions:
+if (importPath.includes('${') || !importPath.startsWith('.') && !importPath.startsWith('/')) {
+  graphMeta.completeness.ambiguous_local++;
+  graphMeta.completeness.known_blind_spots.push(
+    `dynamic import at ${filePath}:${lineNumber}`
+  );
+}
+```
+
+**Test after fix:**
+```bash
+cd ~/test-repos/dynamic
+rm -rf .codemind
+codemind index
+# Should show: ambiguous_local >= 1
+# Should NOT show 100% local completeness
+```
+
+---
+
+## FIX 6: BUG-6 (MINOR) — CommonJS `require()` not indexed
+
+The parser only handles ESM `import` statements, not `require()` calls. In `.js` files (and some `.ts` files), `require()` is the import mechanism.
+
+Fix: add a tree-sitter query (or AST walker) that detects `require()` calls:
+
+```typescript
+// Pattern: const X = require('./module')
+// Pattern: const { X } = require('./module')  
+// Pattern: require('./module')
+
+// Tree-sitter query for call_expression where function is "require"
+// and the first argument is a string literal starting with "./"
+```
+
+When a `require('./module')` is found:
+1. Resolve the path the same way as ESM imports (workspace map, relative, barrel)
+2. Create an IMPORTS edge from the current file to the resolved module
+3. If the require path is a bare module name (e.g., `require('express')`), count it as external
+
+This doesn't need to handle every CommonJS edge case (dynamic requires, conditional requires). Just handle the standard `const X = require('./Y')` pattern — that covers 90% of real usage.
+
+**Test after fix:**
+```bash
+cd ~/test-repos/mixed
+rm -rf .codemind
+codemind index
+codemind check --file validator.ts
+# server.js should now appear in the graph
+# handler.ts should show as dependent of validator.ts
+
+cd ~/test-repos/passport
+rm -rf .codemind
+codemind index
+# Local completeness should be > 0% (was 0%)
+# Node count should include functions from .js files
+```
+
+---
+
+## FIX 7: BUG-7 (MINOR) — Skill file not generated
+
+`codemind index` should create `.claude/skills/codemind.md` in the repo root. It currently doesn't.
+
+Fix: at the end of the index runner, after writing the graph:
+
+```typescript
+const skillDir = path.join(repoRoot, '.claude', 'skills');
+const skillPath = path.join(skillDir, 'codemind.md');
+
+if (!fs.existsSync(skillPath)) {
+  fs.mkdirSync(skillDir, { recursive: true });
+  fs.writeFileSync(skillPath, SKILL_FILE_CONTENT);
+  console.log(`  Created Claude Code skill file at .claude/skills/codemind.md`);
+}
+```
+
+The `SKILL_FILE_CONTENT` should be the skill file content from the project's own skill template (it already exists in the repo as a reference file — embed it as a string constant or read it from a template).
+
+**Test after fix:**
+```bash
+cd ~/test-repos/got
+rm -rf .codemind .claude
+codemind index
+cat .claude/skills/codemind.md | head -5
+# Should show the skill file header
+
+# Second index should NOT overwrite or duplicate
+codemind index
+wc -l .claude/skills/codemind.md
+# Should be same line count as first run
+```
+
+---
+
+## FIX 8: BUG-8 (COSMETIC) — Pure CommonJS repos show 0% completeness
+
+After FIX 6 adds `require()` support, this should resolve itself. If passport still shows 0% after FIX 6, the issue is that the local completeness formula divides by zero when there are zero resolved local imports.
+
+Safeguard:
+```typescript
+const localCompleteness = (resolved + localAmbiguous) === 0
+  ? 100  // No local imports at all = trivially complete
+  : Math.round((resolved / (resolved + localAmbiguous)) * 100);
+```
+
+If a repo has ZERO local imports (only external), completeness is 100% by definition — there's nothing local to resolve.
+
+**Test after fix:**
+```bash
+cd ~/test-repos/passport
+rm -rf .codemind
+codemind index
+# Should show > 0% if require() calls exist
+# Or 100% if all requires are external (express, etc.) and there are no local calls
+```
+
+---
+
+## VERIFICATION
+
+After all 8 fixes, run the failed tests from the comprehensive suite:
+
+```bash
+echo "=== FIX 1: MCP Server ==="
+cd ~/test-repos/got
+codemind serve &
+sleep 3
+kill -0 $! 2>/dev/null && echo "PASS" || echo "FAIL"
+kill $! 2>/dev/null; wait $! 2>/dev/null
+
+echo "=== FIX 2: Barrel exports ==="
+cd ~/test-repos/barrel
+rm -rf .codemind && codemind index
+codemind check --file utils/logger.ts 2>&1 | grep -i "app\|dependent" && echo "PASS" || echo "FAIL"
+
+echo "=== FIX 3: Nonexistent file ==="
+cd ~/test-repos/got
+codemind check --file nonexistent.ts 2>&1; echo "Exit code: $?"
+
+echo "=== FIX 4: JSON output ==="
+codemind check --file source/core/options.ts --json 2>/dev/null | python3 -c "import sys,json; json.load(sys.stdin); print('PASS')" 2>/dev/null || echo "FAIL"
+
+echo "=== FIX 5: Dynamic imports ==="
+cd ~/test-repos/dynamic
+rm -rf .codemind && codemind index 2>&1 | grep -i "ambig" && echo "PASS" || echo "CHECK MANUALLY"
+
+echo "=== FIX 6: CommonJS ==="
+cd ~/test-repos/mixed
+rm -rf .codemind && codemind index
+codemind check --file validator.ts 2>&1 | grep -i "depend\|caller" && echo "PASS" || echo "FAIL"
+
+echo "=== FIX 7: Skill file ==="
+cd ~/test-repos/got
+rm -rf .codemind .claude && codemind index
+test -f .claude/skills/codemind.md && echo "PASS" || echo "FAIL"
+
+echo "=== FIX 8: Passport completeness ==="
+cd ~/test-repos/passport
+rm -rf .codemind && codemind index 2>&1 | grep -i "completeness\|local" && echo "CHECK VALUE" || echo "FAIL"
+
+echo "=== Regression: Cap still works ==="
+cd ~/test-repos/cap
+rm -rf .codemind && codemind index
+time codemind check --file packages/database/index.ts
+```
+
+**All 9 checks must pass. The regression test on Cap must still show 75%+ completeness and sub-2s check time.**
+
+Create `TEST-RESULTS-SPRINT2.md` with:
+1. Bug # | Status (FIXED/PARTIAL/OPEN) | Before → After
+2. Updated demo readiness score: target 9/10
+3. Any new bugs introduced by these fixes
+
+Save to the CodeMind project root.

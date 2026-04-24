@@ -1,0 +1,52 @@
+{
+  "name": "codemind",
+  "version": "0.1.0",
+  "description": "Know the blast radius of every change before it ships.",
+  "license": "MIT",
+  "bin": {
+    "codemind": "./bin/codemind.js"
+  },
+  "main": "./dist/index.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup src/index.ts --format cjs --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:perf": "vitest run tests/perf",
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "hygiene": "ts-node scripts/hygiene-check.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.24.0",
+    "@codemind/shared": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "chalk": "^5.3.0",
+    "chokidar": "^3.6.0",
+    "commander": "^12.0.0",
+    "js-yaml": "^4.1.0",
+    "msgpackr": "^1.10.0",
+    "ora": "^8.0.0",
+    "pino": "^9.0.0",
+    "pino-pretty": "^11.0.0",
+    "simple-git": "^3.24.0",
+    "tree-sitter": "^0.21.0",
+    "tree-sitter-javascript": "^0.21.0",
+    "tree-sitter-typescript": "^0.21.0",
+    "uuid": "^14.0.0"
+  },
+  "devDependencies": {
+    "@types/chokidar": "^2.1.7",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.0.0",
+    "@types/uuid": "^10.0.0",
+    "ts-node": "^10.9.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
+  }
+}

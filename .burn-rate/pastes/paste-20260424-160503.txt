@@ -1,0 +1,821 @@
+# CodeMind Comprehensive Test Suite
+
+## BUDGET: $3 MAXIMUM for all API calls. Tests marked [FREE] use zero credits. Tests marked [API $X.XX] use credits. Track cumulative spend. Stop all API tests if cumulative exceeds $2.50.
+
+## PHASE 1 — MULTI-REPO ARCHITECTURE TESTS [ALL FREE]
+
+We need to know CodeMind works across different TypeScript/JS architectures, not just the two repos we've tested. Clone all five repos first, then test sequentially.
+
+```bash
+# Clone all test repos (shallow clone, save disk)
+git clone --depth 30 https://github.com/fastify/fastify.git ~/test-repos/fastify
+git clone --depth 30 https://github.com/trpc/trpc.git ~/test-repos/trpc
+git clone --depth 30 https://github.com/lobehub/lobe-chat.git ~/test-repos/lobe-chat
+git clone --depth 30 https://github.com/jaredhanson/passport.git ~/test-repos/passport
+git clone --depth 30 https://github.com/colinhacks/zod.git ~/test-repos/zod
+```
+
+Why these five:
+- **fastify** — plugin-based architecture, heavy use of generics and type inference, `.js` + `.ts` mixed
+- **trpc** — pnpm monorepo, deep TypeScript generics, workspace cross-references
+- **lobe-chat** — large Next.js app (1000+ files), pnpm monorepo, i18n, AI integrations
+- **passport** — old-school CommonJS, `.js` only (no TypeScript), `require()` instead of `import`
+- **zod** — single package, pure TypeScript, heavy class inheritance chains, method chaining patterns
+
+### Test 1.1: Index All Five + Record Metrics
+
+Run this for EACH repo:
+```bash
+cd ~/test-repos/<repo>
+rm -rf .codemind
+time codemind index
+codemind graph --hotspots 2>/dev/null | head -10
+```
+
+**Record in a table:**
+
+| Repo | Nodes | Edges | Local Completeness | External Excluded | Ambiguous Local | Index Time | Top Hotspot |
+|------|-------|-------|-------------------|-------------------|-----------------|------------|-------------|
+| fastify | | | | | | | |
+| trpc | | | | | | | |
+| lobe-chat | | | | | | | |
+| passport | | | | | | | |
+| zod | | | | | | | |
+
+**Pass criteria:**
+- [ ] ALL FIVE index without crashing
+- [ ] Local completeness is 60%+ on at least 4 of 5 repos
+- [ ] passport (pure JS, CommonJS) indexes — if it crashes or shows 0 nodes, that's a bug (CodeMind claims JS support)
+- [ ] lobe-chat (large repo) indexes in under 180 seconds
+- [ ] zod (inheritance-heavy) shows reasonable edge counts for INHERITS type
+- [ ] No "parse_skipped" warnings (the buffer size fix should handle all files)
+
+**Specific things to watch:**
+- **fastify**: Uses `module.exports` and `require()` alongside ESM. Does the parser handle both?
+- **trpc**: Uses `@trpc/server`, `@trpc/client` workspace references. Does workspace resolution work?
+- **passport**: ZERO TypeScript. If CodeMind only supports TS and not JS, that's a gap to document.
+- **lobe-chat**: Likely has 1000+ nodes. Does the graph stay performant?
+
+---
+
+### Test 1.2: Check Latency Across All Five [FREE]
+
+For each repo, pick the #1 hotspot from Test 1.1 and run check:
+
+```bash
+cd ~/test-repos/<repo>
+time codemind check --file <path-to-hotspot>
+```
+
+**Record:**
+
+| Repo | Hotspot File | Risk Level | Direct Deps | Check Time |
+|------|-------------|------------|-------------|------------|
+| fastify | | | | |
+| trpc | | | | |
+| lobe-chat | | | | |
+| passport | | | | |
+| zod | | | | |
+
+**Pass criteria:**
+- [ ] ALL FIVE return in under 2 seconds
+- [ ] lobe-chat hotspot (largest repo) still under 2 seconds
+- [ ] Risk levels make sense (core files should be MEDIUM or higher)
+
+---
+
+## PHASE 2 — EDGE CASE TORTURE TESTS [ALL FREE]
+
+These test things that break most tools but happen in real codebases.
+
+### Test 2.1: Circular Dependencies
+
+```bash
+mkdir -p ~/test-repos/circular && cd ~/test-repos/circular
+git init
+
+cat > a.ts << 'EOF'
+import { bFunction } from './b';
+export function aFunction() { return bFunction(); }
+EOF
+
+cat > b.ts << 'EOF'
+import { aFunction } from './a';
+export function bFunction() { return aFunction(); }
+EOF
+
+git add . && git commit -m "circular deps"
+
+codemind index
+codemind check --file a.ts
+codemind graph --export json | python3 -c "import sys,json; d=json.load(sys.stdin); print(f'Nodes: {len(d.get(\"nodes\",[]))}, Edges: {len(d.get(\"edges\",[]))}')"
+```
+
+**Pass criteria:**
+- [ ] Does NOT infinite loop during graph traversal
+- [ ] Does NOT infinite loop during blast radius BFS
+- [ ] Reports both files as dependents of each other
+- [ ] Check returns a risk level without hanging
+
+---
+
+### Test 2.2: Barrel Files (index.ts Re-exports)
+
+```bash
+mkdir -p ~/test-repos/barrel/utils && cd ~/test-repos/barrel
+git init
+
+cat > utils/logger.ts << 'EOF'
+export function log(msg: string) { console.log(msg); }
+EOF
+
+cat > utils/math.ts << 'EOF'
+export function add(a: number, b: number) { return a + b; }
+EOF
+
+cat > utils/index.ts << 'EOF'
+export { log } from './logger';
+export { add } from './math';
+EOF
+
+cat > app.ts << 'EOF'
+import { log, add } from './utils';
+log(String(add(1, 2)));
+EOF
+
+git add . && git commit -m "barrel exports"
+
+codemind index
+codemind check --file utils/logger.ts
+```
+
+**Pass criteria:**
+- [ ] `app.ts` shows as a dependent of `utils/logger.ts` (the import goes through the barrel but should still resolve)
+- [ ] EXPORTS edges exist from `utils/index.ts` to `utils/logger.ts` and `utils/math.ts`
+- [ ] Completeness is high (all imports are local and resolvable)
+
+---
+
+### Test 2.3: Dynamic Imports
+
+```bash
+mkdir -p ~/test-repos/dynamic && cd ~/test-repos/dynamic
+git init
+
+cat > loader.ts << 'EOF'
+export async function loadPlugin(name: string) {
+  const plugin = await import(`./plugins/${name}`);
+  return plugin.default;
+}
+EOF
+
+cat > plugins/auth.ts << 'EOF'
+export default function auth() { return 'authenticated'; }
+EOF
+
+git add . && git commit -m "dynamic imports"
+
+codemind index
+codemind check --file plugins/auth.ts
+```
+
+**Pass criteria:**
+- [ ] Does NOT crash on template literal imports
+- [ ] Flags `import(\`./plugins/${name}\`)` as ambiguous (cannot resolve at static analysis time)
+- [ ] Completeness metric reflects the unresolved dynamic import
+- [ ] `plugins/auth.ts` shows 0 callers (correct — the dynamic import is unresolvable)
+
+---
+
+### Test 2.4: Very Long File (Stress)
+
+```bash
+mkdir -p ~/test-repos/bigfile && cd ~/test-repos/bigfile
+git init
+
+# Generate a 200KB TypeScript file with 500 functions
+python3 -c "
+for i in range(500):
+    if i > 0:
+        print(f'import {{ func{i-1} }} from \"./bigfile\";')
+    print(f'export function func{i}() {{ return {i}; }}')
+" > bigfile.ts
+
+# Generate a file that imports 100 of them
+python3 -c "
+imports = ', '.join([f'func{i}' for i in range(100)])
+print(f'import {{ {imports} }} from \"./bigfile\";')
+print(f'export function main() {{ return [{imports}]; }}')
+" > consumer.ts
+
+git add . && git commit -m "big file"
+
+time codemind index
+codemind check --file bigfile.ts
+codemind graph --hotspots | head -5
+```
+
+**Pass criteria:**
+- [ ] Does NOT crash on the 200KB file (parse buffer fix should handle this)
+- [ ] Indexes 500+ functions as separate nodes
+- [ ] Check returns in under 2 seconds even with 100 direct dependents
+- [ ] Hotspots shows `bigfile.ts` functions at the top
+
+---
+
+### Test 2.5: No Source Files (Only Config)
+
+```bash
+mkdir -p ~/test-repos/configonly && cd ~/test-repos/configonly
+git init
+echo '{ "name": "test" }' > package.json
+echo '{}' > tsconfig.json
+echo "# README" > README.md
+git add . && git commit -m "config only"
+
+codemind index
+```
+
+**Pass criteria:**
+- [ ] Prints warning: "No supported source files found"
+- [ ] Does NOT crash
+- [ ] Exit code is 0 (warning, not error)
+
+---
+
+### Test 2.6: Mixed JS/TS with require() and import
+
+```bash
+mkdir -p ~/test-repos/mixed && cd ~/test-repos/mixed
+git init
+
+cat > server.js << 'EOF'
+const express = require('express');
+const { handler } = require('./handler');
+const app = express();
+app.get('/', handler);
+module.exports = app;
+EOF
+
+cat > handler.ts << 'EOF'
+import { validate } from './validator';
+export function handler(req: any, res: any) {
+  if (validate(req.query)) res.send('ok');
+}
+EOF
+
+cat > validator.ts << 'EOF'
+export function validate(input: any): boolean {
+  return !!input;
+}
+EOF
+
+git add . && git commit -m "mixed js ts"
+
+codemind index
+codemind check --file validator.ts
+```
+
+**Pass criteria:**
+- [ ] Both `.js` and `.ts` files are indexed
+- [ ] `require('./handler')` in `server.js` creates an edge to `handler.ts`
+- [ ] `handler.ts` shows as a dependent of `validator.ts`
+- [ ] If `.js` is NOT supported: clear message in output, not a silent skip
+
+---
+
+### Test 2.7: TypeScript Decorators (NestJS-style)
+
+```bash
+mkdir -p ~/test-repos/decorators && cd ~/test-repos/decorators
+git init
+
+cat > controller.ts << 'EOF'
+function Get(path: string) { return function(target: any, key: string) {}; }
+function Injectable() { return function(target: any) {}; }
+
+@Injectable()
+class UserService {
+  getUser(id: string) { return { id, name: 'test' }; }
+}
+
+class UserController {
+  constructor(private userService: UserService) {}
+
+  @Get('/users/:id')
+  findOne(id: string) {
+    return this.userService.getUser(id);
+  }
+}
+
+export { UserController, UserService };
+EOF
+
+git add . && git commit -m "decorators"
+
+codemind index
+codemind check --file controller.ts
+```
+
+**Pass criteria:**
+- [ ] Does NOT crash on decorator syntax
+- [ ] Parses both classes and their methods
+- [ ] Detects the `userService.getUser()` call site (method call through constructor injection)
+- [ ] If decorators are not fully supported: ambiguous call sites count reflects this honestly
+
+---
+
+### Test 2.8: Deeply Nested Directory Structure
+
+```bash
+mkdir -p ~/test-repos/deep/src/modules/auth/guards/jwt/strategies && cd ~/test-repos/deep
+git init
+
+cat > src/modules/auth/guards/jwt/strategies/local.ts << 'EOF'
+export function validateLocal(token: string) { return token.length > 0; }
+EOF
+
+cat > src/modules/auth/guards/jwt/guard.ts << 'EOF'
+import { validateLocal } from './strategies/local';
+export function jwtGuard(token: string) { return validateLocal(token); }
+EOF
+
+cat > src/modules/auth/auth.ts << 'EOF'
+import { jwtGuard } from './guards/jwt/guard';
+export function authenticate(token: string) { return jwtGuard(token); }
+EOF
+
+cat > src/app.ts << 'EOF'
+import { authenticate } from './modules/auth/auth';
+export function main() { return authenticate('token123'); }
+EOF
+
+git add . && git commit -m "deep nesting"
+
+codemind index
+codemind check --file src/modules/auth/guards/jwt/strategies/local.ts
+```
+
+**Pass criteria:**
+- [ ] Indexes all 4 files despite 6 levels of nesting
+- [ ] `check` on the deepest file traces ALL the way up to `app.ts` (depth 3)
+- [ ] Relative imports with multiple `../` resolve correctly
+
+---
+
+## PHASE 3 — COMMAND-SPECIFIC DEEP TESTS [FREE EXCEPT WHERE MARKED]
+
+### Test 3.1: Check — All Risk Levels
+
+Using the repos from Phase 1, verify we get all four risk levels:
+
+```bash
+# LOW — find a leaf file with 0 callers
+cd ~/test-repos/zod
+codemind check --file <a test file or fixture file>
+
+# MEDIUM — find a file with 10-15 callers
+cd ~/test-repos/fastify
+codemind check --file <utility file from hotspots>
+
+# HIGH — use the known high-risk file
+cd ~/test-repos/got
+codemind check --file source/core/options.ts
+
+# CRITICAL — may not exist naturally. Document if we can't trigger it.
+```
+
+**Record:**
+
+| Target Level | Repo | File | Actual Level | Correct? |
+|---|---|---|---|---|
+| LOW | | | | |
+| MEDIUM | | | | |
+| HIGH | | | | |
+| CRITICAL | | | | |
+
+**Pass criteria:**
+- [ ] At least 3 of 4 risk levels observed across test repos
+- [ ] LOW files genuinely have few/no callers
+- [ ] HIGH files genuinely have many callers or coverage gaps
+- [ ] If CRITICAL never triggers: document the threshold and confirm the classification rules are correct
+
+---
+
+### Test 3.2: Check --think [API ~$0.50]
+
+Pick ONE repo only (got — smallest, cheapest context):
+
+```bash
+cd ~/test-repos/got
+codemind check --file source/core/options.ts --think
+```
+
+**Pass criteria:**
+- [ ] Returns all fast-tier data PLUS Opus enrichment
+- [ ] Failure scenarios mention specific files from the `got` codebase (not generic advice)
+- [ ] Suggested tests are actionable (mention specific functions or paths)
+- [ ] Total execution time: 15-45 seconds
+
+**DO NOT run --think on any other repo. One test is sufficient and saves budget.**
+
+---
+
+### Test 3.3: Graph Exports [FREE]
+
+Test all export formats on `got` (small, fast):
+
+```bash
+cd ~/test-repos/got
+
+# Mermaid
+codemind graph --export mermaid > /tmp/got.mermaid
+head -5 /tmp/got.mermaid
+wc -l /tmp/got.mermaid
+
+# JSON
+codemind graph --export json > /tmp/got.json
+python3 -c "import json; d=json.load(open('/tmp/got.json')); print(f'Nodes: {len(d.get(\"nodes\",d.get(\"graph\",{}).get(\"nodes\",[])))}'); print(f'Edges: {len(d.get(\"edges\",d.get(\"graph\",{}).get(\"edges\",[])))}'); print('Keys:', list(d.keys())[:5])"
+
+# DOT
+codemind graph --export dot > /tmp/got.dot
+head -5 /tmp/got.dot
+grep -c '\->' /tmp/got.dot
+```
+
+**Pass criteria:**
+- [ ] Mermaid: starts with `graph` or `flowchart`, contains `-->`, more than 10 lines
+- [ ] JSON: valid JSON, contains nodes and edges arrays with expected field names
+- [ ] DOT: starts with `digraph`, contains `->`, valid Graphviz syntax
+- [ ] All three are consistent (same approximate node/edge counts)
+
+---
+
+### Test 3.4: Graph --hotspots Across Repo Sizes [FREE]
+
+```bash
+# Small repo
+cd ~/test-repos/zod && codemind graph --hotspots | head -10
+
+# Medium repo
+cd ~/test-repos/got && codemind graph --hotspots | head -10
+
+# Large repo
+cd ~/test-repos/lobe-chat && codemind graph --hotspots | head -10
+```
+
+**Pass criteria:**
+- [ ] All three return results without crashing
+- [ ] Output is consistently formatted across all three
+- [ ] Hotspot files are real files that exist in each repo
+- [ ] Larger repos have larger dependent counts (sanity check)
+
+---
+
+### Test 3.5: See — Diagram Comparison [API ~$1.50]
+
+Create a deliberately WRONG architecture diagram for the `got` repo to test detection:
+
+```bash
+# Create a test diagram that's intentionally inaccurate
+cat > /tmp/got-wrong-arch.svg << 'SVGEOF'
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" style="background:#fff">
+  <style>
+    rect { fill: #e8e8e8; stroke: #333; stroke-width: 2; rx: 8; }
+    text { font-family: sans-serif; font-size: 13px; text-anchor: middle; dominant-baseline: central; }
+    line { stroke: #666; stroke-width: 2; marker-end: url(#arr); }
+    marker path { fill: #666; }
+  </style>
+  <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10z"/></marker></defs>
+
+  <!-- Components — some real, some fake -->
+  <rect x="50" y="40" width="140" height="50"/><text x="120" y="65">HTTP Client</text>
+  <rect x="300" y="40" width="140" height="50"/><text x="370" y="65">Options Parser</text>
+  <rect x="550" y="40" width="140" height="50"/><text x="620" y="65">Cache Layer</text>
+
+  <rect x="50" y="180" width="140" height="50"/><text x="120" y="205">Retry Handler</text>
+  <rect x="300" y="180" width="140" height="50"/><text x="370" y="205">Auth Module</text>
+  <rect x="550" y="180" width="140" height="50"/><text x="620" y="205">WebSocket Client</text>
+
+  <rect x="175" y="320" width="140" height="50"/><text x="245" y="345">DNS Resolver</text>
+  <rect x="425" y="320" width="140" height="50"/><text x="495" y="345">Response Parser</text>
+
+  <!-- Connections — some correct, some phantom -->
+  <line x1="190" y1="65" x2="295" y2="65"/>
+  <line x1="440" y1="65" x2="545" y2="65"/>
+  <line x1="120" y1="90" x2="120" y2="175"/>
+  <line x1="370" y1="90" x2="370" y2="175"/>
+  <line x1="620" y1="90" x2="620" y2="175"/>
+  <line x1="190" y1="205" x2="295" y2="205"/>
+  <line x1="120" y1="230" x2="245" y2="315"/>
+  <line x1="370" y1="230" x2="495" y2="315"/>
+</svg>
+SVGEOF
+
+cd ~/test-repos/got
+codemind see /tmp/got-wrong-arch.svg
+```
+
+The diagram intentionally includes:
+- **Real-ish components**: HTTP Client, Options Parser, Retry Handler (these map to real got modules)
+- **Phantom components**: Cache Layer, WebSocket Client, Auth Module, DNS Resolver (got doesn't have these as separate modules)
+- **Wrong connections**: some arrows that don't match reality
+
+**Pass criteria:**
+- [ ] Vision API successfully extracts all 8 components from the SVG
+- [ ] Entity resolution maps at least 3 components to real `got` files (HTTP Client → core/index.ts, Options Parser → core/options.ts, Retry Handler → retry logic)
+- [ ] Identifies at least 2 phantom components (services in diagram that don't exist in code)
+- [ ] Identifies at least 1 missing connection (real dependency not shown in diagram)
+- [ ] Accuracy percentage is between 30-60% (diagram is deliberately wrong)
+- [ ] Corrected Mermaid diagram is generated
+- [ ] Output formatting matches the spec (accuracy bar, match/phantom/missing sections)
+
+---
+
+### Test 3.6: Trace [API ~$0.80]
+
+Use `got` repo. Simulate a realistic error:
+
+```bash
+cd ~/test-repos/got
+codemind trace "RequestError: ETIMEDOUT - connect ETIMEDOUT at source/core/index.ts:312"
+```
+
+**Pass criteria:**
+- [ ] Triage step classifies this (likely CODE or INFRASTRUCTURE)
+- [ ] If CODE: backward trace finds commits touching `source/core/index.ts` and its callers
+- [ ] Probable causes reference real commits from git history
+- [ ] Confidence is capped at 80%
+- [ ] Causal chain narrative is coherent (reads like a human-written incident report)
+- [ ] If classified as INFRASTRUCTURE: says so and suggests checking network/DNS instead of blaming code
+
+Also test with a clearly non-code error:
+```bash
+codemind trace "ENOMEM: not enough memory, cannot allocate 1073741824 bytes"
+```
+
+- [ ] Triage should classify as INFRASTRUCTURE, not CODE
+- [ ] Should NOT run the full code trace
+- [ ] Should suggest checking memory limits, not blaming a commit
+
+---
+
+## PHASE 4 — CLI UX TESTS [ALL FREE]
+
+### Test 4.1: Help Text
+
+```bash
+codemind --help
+codemind check --help
+codemind see --help
+codemind trace --help
+codemind graph --help
+codemind index --help
+codemind serve --help
+```
+
+**Pass criteria:**
+- [ ] Every command has help text (no "Unknown command" errors)
+- [ ] Help text shows flags and their descriptions
+- [ ] No typos or placeholder text ("TODO", "not implemented", "lorem ipsum")
+
+---
+
+### Test 4.2: --json Flag Consistency
+
+```bash
+cd ~/test-repos/got
+
+# Every command with --json should output ONLY valid JSON, no human text mixed in
+codemind --json 2>/dev/null | python3 -c "import sys,json; json.load(sys.stdin); print('status: valid JSON')" 
+codemind check --file source/core/options.ts --json 2>/dev/null | python3 -c "import sys,json; json.load(sys.stdin); print('check: valid JSON')"
+codemind graph --hotspots --json 2>/dev/null | python3 -c "import sys,json; json.load(sys.stdin); print('hotspots: valid JSON')"
+```
+
+**Pass criteria:**
+- [ ] All three produce valid JSON that parses without error
+- [ ] No ANSI color codes in JSON output
+- [ ] No human-readable warnings mixed into JSON stdout (warnings should go to stderr)
+
+---
+
+### Test 4.3: Error Messages
+
+```bash
+# Non-existent file
+codemind check --file does/not/exist.ts
+
+# Non-existent image for see
+codemind see /tmp/nonexistent.png
+
+# Invalid image file for see
+echo "not an image" > /tmp/fake.png
+codemind see /tmp/fake.png
+
+# No git repo
+cd /tmp && codemind index
+
+# No index exists
+rm -rf /tmp/test-no-index && mkdir /tmp/test-no-index && cd /tmp/test-no-index && git init
+codemind check --file anything.ts
+```
+
+**Pass criteria:**
+- [ ] ALL produce clear error messages (not stack traces)
+- [ ] ALL exit with non-zero exit code
+- [ ] No unhandled promise rejections
+- [ ] Messages suggest what to do ("Run `codemind index` first" etc.)
+
+---
+
+### Test 4.4: Repeated Index (Idempotency)
+
+```bash
+cd ~/test-repos/got
+codemind index
+codemind index
+codemind index
+```
+
+**Pass criteria:**
+- [ ] Second and third runs don't corrupt the graph
+- [ ] Node/edge counts are identical across all three runs
+- [ ] No "file already exists" or permission errors
+
+---
+
+### Test 4.5: Status Dashboard
+
+```bash
+cd ~/test-repos/got
+codemind
+```
+
+**Pass criteria:**
+- [ ] Shows node count, edge count, local completeness %, languages
+- [ ] Shows index freshness ("X seconds ago" or similar)
+- [ ] Suggests next command
+- [ ] Output is formatted (boxes, colors, alignment — not raw text)
+- [ ] Does NOT show Commander help text
+
+---
+
+## PHASE 5 — MCP SERVER TEST [FREE]
+
+### Test 5.1: Server Lifecycle
+
+```bash
+cd ~/test-repos/got
+
+# Start server
+codemind serve &
+MCP_PID=$!
+sleep 3
+
+# Check it's alive
+kill -0 $MCP_PID 2>/dev/null && echo "Server running" || echo "Server crashed"
+
+# Kill it
+kill $MCP_PID 2>/dev/null
+wait $MCP_PID 2>/dev/null
+
+# Start again — should not fail due to port conflict
+codemind serve &
+MCP_PID=$!
+sleep 3
+kill -0 $MCP_PID 2>/dev/null && echo "Restart successful" || echo "Restart failed"
+kill $MCP_PID 2>/dev/null
+wait $MCP_PID 2>/dev/null
+```
+
+**Pass criteria:**
+- [ ] Server starts without crashing
+- [ ] Server stops cleanly on SIGTERM
+- [ ] Restart works (no EADDRINUSE)
+
+---
+
+### Test 5.2: Skill File Exists
+
+```bash
+# Check that the skill file was created during setup
+cat .claude/skills/codemind.md 2>/dev/null || echo "Skill file not found — check if codemind index creates it"
+```
+
+**Pass criteria:**
+- [ ] File exists at `.claude/skills/codemind.md`
+- [ ] Contains tool usage guidance (when to use check, see, trace)
+- [ ] Mentions all five MCP tools
+
+---
+
+## PHASE 6 — PERFORMANCE BENCHMARKS [FREE]
+
+### Test 6.1: Index Speed Across Sizes
+
+Already collected in Phase 1, but compile here:
+
+| Repo | Files (approx) | Nodes | Index Time | Time per 100 Nodes |
+|------|----------------|-------|------------|---------------------|
+| zod | ~50 | | | |
+| got | ~200 | | | |
+| passport | ~100 | | | |
+| fastify | ~300 | | | |
+| trpc | ~400 | | | |
+| cap | ~1000+ | | | |
+| lobe-chat | ~1500+ | | | |
+
+**Pass criteria:**
+- [ ] Index time scales roughly linearly with file count (not exponentially)
+- [ ] No repo takes more than 180 seconds
+
+---
+
+### Test 6.2: Check Speed Across Blast Radius Sizes
+
+| Repo | File | Direct Deps | Check Time |
+|------|------|-------------|------------|
+| zod (small blast) | | | |
+| got (medium blast) | | | |
+| cap (large blast) | | | |
+| lobe-chat (largest) | | | |
+
+**Pass criteria:**
+- [ ] ALL under 2 seconds
+- [ ] Even the largest blast radius (lobe-chat hotspot) under 2 seconds
+
+---
+
+## FINAL REPORT
+
+After all phases, create `COMPREHENSIVE-TEST-RESULTS.md` with:
+
+### 1. Summary Dashboard
+
+```
+Total tests: ___
+Passed: ___
+Failed: ___
+Skipped: ___
+API credits used: $___
+```
+
+### 2. Multi-Repo Compatibility Matrix
+
+| Repo | Index | Check | Hotspots | Graph Export | Local Completeness |
+|------|-------|-------|----------|-------------|-------------------|
+| Cap (Turborepo) | | | | | |
+| got (single pkg) | | | | | |
+| fastify (plugin) | | | | | |
+| trpc (pnpm mono) | | | | | |
+| lobe-chat (Next.js) | | | | | |
+| passport (CommonJS) | | | | | |
+| zod (inheritance) | | | | | |
+
+### 3. Edge Case Results
+
+| Test | Status | Notes |
+|------|--------|-------|
+| Circular deps | | |
+| Barrel files | | |
+| Dynamic imports | | |
+| 200KB file / 500 functions | | |
+| No source files | | |
+| Mixed JS/TS | | |
+| Decorators | | |
+| Deep nesting | | |
+
+### 4. Bugs Found (New)
+List with severity: BLOCKER / MAJOR / MINOR / COSMETIC
+
+### 5. Performance Summary
+- Fastest index: ___ (repo: ___)
+- Slowest index: ___ (repo: ___)
+- Fastest check: ___ (repo: ___)
+- Slowest check: ___ (repo: ___)
+- All checks under 2s: YES/NO
+
+### 6. Demo Readiness Score: ___/10
+
+### 7. Remaining Risks for Hackathon
+List the top 3 things most likely to go wrong during a live demo.
+
+Save to the CodeMind project root as `COMPREHENSIVE-TEST-RESULTS.md`.
+
+---
+
+## BUDGET TRACKER
+
+| Test | Estimated Cost | Cumulative |
+|------|---------------|------------|
+| Phase 1 (all repos) | $0.00 | $0.00 |
+| Phase 2 (edge cases) | $0.00 | $0.00 |
+| Test 3.2 (check --think) | $0.50 | $0.50 |
+| Test 3.5 (see) | $1.50 | $2.00 |
+| Test 3.6 (trace) | $0.80 | $2.80 |
+| Phase 4 (CLI UX) | $0.00 | $2.80 |
+| Phase 5 (MCP) | $0.00 | $2.80 |
+| Phase 6 (benchmarks) | $0.00 | $2.80 |
+| **BUFFER REMAINING** | | **$0.20** |
+
+If any API call takes longer than 90 seconds, kill it and note the timeout. Do NOT retry API calls unless the first attempt returned a retryable error (not timeout).

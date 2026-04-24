@@ -1,0 +1,277 @@
+# CodeMind: Add `codemind watch` Command
+
+## BUDGET: $0. This feature uses ZERO API calls by default. The watch loop runs the fast tier only (graph traversal, no LLM). The optional `--think-on-critical` flag triggers ONE Opus call only when a CRITICAL change is detected — but don't test that flag during this sprint.
+
+## IMPORTANT: Do NOT modify any existing commands, runners, or core logic. This is a NEW command that IMPORTS existing functions. If you need to change any existing file, limit it to exporting a function that was previously internal.
+
+---
+
+## What to Build
+
+A new `codemind watch` command that runs as a long-lived background agent. It watches for file saves, runs blast radius analysis on the changed file, and prints a real-time risk alert in the terminal. When risk is HIGH or CRITICAL, it shows the full check output. When risk is LOW or MEDIUM, it shows a one-line summary.
+
+This targets the "Best Use of Claude Managed Agents" prize: a long-running, autonomous task that you'd actually ship — not a demo, but something a developer runs in a terminal pane all day.
+
+## Architecture
+
+```
+codemind watch
+    │
+    ├── Loads the existing graph from .codemind/graph.msgpack (once, at startup)
+    │
+    ├── Uses fs.watch / chokidar to monitor source files for changes
+    │   (debounce: 2 seconds after last save, to avoid rapid-fire triggers)
+    │
+    ├── On file change:
+    │   1. Re-parse ONLY the changed file (incremental: update its nodes/edges in the graph)
+    │   2. Run the existing check logic (fast tier) on the changed file
+    │   3. Display result based on risk level:
+    │      - LOW: one-line green summary, no interruption
+    │      - MEDIUM: one-line yellow summary with dependent count
+    │      - HIGH: full check output (the table with dependents + gaps)
+    │      - CRITICAL: full check output + terminal bell + suggestion to run --think
+    │
+    └── Keeps running until Ctrl+C
+```
+
+## New Files
+
+Create these files ONLY. Do not modify existing files except for adding the command to the CLI router.
+
+### 1. `src/watch/watcher.ts`
+
+```typescript
+// The core watch loop
+
+import chokidar from 'chokidar'; // Add to package.json: "chokidar": "^4.0.0"
+
+interface WatchOptions {
+  thinkOnCritical?: boolean;  // Future: auto-trigger --think on CRITICAL (not implemented now)
+  debounceMs?: number;        // Default: 2000
+  scope?: string;             // Optional: only watch a subdirectory
+}
+
+export async function startWatch(options: WatchOptions): Promise<void> {
+  // 1. Load graph (use existing loadGraph function from persistence module)
+  // 2. Detect source file extensions from graph metadata (languages)
+  // 3. Set up chokidar watcher on repo root, filtered to source extensions
+  // 4. On change event (debounced):
+  //    a. Get the changed file path
+  //    b. Re-parse the single file using existing parser (incremental update)
+  //    c. Run existing check analysis on that file (fast tier, no LLM)
+  //    d. Format and print the result based on risk level
+  // 5. Keep the process alive until SIGINT/SIGTERM
+}
+```
+
+### 2. `src/watch/watch-runner.ts`
+
+```typescript
+// Commander action handler — thin wrapper
+
+import { startWatch } from './watcher';
+
+export async function runWatch(options: Record<string, unknown>): Promise<void> {
+  // Validate: graph exists (check .codemind/graph.msgpack)
+  // If not: print error "Run `codemind index` first" and exit
+  // Print startup banner
+  // Call startWatch with options
+}
+```
+
+### 3. Wire into CLI
+
+In the main CLI file (wherever Commander commands are defined), add:
+
+```typescript
+program
+  .command('watch')
+  .description('Monitor file changes and show blast radius alerts in real-time')
+  .option('--scope <dir>', 'Only watch files in this directory')
+  .option('--debounce <ms>', 'Debounce delay in milliseconds', '2000')
+  .action(async (options) => {
+    const { runWatch } = await import('./watch/watch-runner');
+    await runWatch(options);
+  });
+```
+
+## Terminal Output Design
+
+### Startup Banner
+```
+ ╭──────────────────────────────────────────────────────────╮
+ │  CODEMIND WATCH                                          │
+ │  Monitoring 442 nodes across 87 files                    │
+ │  Press Ctrl+C to stop                                    │
+ ╰──────────────────────────────────────────────────────────╯
+```
+
+### LOW Risk Change (one line, green, doesn't interrupt flow)
+```
+ 14:32:07  ✓ LOW   src/utils/format.ts  →  2 dependents · no gaps
+```
+
+### MEDIUM Risk Change (one line, yellow)
+```
+ 14:33:15  ⚠ MED   src/api/routes.ts    →  12 dependents · 1 gap
+```
+
+### HIGH Risk Change (expanded, orange)
+```
+ ╭─── 14:34:22 ── HIGH ───────────────────────────────────╮
+ │  src/auth/middleware.ts                                  │
+ │  38 direct dependents · 2 coverage gaps                  │
+ │                                                          │
+ │  Gaps:  src/workers/webhook.ts · src/mobile/auth.ts     │
+ │  Run:   codemind check --file src/auth/middleware.ts     │
+ ╰──────────────────────────────────────────────────────────╯
+```
+
+### CRITICAL Risk Change (expanded, red, terminal bell)
+```
+ ╭─── 14:35:01 ── CRITICAL ───────────────────────────────╮
+ │  src/db/connection.ts                                    │
+ │  67 direct dependents · 5 coverage gaps · incident hist  │
+ │                                                          │
+ │  ⚠  This file has caused production incidents before.   │
+ │  Run:  codemind check --file src/db/connection.ts --think│
+ ╰──────────────────────────────────────────────────────────╯
+ (bell character: \x07)
+```
+
+## Key Implementation Details
+
+### Debouncing
+File saves often trigger multiple change events (editor writes temp file, then renames). Use a 2-second debounce per file path. If the same file changes 5 times in 2 seconds, only analyze once.
+
+```typescript
+const pending = new Map<string, NodeJS.Timeout>();
+
+watcher.on('change', (filePath: string) => {
+  if (pending.has(filePath)) clearTimeout(pending.get(filePath)!);
+  pending.set(filePath, setTimeout(() => {
+    pending.delete(filePath);
+    analyzeChange(filePath);
+  }, debounceMs));
+});
+```
+
+### Incremental Re-parse
+Do NOT re-index the entire repo on every file save. Re-parse ONLY the changed file:
+1. Remove all nodes and edges FROM the changed file in the graph
+2. Re-parse the changed file with tree-sitter
+3. Re-add the new nodes and edges
+4. Run check on the new nodes
+
+Use existing parser functions. If the parser currently only works on entire repos, extract the single-file parsing into a reusable function that the watcher can call. This is the ONE place you might need to refactor an existing file — extract a `parseFile(filePath)` function from the indexer if one doesn't already exist.
+
+### File Filtering
+Only watch files with extensions matching indexed languages (.ts, .tsx, .js, .jsx, .py). Ignore:
+- `node_modules/`
+- `.git/`
+- `.codemind/`
+- `dist/`, `build/`, `.next/`, `out/`
+- `*.test.*`, `*.spec.*` (optional: include tests if the user passes `--include-tests`)
+- `*.json`, `*.md`, `*.yaml`, `*.css`
+
+### Process Lifecycle
+- Handle SIGINT (Ctrl+C) gracefully: print summary and exit
+- Handle SIGTERM: same
+- On exit, print a summary: "Watched for 23 minutes. 14 changes analyzed. 2 HIGH risk alerts."
+
+```typescript
+let changeCount = 0;
+let highAlerts = 0;
+const startTime = Date.now();
+
+process.on('SIGINT', () => {
+  const minutes = Math.round((Date.now() - startTime) / 60000);
+  console.log(`\n  Watched for ${minutes} minutes. ${changeCount} changes. ${highAlerts} high-risk alerts.`);
+  process.exit(0);
+});
+```
+
+## Testing
+
+After implementation, test on the `got` repo:
+
+```bash
+cd ~/test-repos/got
+
+# Terminal 1: start watch
+codemind watch
+
+# Terminal 2: make changes and observe
+echo "// test change" >> source/core/options.ts
+# Watch should show HIGH risk within 3 seconds
+
+sleep 5
+
+echo "// harmless" >> source/index.ts  
+# Watch should show LOW or MEDIUM risk
+
+sleep 5
+
+# Revert changes
+cd ~/test-repos/got && git checkout .
+```
+
+**Pass criteria:**
+- [ ] Watch starts without crashing, shows startup banner
+- [ ] Detects file change within 3 seconds of save
+- [ ] Shows correct risk level (options.ts should be HIGH, index.ts should be LOW/MEDIUM)
+- [ ] Does NOT re-index entire repo on each change (check by timing — should be <1s per change)
+- [ ] Ctrl+C prints summary and exits cleanly
+- [ ] Does NOT trigger on node_modules, .git, or non-source files
+- [ ] Multiple rapid saves to same file only trigger ONE analysis (debounce works)
+- [ ] No API calls made (verify: works without ANTHROPIC_API_KEY set)
+
+## Do NOT Implement (Future, Out of Scope)
+
+- `--think-on-critical` (auto Opus call) — flag can exist but should print "coming soon" if used
+- Desktop notifications (macOS/Windows native) — terminal only for now
+- Slack/Discord webhook alerts — post-hackathon
+- Multi-repo watch — post-hackathon
+- Web UI for watch — terminal only
+
+## MCP Tool Addition
+
+Add ONE new MCP tool for the watch status (do NOT add a tool that starts/stops watching — that's a CLI concern):
+
+```typescript
+{
+  name: "codemind_watch_status",
+  description: "Check if CodeMind watch is running and get its latest alerts",
+  input_schema: { type: "object", properties: {} }
+}
+```
+
+This tool reads from a small status file that the watcher writes:
+`.codemind/watch-status.json` — updated on every change analysis:
+```json
+{
+  "running": true,
+  "started_at": "2026-04-24T14:30:00Z",
+  "changes_analyzed": 14,
+  "high_alerts": 2,
+  "last_change": {
+    "file": "src/auth/middleware.ts",
+    "risk": "HIGH",
+    "dependents": 38,
+    "at": "2026-04-24T14:34:22Z"
+  }
+}
+```
+
+This way Claude Code can ask "is watch running? any high-risk changes recently?" without needing to interact with the watch process directly.
+
+## Update the Skill File
+
+Add this section to `.claude/skills/codemind.md`:
+
+```markdown
+### Background monitoring
+- `codemind_watch_status` tells you if the watch daemon is running and if any recent changes were flagged as HIGH or CRITICAL risk
+- If watch detected a HIGH/CRITICAL change, suggest the developer run `codemind check --file <path> --think` for the flagged file
+- You do NOT need to start or stop the watch daemon — the developer manages that in their terminal
+```
