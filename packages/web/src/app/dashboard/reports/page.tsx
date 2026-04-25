@@ -38,10 +38,10 @@ export default async function ReportsPage() {
           {reports.map(r => {
             const data = JSON.parse(r.data);
             const score = data.summary?.securityScore ?? 0;
-            const scoreColor = score >= 80 ? "#00F5D4" : score >= 60 ? "#FFB347" : "#FF6B6B";
+            const scoreClass = score >= 80 ? "text-neon" : score >= 60 ? "text-solar" : "text-heat";
             return (
               <Link key={r.id} href={`/dashboard/reports/${r.id}`}
-                className="glass rounded-xl p-5 border border-border flex items-center gap-4 card-hover-effect group block">
+                className="bg-surface border border-border rounded-xl p-5 flex items-center gap-4 hover:border-border-light hover:bg-surface-raised transition-all duration-150 group block">
                 <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0">
                   <FileText size={16} className="text-accent" />
                 </div>
@@ -53,11 +53,11 @@ export default async function ReportsPage() {
                   <p className="font-body text-xs text-ink-muted">
                     {data.summary?.totalFiles ?? 0} files · {data.summary?.totalEdges ?? 0} edges · {data.summary?.languages?.join(", ") ?? ""}
                   </p>
-                  <p className="font-mono text-[11px] text-ink-dim mt-0.5">{new Date(r.createdAt).toLocaleString()}</p>
+                  <p className="font-mono text-[10px] text-ink-dim mt-0.5">{new Date(r.createdAt).toLocaleString()}</p>
                 </div>
                 <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                  <div className="font-mono text-lg font-bold" style={{ color: scoreColor }}>{score}</div>
-                  <div className="font-mono text-[10px] text-ink-dim">security score</div>
+                  <div className={`font-mono text-lg font-bold leading-none ${scoreClass}`}>{score}</div>
+                  <div className="font-mono text-[10px] text-ink-dim">security</div>
                 </div>
                 <ArrowRight size={14} className="text-ink-dim group-hover:text-brand transition-colors flex-shrink-0" />
               </Link>

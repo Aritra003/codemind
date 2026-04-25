@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import Link from "next/link";
-import { GitBranch, Zap, Key, ArrowRight, Network } from "lucide-react";
+import { GitBranch, Zap, Key, ArrowRight, Network, GitFork, AlertTriangle } from "lucide-react";
 
 export default async function DashboardHome() {
   const session = await auth();
@@ -16,86 +16,148 @@ export default async function DashboardHome() {
   const name = session?.user?.name?.split(" ")[0] ?? "there";
 
   const QUICK_ACTIONS = [
-    { href: "/dashboard/repos",   Icon: GitBranch, color: "#4361EE", label: "Connect repo",    desc: "Link a GitHub repository" },
-    { href: "/dashboard/check",   Icon: Zap,       color: "#FF6B6B", label: "Run a check",     desc: "Paste a file path to analyze" },
-    { href: "/dashboard/graph",   Icon: Network,   color: "#A78BFA", label: "Explore graph",   desc: "Visual graph explorer" },
-    { href: "/dashboard/apikeys", Icon: Key,       color: "#00F5D4", label: "Create API key",  desc: "For agent authentication" },
+    {
+      href: "/dashboard/repos",
+      Icon: GitBranch,
+      colorClass: "text-brand",
+      bgClass: "bg-brand/10 border-brand/20",
+      label: "Connect repo",
+      desc: "Link a GitHub repository to index",
+    },
+    {
+      href: "/dashboard/check",
+      Icon: Zap,
+      colorClass: "text-heat",
+      bgClass: "bg-heat/10 border-heat/20",
+      label: "Scan a file",
+      desc: "Paste a path and get blast radius",
+    },
+    {
+      href: "/dashboard/graph",
+      Icon: Network,
+      colorClass: "text-violet",
+      bgClass: "bg-violet/10 border-violet/20",
+      label: "Explore graph",
+      desc: "Visual dependency explorer",
+    },
+    {
+      href: "/dashboard/diagram",
+      Icon: GitFork,
+      colorClass: "text-accent",
+      bgClass: "bg-accent/10 border-accent/20",
+      label: "Generate diagram",
+      desc: "Export a Mermaid dependency map",
+    },
   ];
+
+  const riskColor = (level: string) => {
+    if (level === "CRITICAL") return "text-heat";
+    if (level === "HIGH")     return "text-heat";
+    if (level === "MEDIUM")   return "text-solar";
+    return "text-neon";
+  };
+
+  const riskDot = (level: string) => {
+    if (level === "CRITICAL" || level === "HIGH") return "bg-heat";
+    if (level === "MEDIUM") return "bg-solar";
+    return "bg-neon";
+  };
 
   return (
     <div className="p-6 lg:p-8 max-w-5xl">
-      {/* Header */}
+
+      {/* Header ─────────────────────────────────────── */}
       <div className="mb-8">
-        <h1 className="font-display text-2xl font-bold text-ink mb-1">Good day, {name} 👋</h1>
-        <p className="font-body text-sm text-ink-muted">Your CodeMind command centre.</p>
+        <h1 className="font-display text-2xl font-bold text-ink mb-1">
+          Welcome back, {name}.
+        </h1>
+        <p className="font-body text-sm text-ink-muted">Your codebase, in focus.</p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      {/* Stats ──────────────────────────────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
         {[
-          { label: "Repos connected", value: repos, color: "#4361EE" },
-          { label: "API keys", value: keys, color: "#00F5D4" },
-          { label: "Checks run", value: checks.length, color: "#FFB347" },
-          { label: "MCP tools", value: 6, color: "#A78BFA" },
+          { label: "Repos connected", value: repos,         color: "text-brand"  },
+          { label: "API keys",        value: keys,          color: "text-accent" },
+          { label: "Checks run",      value: checks.length, color: "text-solar"  },
+          { label: "MCP tools",       value: 6,             color: "text-violet" },
         ].map(s => (
-          <div key={s.label} className="glass rounded-xl p-4 border border-border">
-            <div className="font-mono text-2xl font-bold mb-1" style={{ color: s.color }}>{s.value}</div>
+          <div key={s.label} className="bg-surface-card border border-border rounded-xl p-4">
+            <div className={`font-mono text-3xl font-bold leading-none mb-2 ${s.color}`}>{s.value}</div>
             <div className="font-body text-xs text-ink-muted">{s.label}</div>
           </div>
         ))}
       </div>
 
-      {/* Quick actions */}
-      <h2 className="font-display font-semibold text-ink mb-4 text-sm tracking-wide">QUICK ACTIONS</h2>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      {/* Quick actions ──────────────────────────────── */}
+      <p className="font-mono text-[10px] text-ink-dim uppercase tracking-widest mb-3">Quick actions</p>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
         {QUICK_ACTIONS.map(a => (
           <Link key={a.href} href={a.href}
-            className="glass rounded-xl p-4 border border-border hover:border-border-light card-hover-effect group">
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3"
-              style={{ background: `${a.color}12`, border: `1px solid ${a.color}25` }}>
-              <a.Icon size={16} style={{ color: a.color }} />
+            className="bg-surface border border-border rounded-xl p-4 hover:border-border-light hover:bg-surface-raised transition-all duration-150 group">
+            <div className={`w-8 h-8 rounded-lg border flex items-center justify-center mb-3 ${a.bgClass}`}>
+              <a.Icon size={14} className={a.colorClass} />
             </div>
-            <p className="font-body font-medium text-sm text-ink mb-1 group-hover:text-brand transition-colors">{a.label}</p>
-            <p className="font-body text-xs text-ink-muted">{a.desc}</p>
+            <p className="font-body font-medium text-sm text-ink mb-0.5 group-hover:text-brand transition-colors">{a.label}</p>
+            <p className="font-body text-xs text-ink-muted leading-snug">{a.desc}</p>
           </Link>
         ))}
       </div>
 
-      {/* Recent checks */}
+      {/* Recent checks ──────────────────────────────── */}
       {checks.length > 0 && (
         <>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display font-semibold text-ink text-sm tracking-wide">RECENT CHECKS</h2>
-            <Link href="/dashboard/check" className="text-xs text-brand hover:underline flex items-center gap-1">
-              View all <ArrowRight size={11} />
+          <div className="flex items-center justify-between mb-3">
+            <p className="font-mono text-[10px] text-ink-dim uppercase tracking-widest">Recent scans</p>
+            <Link href="/dashboard/check"
+              className="text-[11px] font-mono text-brand hover:text-brand/80 flex items-center gap-1 transition-colors">
+              View all <ArrowRight size={10} />
             </Link>
           </div>
-          <div className="glass rounded-xl border border-border overflow-hidden">
+          <div className="bg-surface border border-border rounded-xl overflow-hidden">
             {checks.map((c, i) => (
-              <div key={c.id} className={`flex items-center gap-4 px-4 py-3 ${i < checks.length - 1 ? "border-b border-border" : ""}`}>
-                <div className="w-2 h-2 rounded-full flex-shrink-0"
-                  style={{ background: c.riskLevel === "HIGH" || c.riskLevel === "CRITICAL" ? "#FF6B6B" : c.riskLevel === "MEDIUM" ? "#FFB347" : "#00F5D4" }} />
+              <div key={c.id}
+                className={`flex items-center gap-3 px-4 py-3 ${i < checks.length - 1 ? "border-b border-border" : ""} hover:bg-surface-raised transition-colors`}>
+                <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${riskDot(c.riskLevel ?? "")}`} />
                 <code className="font-mono text-xs text-ink flex-1 truncate">{c.filePath}</code>
-                <span className="font-mono text-xs font-bold flex-shrink-0"
-                  style={{ color: c.riskLevel === "HIGH" || c.riskLevel === "CRITICAL" ? "#FF6B6B" : c.riskLevel === "MEDIUM" ? "#FFB347" : "#00F5D4" }}>
+                <span className={`font-mono text-[10px] font-bold flex-shrink-0 ${riskColor(c.riskLevel ?? "")}`}>
                   {c.riskLevel}
                 </span>
-                <span className="font-body text-[11px] text-ink-dim flex-shrink-0">{c.dependents} deps</span>
+                <span className="font-body text-[10px] text-ink-dim flex-shrink-0">{c.dependents} deps</span>
               </div>
             ))}
           </div>
         </>
       )}
 
+      {/* Empty state ────────────────────────────────── */}
       {repos === 0 && (
-        <div className="glass rounded-2xl p-8 text-center border border-dashed border-border mt-2">
-          <div className="text-3xl mb-4">🔗</div>
-          <h3 className="font-display font-semibold text-ink mb-2">Connect your first repo</h3>
-          <p className="font-body text-sm text-ink-muted mb-5 max-w-sm mx-auto">Link a GitHub repository to index it and start running blast radius checks from the web.</p>
+        <div className="border border-dashed border-border rounded-2xl p-10 text-center mt-4">
+          <div className="w-10 h-10 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center mx-auto mb-4">
+            <GitBranch size={18} className="text-brand" />
+          </div>
+          <h3 className="font-display font-semibold text-ink mb-2">Connect your first repository</h3>
+          <p className="font-body text-sm text-ink-muted mb-6 max-w-sm mx-auto">
+            Link a GitHub repository to index it and start running blast-radius checks, ask questions, and generate diagrams.
+          </p>
           <Link href="/dashboard/repos"
             className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-body font-medium text-white bg-brand rounded-xl hover:bg-brand/90 transition-colors">
-            Connect GitHub repo <ArrowRight size={14} />
+            Connect a repository <ArrowRight size={13} />
           </Link>
+        </div>
+      )}
+
+      {/* No checks yet nudge ────────────────────────── */}
+      {repos > 0 && checks.length === 0 && (
+        <div className="flex items-start gap-3 mt-4 p-4 bg-solar/5 border border-solar/20 rounded-xl">
+          <AlertTriangle size={14} className="text-solar flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="font-body text-sm text-ink font-medium mb-0.5">No scans yet</p>
+            <p className="font-body text-xs text-ink-muted">
+              Run your first blast-radius scan — paste a file path in{" "}
+              <Link href="/dashboard/check" className="text-brand hover:underline">Scan</Link>.
+            </p>
+          </div>
         </div>
       )}
     </div>

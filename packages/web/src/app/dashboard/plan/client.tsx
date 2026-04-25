@@ -14,7 +14,7 @@ function StepCard({ line }: { line: string }) {
   const isStep  = /^STEP\s+\d+:/i.test(clean);
   const isPR    = /^PR BOUNDARY/i.test(clean);
   const isRisk  = clean.trim().startsWith("Risk:");
-  const riskColor = clean.includes("HIGH") ? "text-heat" : clean.includes("MEDIUM") ? "text-solar" : "text-emerald-400";
+  const riskColor = clean.includes("HIGH") ? "text-heat" : clean.includes("MEDIUM") ? "text-solar" : "text-neon";
 
   if (isStep) return <p className="font-mono text-sm font-bold text-brand mt-5 mb-1">{clean}</p>;
   if (isPR)   return <div className="my-4 px-4 py-2.5 rounded-xl border border-brand/30 bg-brand/5"><p className="font-mono text-xs font-bold text-brand">{clean}</p></div>;

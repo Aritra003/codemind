@@ -137,68 +137,83 @@ export function hasTestCoverage(node: WNode, graph: WebGraph): boolean {
 }
 
 // Mermaid generation from graph — no AI required
-const WARN_THRESHOLD = 50
+const PREVIEW_CAP = 50   // max nodes shown — keeps the diagram readable
+const EDGE_CAP    = 120  // max edges — avoids spaghetti
+const WARN_AT     = 30   // advisory warning threshold
 
 function sanitiseId(id: string) { return id.replace(/::/g, '__').replace(/[/.]/g, '_') }
 
-function nodeLabel(node: WNode) {
-  if (node.kind === 'class') return `"${node.name} (class)"`
-  if (node.kind === 'method') return `"${node.name} (method)"`
-  if (node.kind === 'module') return `"${node.name} (module)"`
-  return `"${node.name}"`
-}
-
 function edgeArrow(kind?: string) {
-  if (kind === 'imports') return '-.->'
+  if (kind === 'imports')                       return '--->'
+  if (kind === 'circular')                      return '-. circular .->'
   if (kind === 'extends' || kind === 'implements') return '--|>'
-  if (kind === 'declared') return '---'
-  return '-->'
+  return '--->'
 }
 
 export function generateMermaid(
   graph: WebGraph,
   scope?: string,
-): { diagram: string; nodeCount: number; edgeCount: number; warning?: string } {
-  const scopedNodes = scope ? graph.nodes.filter(n => n.file.startsWith(scope)) : graph.nodes
-  if (scopedNodes.length === 0) return { diagram: 'graph LR', nodeCount: 0, edgeCount: 0 }
-
-  const scopedIds = new Set(scopedNodes.map(n => n.id))
-  const lines = ['graph LR']
-  const byFile = new Map<string, WNode[]>()
-  for (const n of scopedNodes) {
-    const bucket = byFile.get(n.file) ?? []
-    bucket.push(n)
-    byFile.set(n.file, bucket)
-  }
-  for (const [file, nodes] of byFile) {
-    lines.push(`  subgraph ${JSON.stringify(file)}`)
-    for (const n of nodes) lines.push(`    ${sanitiseId(n.id)}[${nodeLabel(n)}]`)
-    lines.push('  end')
+): { diagram: string; nodeCount: number; edgeCount: number; totalCount: number; warning?: string } {
+  const allScoped = scope
+    ? graph.nodes.filter(n => n.file.startsWith(scope))
+    : graph.nodes
+  if (allScoped.length === 0) {
+    const hint = scope ? `No files found under "${scope}".` : 'No files indexed yet.'
+    return { diagram: `graph TD\n  msg["${hint}"]`, nodeCount: 0, edgeCount: 0, totalCount: 0 }
   }
 
-  const externalStubs = new Set<string>()
-  let edgeCount = 0
-  const nodeById = new Map(graph.nodes.map(n => [n.id, n]))
+  const totalCount = allScoped.length
+
+  // Rank nodes by how many in-scope files depend on them — most-depended-on first.
+  // This makes the most critical files the layout anchors.
+  const scopedIdSet = new Set(allScoped.map(n => n.id))
+  const inDeg = new Map<string, number>()
   for (const e of graph.edges) {
-    if (!scopedIds.has(e.from)) continue
-    const fromId = sanitiseId(e.from)
-    const arrow = edgeArrow(e.kind)
-    if (scopedIds.has(e.to)) {
-      lines.push(`  ${fromId} ${arrow} ${sanitiseId(e.to)}`)
-    } else {
-      const stubId = `ext__${sanitiseId(e.to)}`
-      if (!externalStubs.has(stubId)) {
-        const toNode = nodeById.get(e.to)
-        lines.push(`  ${stubId}["${toNode ? `${toNode.name} (ext)` : `${e.to} (ext)`}"]`)
-        externalStubs.add(stubId)
-      }
-      lines.push(`  ${fromId} ${arrow} ${stubId}`)
+    if (scopedIdSet.has(e.to) && scopedIdSet.has(e.from)) {
+      inDeg.set(e.to, (inDeg.get(e.to) ?? 0) + 1)
     }
+  }
+  const sorted = [...allScoped].sort((a, b) => (inDeg.get(b.id) ?? 0) - (inDeg.get(a.id) ?? 0))
+  const scopedNodes = sorted.slice(0, PREVIEW_CAP)
+  const renderIds   = new Set(scopedNodes.map(n => n.id))
+
+  const lines = ['graph TD']
+
+  // Node definitions — short labels, stadium shape for hub files
+  for (const n of scopedNodes) {
+    const raw   = n.name.replace(/"/g, "'")
+    const label = raw.length > 26 ? raw.slice(0, 24) + '…' : raw
+    const deg   = inDeg.get(n.id) ?? 0
+    // Stadium shape for heavily-depended-on files so they stand out visually
+    lines.push(deg >= 6
+      ? `  ${sanitiseId(n.id)}(["${label}"])`
+      : `  ${sanitiseId(n.id)}["${label}"]`)
+  }
+
+  // Edges — only between rendered nodes
+  let edgeCount = 0
+  for (const e of graph.edges) {
+    if (edgeCount >= EDGE_CAP) break
+    if (!renderIds.has(e.from) || !renderIds.has(e.to)) continue
+    lines.push(`  ${sanitiseId(e.from)} ${edgeArrow(e.kind)} ${sanitiseId(e.to)}`)
     edgeCount++
   }
 
+  // Style hub nodes with brand color so they're instantly recognisable
+  const hubs = scopedNodes.filter(n => (inDeg.get(n.id) ?? 0) >= 6)
+  if (hubs.length > 0) {
+    lines.push('  classDef hub fill:#4F46E5,stroke:#6366F1,color:#e2e8f0,stroke-width:2px')
+    lines.push(`  class ${hubs.map(n => sanitiseId(n.id)).join(',')} hub`)
+  }
+
   const nodeCount = scopedNodes.length
-  const result: { diagram: string; nodeCount: number; edgeCount: number; warning?: string } = { diagram: lines.join('\n'), nodeCount, edgeCount }
-  if (nodeCount > WARN_THRESHOLD) result.warning = `${nodeCount} nodes — large diagrams may not render well in all tools.`
+  const result: { diagram: string; nodeCount: number; edgeCount: number; totalCount: number; warning?: string } = {
+    diagram: lines.join('\n'), nodeCount, edgeCount, totalCount,
+  }
+  if (totalCount > PREVIEW_CAP) {
+    result.warning = `Showing top ${PREVIEW_CAP} of ${totalCount} files by dependency count. Use Scope to focus on a directory.`
+  } else if (nodeCount > WARN_AT) {
+    result.warning = `${nodeCount} nodes — use Scope to focus on a directory for a clearer view.`
+  }
   return result
 }

@@ -10,9 +10,9 @@ function basename(p: string) { return p.split("/").pop() ?? p; }
 function dirname(p: string)  { const parts = p.split("/"); return parts.length > 1 ? parts.slice(0, -1).join("/") : ""; }
 
 function depColor(n: number) {
-  if (n >= 10) return { bg: "#EF444420", fg: "#EF4444" };
-  if (n >= 4)  return { bg: "#F59E0B20", fg: "#F59E0B" };
-  return { bg: "#4361EE20", fg: "#4361EE" };
+  if (n >= 10) return { bg: "rgba(255,58,94,0.12)",  fg: "#FF3A5E" };
+  if (n >= 4)  return { bg: "rgba(255,179,0,0.12)",  fg: "#FFB300" };
+  return        { bg: "rgba(91,110,255,0.12)", fg: "#5B6EFF" };
 }
 
 function FilePicker({ nodes, value, onChange }: { nodes: FileNode[]; value: string; onChange: (v: string) => void }) {
@@ -31,7 +31,7 @@ function FilePicker({ nodes, value, onChange }: { nodes: FileNode[]; value: stri
     : nodes;
 
   const selected = nodes.find(n => n.id === value);
-  const { fg, bg } = selected ? depColor(selected.deps) : { fg: "#4361EE", bg: "#4361EE20" };
+  const { fg, bg } = selected ? depColor(selected.deps) : { fg: "#5B6EFF", bg: "rgba(91,110,255,0.12)" };
 
   return (
     <div ref={ref} className="relative">
@@ -142,7 +142,7 @@ export default function CheckPage() {
     finally { setLoading(false); }
   };
 
-  const RISK_COLOR = { CRITICAL: "#EF4444", HIGH: "#EF4444", MEDIUM: "#F59E0B", LOW: "#10B981" } as Record<string, string>;
+  const RISK_COLOR = { CRITICAL: "#FF3A5E", HIGH: "#FF3A5E", MEDIUM: "#FFB300", LOW: "#39FF82" } as Record<string, string>;
   const RISK_WIDTH = { CRITICAL: 100, HIGH: 82, MEDIUM: 55, LOW: 25 } as Record<string, number>;
 
   return (
@@ -191,7 +191,7 @@ export default function CheckPage() {
 
         <button onClick={run} disabled={loading || !filePath.trim()}
           className="w-full flex items-center justify-center gap-2 py-3 text-sm font-body font-semibold text-white bg-brand hover:bg-brand/90 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-          {loading ? <><Loader2 size={15} className="animate-spin" /> Analyzing…</> : <><Zap size={15} /> Run Check</>}
+          {loading ? <><Loader2 size={15} className="animate-spin" /> Scanning…</> : <><Zap size={15} /> Scan</>}
         </button>
       </div>
 
@@ -202,14 +202,14 @@ export default function CheckPage() {
       )}
 
       {result && (
-        <div className="glass rounded-2xl p-6 space-y-5" style={{ borderColor: `${RISK_COLOR[result.riskLevel] ?? "#4361EE"}25` }}>
+        <div className="glass rounded-2xl p-6 space-y-5" style={{ borderColor: `${RISK_COLOR[result.riskLevel] ?? "#5B6EFF"}25` }}>
           <div className="flex items-start justify-between gap-4">
             <div>
               <code className="font-mono text-sm text-ink">{result.filePath}</code>
               <div className="font-body text-xs text-ink-muted mt-0.5">{result.latency}ms analysis time</div>
             </div>
             <div className="px-3 py-1.5 rounded-lg font-mono text-sm font-bold flex-shrink-0"
-              style={{ background: `${RISK_COLOR[result.riskLevel] ?? "#4361EE"}15`, color: RISK_COLOR[result.riskLevel] ?? "#4361EE" }}>
+              style={{ background: `${RISK_COLOR[result.riskLevel] ?? "#5B6EFF"}15`, color: RISK_COLOR[result.riskLevel] ?? "#5B6EFF" }}>
               {result.riskLevel}
             </div>
           </div>
@@ -227,9 +227,9 @@ export default function CheckPage() {
 
           <div className="grid grid-cols-3 gap-3">
             {[
-              { label: "Direct deps",   value: result.dependents,    color: "#4361EE" },
-              { label: "Coverage gaps", value: result.gaps,           color: result.gaps > 0 ? "#F59E0B" : "#10B981" },
-              { label: "Transitive",    value: result.transitiveDeps, color: "#A78BFA" },
+              { label: "Direct deps",   value: result.dependents,    color: "#5B6EFF" },
+              { label: "Coverage gaps", value: result.gaps,           color: result.gaps > 0 ? "#FFB300" : "#39FF82" },
+              { label: "Transitive",    value: result.transitiveDeps, color: "#B06EFF" },
             ].map(s => (
               <div key={s.label} className="bg-surface rounded-xl p-3 text-center">
                 <div className="font-mono text-xl font-bold mb-0.5" style={{ color: s.color }}>{s.value}</div>

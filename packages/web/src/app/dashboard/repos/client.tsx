@@ -157,7 +157,7 @@ export function ReposClient({ repos: initial, hasGithubToken }: Props) {
                       className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-body font-medium rounded-lg transition-all flex-shrink-0 disabled:opacity-50"
                       style={alreadyAdded
                         ? { background: "var(--surface-raised)", color: "var(--ink-dim)", border: "1px solid var(--border)" }
-                        : { background: "rgba(67,97,238,0.12)", color: "#4361EE", border: "1px solid rgba(67,97,238,0.25)" }}>
+                        : { background: "rgba(91,110,255,0.12)", color: "#5B6EFF", border: "1px solid rgba(91,110,255,0.25)" }}>
                       {addingRepo === repo.fullName ? <Loader2 size={11} className="animate-spin" /> : alreadyAdded ? <CheckCircle size={11} /> : <Plus size={11} />}
                       {alreadyAdded ? "Added" : "Add"}
                     </button>
@@ -218,7 +218,7 @@ export function ReposClient({ repos: initial, hasGithubToken }: Props) {
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-body font-medium rounded-lg transition-all"
                 style={repo.indexedAt
                   ? { background: "var(--surface-raised)", color: "var(--ink-muted)", border: "1px solid var(--border)" }
-                  : { background: "rgba(67,97,238,0.12)", color: "#4361EE", border: "1px solid rgba(67,97,238,0.25)" }}>
+                  : { background: "rgba(91,110,255,0.12)", color: "#5B6EFF", border: "1px solid rgba(91,110,255,0.25)" }}>
                 {indexing === repo.id ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
                 {repo.indexedAt ? "Re-index" : "Index"}
               </button>

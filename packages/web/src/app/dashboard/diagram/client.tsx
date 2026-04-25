@@ -1,8 +1,8 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { GitFork, Loader2, Copy, Check, Download, ChevronDown, Info, AlertTriangle, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { GitFork, Loader2, Copy, Check, Download, ChevronDown, Info, AlertTriangle, ZoomIn, ZoomOut, RotateCcw, Maximize2 } from "lucide-react";
 type Repo   = { id: string; fullName: string; graphData: unknown };
-type Result = { diagram: string; nodeCount: number; edgeCount: number; warning?: string; repoName: string };
+type Result = { diagram: string; nodeCount: number; edgeCount: number; totalCount: number; warning?: string; repoName: string };
 
 function useCopy(text: string) {
   const [copied, setCopied] = useState(false);
@@ -18,50 +18,169 @@ function useCopy(text: string) {
 let renderSeq = 0;
 
 function DiagramPreview({ diagram }: { diagram: string }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale]   = useState(1);
-  const [error, setError]   = useState<string | null>(null);
+  const wrapRef    = useRef<HTMLDivElement>(null);  // outer overflow:hidden shell
+  const canvasRef  = useRef<HTMLDivElement>(null);  // inner div that holds the SVG
+  const svgRef     = useRef<SVGSVGElement | null>(null);
+  const xf         = useRef({ scale: 1, tx: 0, ty: 0 });
+  const drag       = useRef({ active: false, x: 0, y: 0 });
+  const [error, setError] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
 
+  const applyXf = useCallback(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const { scale, tx, ty } = xf.current;
+    svg.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`;
+    // SVGSVGElement.style is CSSStyleDeclaration — no cast needed
+  }, []);
+
+  const fitToView = useCallback(() => {
+    const wrap = wrapRef.current;
+    const svg  = svgRef.current;
+    if (!wrap || !svg) return;
+    const cw = wrap.clientWidth, ch = wrap.clientHeight;
+    const vb = svg.viewBox.baseVal;
+    const sw = vb.width  > 0 ? vb.width  : svg.getBoundingClientRect().width;
+    const sh = vb.height > 0 ? vb.height : svg.getBoundingClientRect().height;
+    if (!sw || !sh) return;
+    const k = Math.min(cw / sw, ch / sh) * 0.9;
+    xf.current = { scale: k, tx: (cw - sw * k) / 2, ty: Math.max(16, (ch - sh * k) / 2) };
+    applyXf();
+  }, [applyXf]);
+
+  // Render Mermaid whenever diagram string changes
   useEffect(() => {
-    if (!containerRef.current || !diagram) return;
-    setError(null);
-    const el = containerRef.current;
-    el.innerHTML = "";
-    const id = `mermaid-render-${++renderSeq}`;
+    const canvas = canvasRef.current;
+    if (!canvas || !diagram) return;
+    setError(null); setReady(false);
+    canvas.innerHTML = "";
+    svgRef.current = null;
+    const id = `mmd-${++renderSeq}`;
     import("mermaid").then(({ default: mermaid }) => {
       mermaid.initialize({
-        startOnLoad: false, theme: "dark",
-        themeVariables: { background: "#05050F", primaryColor: "#6366F1", primaryTextColor: "#E2E8F0", primaryBorderColor: "#4F46E5", lineColor: "#475569", secondaryColor: "#10B981", tertiaryColor: "#1E293B", edgeLabelBackground: "#0F172A", fontFamily: "'JetBrains Mono', monospace", fontSize: "13px" },
-        flowchart: { curve: "basis", padding: 20 }, securityLevel: "loose",
+        startOnLoad: false, theme: "dark", maxTextSize: 1_000_000,
+        themeVariables: {
+          background: "#05050F", primaryColor: "#6366F1", primaryTextColor: "#E2E8F0",
+          primaryBorderColor: "#4F46E5", lineColor: "#6366F1", secondaryColor: "#10B981",
+          tertiaryColor: "#1E293B", edgeLabelBackground: "#0F0F1A",
+          fontFamily: "'JetBrains Mono', monospace", fontSize: "12px",
+          nodeBorder: "#4F46E5", clusterBkg: "#0F0F1A", clusterBorder: "#1E1E35",
+        },
+        flowchart: { curve: "basis", padding: 24, nodeSpacing: 40, rankSpacing: 56 },
+        securityLevel: "loose",
       });
       return mermaid.render(id, diagram);
     })
-      .then(({ svg }) => { if (containerRef.current) containerRef.current.innerHTML = svg; })
-      .catch(e => { setError(String(e)); if (containerRef.current) containerRef.current.innerHTML = ""; });
-  }, [diagram]);
+      .then(({ svg: svgStr }) => {
+        if (!canvasRef.current) return;
+        canvasRef.current.innerHTML = svgStr;
+        const svgEl = canvasRef.current.querySelector("svg");
+        if (!svgEl) return;
+        // Remove Mermaid's inline size constraints so we control transforms
+        svgEl.removeAttribute("width");
+        svgEl.removeAttribute("height");
+        svgEl.style.maxWidth        = "none";
+        svgEl.style.overflow        = "visible";
+        svgEl.style.position        = "absolute";
+        svgEl.style.top             = "0";
+        svgEl.style.left            = "0";
+        svgEl.style.transformOrigin = "0 0";
+        svgRef.current = svgEl;
+        setReady(true);
+        requestAnimationFrame(fitToView);
+      })
+      .catch((e: unknown) => {
+        const msg = String(e);
+        const friendly = msg.includes("Maximum text size") || msg.includes("maxTextSize")
+          ? "Diagram too large to preview — use the Scope field to filter by directory."
+          : "Diagram render error — switch to Source tab to inspect the generated Mermaid.";
+        setError(friendly);
+        if (canvasRef.current) canvasRef.current.innerHTML = "";
+      });
+  }, [diagram, fitToView]);
 
-  const zoom = (delta: number) => setScale(s => Math.min(3, Math.max(0.3, s + delta)));
-  const reset = () => setScale(1);
+  // Native SVG pan + zoom — wheel zooms toward cursor, pointer-drag pans
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const rect   = el.getBoundingClientRect();
+      const cx     = e.clientX - rect.left, cy = e.clientY - rect.top;
+      const factor = e.deltaY < 0 ? 1.12 : 0.89;
+      const { scale, tx, ty } = xf.current;
+      const ns = Math.min(8, Math.max(0.08, scale * factor));
+      xf.current = { scale: ns, tx: cx - (cx - tx) * (ns / scale), ty: cy - (cy - ty) * (ns / scale) };
+      applyXf();
+    };
+    const onDown = (e: PointerEvent) => {
+      drag.current = { active: true, x: e.clientX, y: e.clientY };
+      el.setPointerCapture(e.pointerId);
+      el.style.cursor = "grabbing";
+    };
+    const onMove = (e: PointerEvent) => {
+      if (!drag.current.active) return;
+      xf.current.tx += e.clientX - drag.current.x;
+      xf.current.ty += e.clientY - drag.current.y;
+      drag.current = { active: true, x: e.clientX, y: e.clientY };
+      applyXf();
+    };
+    const onUp = () => { drag.current.active = false; el.style.cursor = "grab"; };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+    el.addEventListener("pointerdown", onDown);
+    el.addEventListener("pointermove", onMove);
+    el.addEventListener("pointerup", onUp);
+    el.addEventListener("pointerleave", onUp);
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+      el.removeEventListener("pointerdown", onDown);
+      el.removeEventListener("pointermove", onMove);
+      el.removeEventListener("pointerup", onUp);
+      el.removeEventListener("pointerleave", onUp);
+    };
+  }, [applyXf]);
+
+  const zoomBtn = (factor: number) => {
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+    const cx = wrap.clientWidth / 2, cy = wrap.clientHeight / 2;
+    const { scale, tx, ty } = xf.current;
+    const ns = Math.min(8, Math.max(0.08, scale * factor));
+    xf.current = { scale: ns, tx: cx - (cx - tx) * (ns / scale), ty: cy - (cy - ty) * (ns / scale) };
+    applyXf();
+  };
+
+  const btnStyle: React.CSSProperties = { background: "rgba(8,8,18,0.88)", border: "1px solid rgba(255,255,255,0.09)" };
 
   if (error) return (
-    <div className="flex items-center gap-2 p-4 text-xs font-mono text-heat">
-      <AlertTriangle size={13} /> Diagram render error — check Mermaid syntax in the source tab.
+    <div className="flex flex-col items-center justify-center h-full gap-3 p-6">
+      <AlertTriangle size={20} className="text-heat opacity-70" />
+      <p className="font-mono text-xs text-heat text-center max-w-sm">{error}</p>
     </div>
   );
 
   return (
-    <div className="relative w-full h-full overflow-hidden">
+    <div className="relative w-full h-full">
+      {/* Controls */}
       <div className="absolute top-3 right-3 z-10 flex flex-col gap-1">
-        {([["in", () => zoom(0.2)], ["out", () => zoom(-0.2)], ["reset", reset]] as [string, () => void][]).map(([k, fn]) => (
-          <button key={k} onClick={fn}
-            className="p-1.5 rounded-lg text-ink-muted hover:text-ink transition-colors"
-            style={{ background: "rgba(8,8,18,0.85)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            {k === "in" ? <ZoomIn size={12} /> : k === "out" ? <ZoomOut size={12} /> : <RotateCcw size={12} />}
+        {([["in", () => zoomBtn(1.25)], ["out", () => zoomBtn(0.8)], ["fit", fitToView], ["reset", () => { xf.current={scale:1,tx:0,ty:0}; applyXf(); }]] as [string, ()=>void][]).map(([k,fn]) => (
+          <button key={k} onClick={fn} aria-label={k}
+            className="p-1.5 rounded-lg text-ink-muted hover:text-ink transition-colors" style={btnStyle}>
+            {k==="in"?<ZoomIn size={12}/>:k==="out"?<ZoomOut size={12}/>:k==="fit"?<Maximize2 size={12}/>:<RotateCcw size={12}/>}
           </button>
         ))}
       </div>
-      <div className="w-full h-full overflow-auto flex items-start justify-center p-6">
-        <div ref={containerRef} style={{ transform: `scale(${scale})`, transformOrigin: "top center", transition: "transform 0.2s" }} />
+      {/* Hint */}
+      {ready && (
+        <div className="absolute bottom-3 left-3 z-10 font-mono text-[10px] text-slate-700 pointer-events-none">
+          scroll to zoom · drag to pan
+        </div>
+      )}
+      {/* Pan/zoom shell */}
+      <div ref={wrapRef} className="w-full h-full overflow-hidden select-none" style={{ cursor: "grab", position: "relative" }}>
+        <div ref={canvasRef} style={{ position: "absolute", top: 0, left: 0 }} />
       </div>
     </div>
   );

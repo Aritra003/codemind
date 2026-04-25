@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { Settings } from "lucide-react";
+import { Settings, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { ProfileEditor } from "./client";
 
@@ -34,19 +34,19 @@ export default async function SettingsPage() {
 
       {/* Quick links */}
       <div className="glass rounded-2xl p-6 mb-5">
-        <p className="font-mono text-xs text-ink-muted mb-4">QUICK LINKS</p>
+        <p className="font-mono text-[10px] text-ink-dim uppercase tracking-widest mb-3">Quick links</p>
         <div className="space-y-2">
           {[
             { label: "Manage API Keys", href: "/dashboard/apikeys", desc: "Create and revoke agent authentication keys" },
             { label: "Connected Repos", href: "/dashboard/repos",   desc: "View and manage your GitHub repositories" },
           ].map(l => (
             <Link key={l.href} href={l.href}
-              className="flex items-center gap-3 p-3 bg-surface rounded-xl border border-border hover:border-border-light transition-colors group">
+              className="flex items-center gap-3 p-3 bg-surface rounded-xl border border-border hover:border-border-light hover:bg-surface-raised transition-all group">
               <div className="flex-1">
                 <p className="font-body text-sm font-medium text-ink group-hover:text-brand transition-colors">{l.label}</p>
                 <p className="font-body text-xs text-ink-muted">{l.desc}</p>
               </div>
-              <span className="text-ink-dim group-hover:text-brand transition-colors text-sm">→</span>
+              <ArrowRight size={14} className="text-ink-dim group-hover:text-brand transition-colors flex-shrink-0" />
             </Link>
           ))}
         </div>
@@ -54,7 +54,7 @@ export default async function SettingsPage() {
 
       {/* CLI config */}
       <div className="glass rounded-2xl p-6">
-        <p className="font-mono text-xs text-ink-muted mb-4">CLI CONFIGURATION</p>
+        <p className="font-mono text-[10px] text-ink-dim uppercase tracking-widest mb-3">CLI configuration</p>
         <p className="font-body text-sm text-ink-muted mb-3">The CLI reads config from <code className="font-mono text-brand text-xs">~/.codemind/config.yaml</code>.</p>
         <div className="bg-[#05050B] rounded-xl p-3 font-mono text-xs border border-border text-ink-muted leading-relaxed">
           <div className="text-ink-dim mb-1"># ~/.codemind/config.yaml</div>

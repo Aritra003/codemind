@@ -75,7 +75,7 @@ export function ApiKeysClient({ keys: initial }: { keys: ApiKeyRecord[] }) {
 
       {/* Create form */}
       <div className="glass rounded-2xl p-5 mb-6">
-        <p className="font-mono text-xs text-ink-muted mb-3">CREATE NEW KEY</p>
+        <p className="font-mono text-[10px] text-ink-dim uppercase tracking-widest mb-3">Create new key</p>
         <div className="flex gap-3">
           <input value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === "Enter" && create()}
             placeholder="Claude Code agent" maxLength={64}

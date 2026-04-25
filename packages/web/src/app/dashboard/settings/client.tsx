@@ -37,9 +37,7 @@ export function ProfileEditor({ initial }: { initial: Profile }) {
 
   return (
     <div className="glass rounded-2xl p-6 mb-5">
-      <div className="flex items-center gap-2 mb-5">
-        <p className="font-mono text-xs text-ink-muted">YOUR PROFILE</p>
-      </div>
+      <p className="font-mono text-[10px] text-ink-dim uppercase tracking-widest mb-5">Your profile</p>
 
       {/* Avatar + identity */}
       <div className="flex items-center gap-4 mb-6">

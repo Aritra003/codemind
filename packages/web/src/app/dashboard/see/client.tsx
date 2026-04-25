@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Eye, Upload, Loader2, AlertTriangle, ChevronDown, ChevronRight, Clock, X, FileText, Sparkles, Copy, Check } from "lucide-react";
+import { Eye, Upload, Loader2, AlertTriangle, ChevronDown, ChevronRight, X, FileText, Sparkles, Copy, Check } from "lucide-react";
 import { ACCEPTED_TYPES, DIRECT_PREVIEW_TYPES, MAX_UPLOAD_BYTES, getEffectiveType, rasterizeSVG } from "@/lib/see-utils";
 import { ReportViewer } from "./report-viewer";
 
@@ -90,7 +90,7 @@ function GenerateTab() {
               <span className="font-mono text-[10px] text-ink-dim">{meta.nodeCount} nodes · {meta.edgeCount} edges</span>
             </div>
             <button onClick={copy} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs text-ink-muted hover:text-ink bg-surface hover:bg-surface-raised border border-border transition-all">
-              {copied ? <><Check size={11} className="text-emerald-400" /> Copied</> : <><Copy size={11} /> Copy</>}
+              {copied ? <><Check size={11} className="text-neon" /> Copied</> : <><Copy size={11} /> Copy</>}
             </button>
           </div>
           {meta.warning && (
@@ -298,10 +298,9 @@ export function SeeClient({ history: initialHistory, hasApiKey }: { history: His
 
       {tab === "analyse" && history.length > 0 && (
         <div className="mt-8">
-          <div className="flex items-center gap-2 mb-4">
-            <Clock size={13} className="text-ink-dim" />
-            <span className="font-body text-sm font-medium text-ink-muted">Recent analyses</span>
-            <span className="font-mono text-xs text-ink-dim">({history.length})</span>
+          <div className="flex items-center justify-between mb-3">
+            <p className="font-mono text-[10px] text-ink-dim uppercase tracking-widest">Recent analyses</p>
+            <span className="font-mono text-[10px] text-ink-dim">{history.length}</span>
           </div>
           <div className="space-y-2">
             {history.map(item => <HistoryCard key={item.id} item={item} />)}
