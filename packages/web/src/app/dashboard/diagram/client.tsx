@@ -1,29 +1,8 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { GitFork, Loader2, Copy, Check, Download, ChevronDown, Info, AlertTriangle, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
-import mermaid from "mermaid";
-
 type Repo   = { id: string; fullName: string; graphData: unknown };
 type Result = { diagram: string; nodeCount: number; edgeCount: number; warning?: string; repoName: string };
-
-mermaid.initialize({
-  startOnLoad: false,
-  theme: "dark",
-  themeVariables: {
-    background: "#05050F",
-    primaryColor: "#6366F1",
-    primaryTextColor: "#E2E8F0",
-    primaryBorderColor: "#4F46E5",
-    lineColor: "#475569",
-    secondaryColor: "#10B981",
-    tertiaryColor: "#1E293B",
-    edgeLabelBackground: "#0F172A",
-    fontFamily: "'JetBrains Mono', monospace",
-    fontSize: "13px",
-  },
-  flowchart: { curve: "basis", padding: 20 },
-  securityLevel: "loose",
-});
 
 function useCopy(text: string) {
   const [copied, setCopied] = useState(false);
@@ -36,6 +15,8 @@ function useCopy(text: string) {
   return { copied, copy };
 }
 
+let renderSeq = 0;
+
 function DiagramPreview({ diagram }: { diagram: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale]   = useState(1);
@@ -45,11 +26,18 @@ function DiagramPreview({ diagram }: { diagram: string }) {
     if (!containerRef.current || !diagram) return;
     setError(null);
     const el = containerRef.current;
-    el.removeAttribute("data-processed");
-    el.innerHTML = diagram;
-    mermaid.render("codemind-diagram", diagram)
-      .then(({ svg }) => { el.innerHTML = svg; })
-      .catch(e => { setError(String(e)); el.innerHTML = ""; });
+    el.innerHTML = "";
+    const id = `mermaid-render-${++renderSeq}`;
+    import("mermaid").then(({ default: mermaid }) => {
+      mermaid.initialize({
+        startOnLoad: false, theme: "dark",
+        themeVariables: { background: "#05050F", primaryColor: "#6366F1", primaryTextColor: "#E2E8F0", primaryBorderColor: "#4F46E5", lineColor: "#475569", secondaryColor: "#10B981", tertiaryColor: "#1E293B", edgeLabelBackground: "#0F172A", fontFamily: "'JetBrains Mono', monospace", fontSize: "13px" },
+        flowchart: { curve: "basis", padding: 20 }, securityLevel: "loose",
+      });
+      return mermaid.render(id, diagram);
+    })
+      .then(({ svg }) => { if (containerRef.current) containerRef.current.innerHTML = svg; })
+      .catch(e => { setError(String(e)); if (containerRef.current) containerRef.current.innerHTML = ""; });
   }, [diagram]);
 
   const zoom = (delta: number) => setScale(s => Math.min(3, Math.max(0.3, s + delta)));

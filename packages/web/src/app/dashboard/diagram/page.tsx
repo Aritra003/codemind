@@ -1,6 +1,9 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import DiagramClient from "./client";
+import dynamic from "next/dynamic";
+
+// Mermaid uses browser-only APIs — must never run on the server
+const DiagramClient = dynamic(() => import("./client"), { ssr: false, loading: () => null });
 
 export const metadata = { title: "Diagram | CodeMind" };
 
