@@ -292,47 +292,40 @@ Memory triage algorithm: .claude/reference/MEMORY-TRIAGE.md — run at every ses
 CLAUDE.md — Apex Runtime v1.4 | Authors: Ashish Khandelwal, Arup Kolay | MIT License
 ================================================================================
 
-## Session Context (Last updated: 2026-04-25)
+## Session Context (Last updated: 2026-04-25 — commit a45c1ea pushed to github.com/Aritra003/codemind)
 
 ### Current State
-- CodeMind CLI fully functional — Bug Fix Sprint 2 + audit report + image formats complete
-- **packages/web** — UI/UX Overhaul Sprint complete (Sections A–D + F)
+- CodeMind v6 — all features shipped and pushed to GitHub (main branch)
+- CLI: ask, plan, audit --report, see (multi-format), MCP server, watch, pre-commit hook
+- Web: full Next.js 14 dashboard — Graph (NOVA), Ask, Plan, See, Diagram, Reports, Settings, API Keys
 - Both packages TypeScript-clean with zero errors
 
-### Recent Changes (UI/UX Overhaul Sprint — 2026-04-25)
-**Section C (Profile):** `prisma/schema.prisma` (added `about` field), `/api/profile` route,
-  `settings/client.tsx` (About Me textarea, char counter, inline save) — DONE prev session
+### Recent Changes (this session)
+**Web platform additions:**
+- `packages/web/src/lib/indexer.ts` — FIXED type mismatch: GraphNode now has `name`, `file`, `kind`
+  fields (was missing → Ask/Plan/Mermaid crashed on real graph data). Edge `type` renamed to `kind`.
+- `dashboard/diagram/` — NEW page: live Mermaid preview (mermaid.js, dark CodeMind theme),
+  repo selector, scope filter, zoom controls, copy + download .mmd. Sidebar: "Diagram" (GitFork icon, `g d`).
+- `ask/client.tsx` — loading text: "Asking CodeMind…"; stripMd() strips ###/** from answers
+- `plan/client.tsx` — loading text: "Planning with CodeMind…"; stripMd() strips ###/** from plan output
+- `mermaid` package installed in packages/web
 
-**Section D CLI (image formats):** `packages/cli/src/lib/vision/image-prep.ts` — new file.
-  SVG (sharp→resvg-js fallback), PDF (pdf2pic), BMP/TIFF (sharp), Mermaid (.mmd→mmdc).
-  All optional deps with graceful errors. `see-runner.ts` uses `SUPPORTED_EXTS` constant.
-
-**Section D Web (see upload):** `src/lib/see-utils.ts` (rasterizeSVG + helpers).
-  `see/client.tsx` — SVG client-side canvas rasterization, file-card for non-previewable types,
-  accept attribute expanded, 20MB limit, hint text updated.
-  `api/see/route.ts` — BMP/TIFF via sharp, PDF/Mermaid → helpful "use CLI" error.
-
-**Section A (Graph reimagine):** `D3Graph.tsx` fully reimagined — logarithmic node sizing
-  (12+log2(1+inDeg)*6), risk-colored borders (≥20=heat, ≥10=solar, ≥4=brand), text labels,
-  directional SVG arrow markers, edge types (solid/dashed/dotted/red), stats bar, search input,
-  legend panel, click-to-highlight dependents, zoom controls, ZoomIn/ZoomOut/Reset buttons.
-
-**Section B (Check page):** Repo dropdown (auto-populated from indexed repos), fuzzy FilePicker
-  component (shows nodes from selected repo's graph, fuzzy search, click-to-select).
-
-**Section F (Polish):** `src/lib/toast.tsx` — context-based toast system (success/error/info),
-  slideInRight animation. Wired into repos/client.tsx (index/add actions) + settings/client.tsx.
-  Sidebar.tsx — keyboard shortcuts (`g h/r/c/g/s`, `?` modal), freshness indicators on repos
-  (`FreshnessTag` with color: green=<1h, yellow=<1d, dim=older).
+**Web platform (prior sessions — complete):**
+- NOVA Graph Explorer (D3Graph.tsx) — dual-canvas bloom, force sim, cluster hulls, particles, node inspector
+- Ask + Plan API routes (Opus claude-opus-4-7) with keyword extraction, blast radius, call chains
+- See page: Analyse tab (vision) + Generate Mermaid tab
+- Multi-language indexer: Python, Go, Java, Ruby, Rust, C#, PHP, Kotlin, Swift + TS/JS (regex-based)
+- Security reporter: per-language patterns, circular deps, hotspot analysis, action items
+- Sidebar keyboard shortcuts, toast system, freshness tags, profile About Me
 
 ### Key Decisions
-- Route structure: `app/dashboard/` URLs remain correct
-- SVG rasterization: canvas API on client (no server deps for SVG)
-- BMP/TIFF: sharp on server (optional dep, graceful error if missing)
-- PDF/Mermaid in web: "use CLI" error — complex server deps not justified in web tier
+- Web indexer = GitHub API + regex (no tree-sitter) → file-level nodes, all languages supported
+- CLI indexer = tree-sitter → function/class-level nodes, TS/JS only (Python not yet supported in CLI)
+- Mermaid live render: client-side mermaid.js in browser (no server dep)
+- GraphNode.kind = "module" for all web-indexed nodes (file-level); D3Graph handles gracefully
 
 ### Next Steps
-- **To run**: `cp .env.example .env`, fill GitHub/Google OAuth credentials, `pnpm db:push && pnpm dev`
-- Run regression tests: `pnpm test` in packages/cli
-- Priority: CI/CD pipeline for web deployment (Vercel or Railway)
-- Consider: `codemind audit --report` polish — open report in browser on macOS/Linux/Windows
+- **To run**: `cp packages/web/.env.example packages/web/.env`, fill OAuth creds, `pnpm db:push && pnpm dev`
+- Deploy: Vercel (web) — set env vars: NEXTAUTH_SECRET, GITHUB_CLIENT_ID/SECRET, ANTHROPIC_API_KEY, DATABASE_URL
+- Consider: Add Python support to CLI indexer (tree-sitter-python) for function/class-level nodes
+- Consider: Streaming responses for Ask/Plan (currently waits for full response)

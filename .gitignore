@@ -5,5 +5,11 @@ coverage/
 *.tgz
 .DS_Store
 .env
+.env.local
+.env.production
 ~/test-repos/
 .burn-rate/
+.next/
+*.pack.gz
+prisma/*.db
+prisma/*.db-journal
