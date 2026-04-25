@@ -15,6 +15,9 @@ export type AITask =
   | 'vision-resolve-entities'
   | 'forensics-triage'
   | 'forensics-narrate'
+  | 'audit-think'
+  | 'ask-question'
+  | 'plan-refactor'
 
 export interface ModelConfig {
   model:              string
@@ -59,6 +62,27 @@ export const MODEL_ROUTING: Record<AITask, ModelConfig> = {
   'forensics-narrate': {
     model:             'claude-opus-4-7',
     maxTokens:         2048,
+    cacheSystemPrompt: true,
+  },
+
+  // Audit report narrative — executive summary + working-well analysis. Opus.
+  'audit-think': {
+    model:             'claude-opus-4-7',
+    maxTokens:         1024,
+    cacheSystemPrompt: true,
+  },
+
+  // Graph-powered codebase Q&A — structural reasoning over graph context. Opus.
+  'ask-question': {
+    model:             'claude-opus-4-7',
+    maxTokens:         4096,
+    cacheSystemPrompt: true,
+  },
+
+  // Sequenced refactoring plan from dependency graph. Opus.
+  'plan-refactor': {
+    model:             'claude-opus-4-7',
+    maxTokens:         8192,
     cacheSystemPrompt: true,
   },
 }

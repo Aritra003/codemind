@@ -8,8 +8,10 @@ import * as traceTool       from './tools/trace'
 import * as graphTool       from './tools/graph'
 import * as statusTool      from './tools/status'
 import * as watchStatusTool from './tools/watch-status'
+import * as askTool         from './tools/ask'
+import * as planTool        from './tools/plan'
 
-const ALL_TOOLS = [checkTool, seeTool, traceTool, graphTool, statusTool, watchStatusTool]
+const ALL_TOOLS = [checkTool, seeTool, traceTool, graphTool, statusTool, watchStatusTool, askTool, planTool]
 
 export async function startMcpServer(config: UserConfig): Promise<void> {
   const server = new Server(

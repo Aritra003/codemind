@@ -47,11 +47,11 @@ describe('startMcpServer', () => {
     expect(mockConnect).toHaveBeenCalledTimes(1)
   })
 
-  it('ListTools handler returns exactly 6 tools', async () => {
+  it('ListTools handler returns exactly 8 tools', async () => {
     await startMcpServer(CONFIG)
     const listHandler = mockSetRequestHandler.mock.calls[0]?.[1] as () => Promise<{ tools: unknown[] }>
     const result = await listHandler()
-    expect(result.tools).toHaveLength(6)
+    expect(result.tools).toHaveLength(8)
   })
 
   it('each tool name starts with "codemind_"', async () => {

@@ -33,6 +33,14 @@ export interface SeeGenerateOptions {
   output?: string   // write to file; defaults to stdout
 }
 
+export interface SeeDiffReport {
+  oldPath:   string
+  newPath:   string
+  added:     string[]   // components in new but not old
+  removed:   string[]   // components in old but not new
+  unchanged: number
+}
+
 export interface GenerateReport {
   diagram:    string
   node_count: number
@@ -49,7 +57,8 @@ export function registerSeeCommand(program: Command, config: UserConfig): void {
     .option('--generate',        'Generate a Mermaid diagram from the indexed code graph (no diagram input needed)')
     .option('--scope <path>',    'Path prefix to filter nodes when using --generate')
     .option('--output <file>',   'Output file for generated diagram (default: stdout)')
-    .action(async (diagram: string | undefined, opts: Partial<SeeOptions & { generate?: boolean; scope?: string; output?: string }>) => {
+    .option('--diff <file>',     'Compare two diagrams and show architectural drift between them')
+    .action(async (diagram: string | undefined, opts: Partial<SeeOptions & { generate?: boolean; scope?: string; output?: string; diff?: string }>) => {
       const { runSee } = await import('./see-runner')
       await runSee(diagram, opts, config)
     })

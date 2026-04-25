@@ -292,30 +292,47 @@ Memory triage algorithm: .claude/reference/MEMORY-TRIAGE.md — run at every ses
 CLAUDE.md — Apex Runtime v1.4 | Authors: Ashish Khandelwal, Arup Kolay | MIT License
 ================================================================================
 
-## Session Context (Last updated: 2026-04-24 17:00)
+## Session Context (Last updated: 2026-04-25)
 
 ### Current State
-- CodeMind CLI fully functional — Bug Fix Sprint 2 complete: all 8 bugs resolved
-- Demo readiness: 9/10 (was 7/10 entering sprint). TypeScript clean.
-- burn-rate plugin fully installed at ~/.claude/
+- CodeMind CLI fully functional — Bug Fix Sprint 2 + audit report + image formats complete
+- **packages/web** — UI/UX Overhaul Sprint complete (Sections A–D + F)
+- Both packages TypeScript-clean with zero errors
 
-### Recent Changes (Sprint 2 — 2026-04-24)
-- `packages/cli/src/lib/mcp/server.ts` — MCP keepalive: setInterval + signal handlers (BUG-1)
-- `packages/cli/src/graph/parser.ts` — barrel re-exports (lazy __module__ nodes), dynamic import (UNRESOLVED_DYN), require() → IMPORTS edges (BUG-4/5/6)
-- `packages/cli/src/graph/completeness.ts` — UNRESOLVED_DYN → ambiguous_local; __module__ edges excluded (BUG-5/8)
-- `packages/cli/src/commands/check-runner.ts` — file existence + indexed-nodes pre-flight (BUG-3)
-- `packages/cli/src/commands/check.ts` + `graph.ts` — --json as local subcommand option (BUG-2)
-- `packages/cli/src/commands/status-runner.ts` — JSON output mode added (BUG-2)
-- `packages/cli/src/commands/index-runner.ts` — .claude/skills/codemind.md created on first index (BUG-7)
-- `TEST-RESULTS-SPRINT2.md` — full test results documented
+### Recent Changes (UI/UX Overhaul Sprint — 2026-04-25)
+**Section C (Profile):** `prisma/schema.prisma` (added `about` field), `/api/profile` route,
+  `settings/client.tsx` (About Me textarea, char counter, inline save) — DONE prev session
+
+**Section D CLI (image formats):** `packages/cli/src/lib/vision/image-prep.ts` — new file.
+  SVG (sharp→resvg-js fallback), PDF (pdf2pic), BMP/TIFF (sharp), Mermaid (.mmd→mmdc).
+  All optional deps with graceful errors. `see-runner.ts` uses `SUPPORTED_EXTS` constant.
+
+**Section D Web (see upload):** `src/lib/see-utils.ts` (rasterizeSVG + helpers).
+  `see/client.tsx` — SVG client-side canvas rasterization, file-card for non-previewable types,
+  accept attribute expanded, 20MB limit, hint text updated.
+  `api/see/route.ts` — BMP/TIFF via sharp, PDF/Mermaid → helpful "use CLI" error.
+
+**Section A (Graph reimagine):** `D3Graph.tsx` fully reimagined — logarithmic node sizing
+  (12+log2(1+inDeg)*6), risk-colored borders (≥20=heat, ≥10=solar, ≥4=brand), text labels,
+  directional SVG arrow markers, edge types (solid/dashed/dotted/red), stats bar, search input,
+  legend panel, click-to-highlight dependents, zoom controls, ZoomIn/ZoomOut/Reset buttons.
+
+**Section B (Check page):** Repo dropdown (auto-populated from indexed repos), fuzzy FilePicker
+  component (shows nodes from selected repo's graph, fuzzy search, click-to-select).
+
+**Section F (Polish):** `src/lib/toast.tsx` — context-based toast system (success/error/info),
+  slideInRight animation. Wired into repos/client.tsx (index/add actions) + settings/client.tsx.
+  Sidebar.tsx — keyboard shortcuts (`g h/r/c/g/s`, `?` modal), freshness indicators on repos
+  (`FreshnessTag` with color: green=<1h, yellow=<1d, dim=older).
 
 ### Key Decisions
-- __module__ nodes are lazy: only created when a module-level call exists (avoids metric pollution)
-- Cap completeness 74% (was 75%): accurate — FIX 5 now tracks 27 previously-ignored dynamic imports
-- UNRESOLVED_DYN always → ambiguous_local (never external); __module__ edges excluded from completeness
-- MCP server exits when stdin closes (client disconnects); setInterval keepalive prevents premature exit
+- Route structure: `app/dashboard/` URLs remain correct
+- SVG rasterization: canvas API on client (no server deps for SVG)
+- BMP/TIFF: sharp on server (optional dep, graceful error if missing)
+- PDF/Mermaid in web: "use CLI" error — complex server deps not justified in web tier
 
 ### Next Steps
-- Run unit test suite: `pnpm test` in packages/cli
-- Priority feature candidates: `codemind watch` (file-watch mode), Python language support
-- APEX-BUILT FEATURE pipeline: run SPEC DELTA before any new feature implementation
+- **To run**: `cp .env.example .env`, fill GitHub/Google OAuth credentials, `pnpm db:push && pnpm dev`
+- Run regression tests: `pnpm test` in packages/cli
+- Priority: CI/CD pipeline for web deployment (Vercel or Railway)
+- Consider: `codemind audit --report` polish — open report in browser on macOS/Linux/Windows

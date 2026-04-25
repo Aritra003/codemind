@@ -5,6 +5,9 @@ import { registerSeeCommand }       from './commands/see'
 import { registerTraceCommand }     from './commands/trace'
 import { registerGraphCommand }     from './commands/graph'
 import { registerServeCommand }     from './commands/serve'
+import { registerAuditCommand }     from './commands/audit'
+import { registerAskCommand }       from './commands/ask'
+import { registerPlanCommand }      from './commands/plan'
 import { loadConfig }               from './lib/config'
 import { validateEnvCli }           from './lib/validate-env'
 
@@ -22,10 +25,13 @@ async function main(): Promise<void> {
 
   registerIndexCommand(program, config)
   registerCheckCommand(program, config)
+  registerAuditCommand(program, config)
   registerSeeCommand(program, config)
   registerTraceCommand(program, config)
   registerGraphCommand(program, config)
   registerServeCommand(program, config)
+  registerAskCommand(program, config)
+  registerPlanCommand(program, config)
 
   program
     .command('watch')

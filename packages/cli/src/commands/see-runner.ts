@@ -14,19 +14,19 @@ import {
 } from '../lib/output/format'
 import { logger } from '../lib/logger'
 import { runSeeGenerateCore } from './see'
+import { SUPPORTED_EXTS } from '../lib/vision/image-prep'
 
-const SUPPORTED_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.svg']
+const SUPPORTED_EXTENSIONS = [...SUPPORTED_EXTS]
 
-type RunSeeOpts = Partial<SeeOptions & { generate?: boolean; scope?: string; output?: string }>
+type RunSeeOpts = Partial<SeeOptions & { generate?: boolean; scope?: string; output?: string; diff?: string }>
 
 export async function runSee(
   diagramArg: string | undefined,
   opts:       RunSeeOpts,
   config:     UserConfig,
 ): Promise<void> {
-  if (opts.generate) {
-    return runSeeGenerate(opts, config)
-  }
+  if (opts.generate) return runSeeGenerate(opts, config)
+  if (opts.diff)     return runSeeDiff(diagramArg, opts.diff, config)
   return runSeeCompare(diagramArg, opts, config)
 }
 
@@ -82,6 +82,74 @@ async function runSeeGenerate(opts: RunSeeOpts, config: UserConfig): Promise<voi
   }
 }
 
+async function runSeeDiff(
+  oldArg:  string | undefined,
+  newArg:  string,
+  config:  UserConfig,
+): Promise<void> {
+  if (!oldArg) {
+    process.stderr.write(
+      formatError('NO_DIAGRAM', 'Provide both diagrams: codemind see old.png --diff new.png') + '\n',
+    )
+    process.exit(1)
+  }
+
+  if (!config.anthropic_api_key) {
+    process.stderr.write(
+      formatError('NO_API_KEY', '`see --diff` requires an Anthropic API key.', 'Set ANTHROPIC_API_KEY in ~/.codemind/config.yaml.') + '\n',
+    )
+    process.exit(1)
+  }
+
+  const repoRoot = process.cwd()
+  const oldPath  = path.isAbsolute(oldArg) ? oldArg : path.join(repoRoot, oldArg)
+  const newPath  = path.isAbsolute(newArg) ? newArg : path.join(repoRoot, newArg)
+
+  try { await fs.access(oldPath) } catch {
+    process.stderr.write(formatError('FILE_NOT_FOUND', `Cannot read: ${oldPath}`) + '\n')
+    process.exit(1)
+  }
+  try { await fs.access(newPath) } catch {
+    process.stderr.write(formatError('FILE_NOT_FOUND', `Cannot read: ${newPath}`) + '\n')
+    process.exit(1)
+  }
+
+  const ai       = new AIClient(config)
+  const vision   = new VisionModule(ai)
+  const spinner1 = ora(`Extracting from ${path.basename(oldPath)}…`).start()
+  const oldResult = await vision.extractEntities(oldPath)
+  spinner1.succeed(`Found ${oldResult.entities.length} components in old diagram`)
+
+  const spinner2 = ora(`Extracting from ${path.basename(newPath)}…`).start()
+  const newResult = await vision.extractEntities(newPath)
+  spinner2.succeed(`Found ${newResult.entities.length} components in new diagram`)
+
+  const oldSet = new Set(oldResult.entities.map(e => e.toLowerCase().trim()))
+  const newSet = new Set(newResult.entities.map(e => e.toLowerCase().trim()))
+
+  const added   = newResult.entities.filter(e => !oldSet.has(e.toLowerCase().trim()))
+  const removed = oldResult.entities.filter(e => !newSet.has(e.toLowerCase().trim()))
+  const unchanged = oldResult.entities.filter(e => newSet.has(e.toLowerCase().trim())).length
+
+  process.stdout.write('\n')
+  process.stdout.write(`  Comparing ${path.basename(oldPath)} → ${path.basename(newPath)}\n\n`)
+
+  if (added.length > 0) {
+    process.stdout.write(`  Added (${added.length}):\n`)
+    for (const c of added) process.stdout.write(`    + ${c}\n`)
+    process.stdout.write('\n')
+  }
+  if (removed.length > 0) {
+    process.stdout.write(`  Removed (${removed.length}):\n`)
+    for (const c of removed) process.stdout.write(`    - ${c}\n`)
+    process.stdout.write('\n')
+  }
+  if (added.length === 0 && removed.length === 0) {
+    process.stdout.write('  No component changes detected.\n\n')
+  }
+  process.stdout.write(`  Unchanged: ${unchanged} components\n`)
+}
+
 async function runSeeCompare(
   diagramArg: string | undefined,
   opts:       RunSeeOpts,
@@ -116,7 +184,7 @@ async function runSeeCompare(
       : path.join(repoRoot, diagramArg)
 
     const ext = path.extname(diagramPath).toLowerCase()
-    if (!SUPPORTED_EXTENSIONS.includes(ext)) {
+    if (!SUPPORTED_EXTENSIONS.includes(ext as (typeof SUPPORTED_EXTS)[number])) {
       spinner.fail(`Unsupported diagram format: ${ext}`)
       process.stderr.write(
         formatError(

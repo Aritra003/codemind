@@ -5,8 +5,11 @@
 // eslint-disable-next-line no-restricted-imports
 import Anthropic from '@anthropic-ai/sdk'
 import { selectModel } from './models'
+import { safeParseJson } from './utils'
 import type { UserConfig, BlastRadius } from '@codemind/shared'
 import type { ForensicsTrace } from '../../commands/trace'
+import type { Theme, HealthScore, PositiveSignal, AuditThinkResult } from '../../report/report-types'
+import type { CodeGraph } from '@codemind/shared'
 import { AITimeoutError } from '../errors'
 
 const TIMEOUT_MS = 30_000
@@ -44,11 +47,12 @@ export class AIClient {
 
   async extractDiagramEntities(imagePath: string): Promise<DiagramExtractionResult> {
     const { model, maxTokens } = selectModel('vision-extract-diagram')
-    const imageData = await import('fs/promises').then(fs => fs.readFile(imagePath))
+    const { prepareImage } = await import('../vision/image-prep')
+    const prepared   = await prepareImage(imagePath)
     const msg = await this.callWithRetry('extractDiagramEntities', () => this.client.messages.create({
       model, max_tokens: maxTokens,
       messages: [{ role: 'user', content: [
-        { type: 'image', source: { type: 'base64', media_type: 'image/png', data: imageData.toString('base64') } },
+        { type: 'image', source: { type: 'base64', media_type: prepared.mediaType, data: prepared.data.toString('base64') } },
         { type: 'text', text: 'List all named components/modules. Respond JSON: {"entities":[],"confidence":0.8}' },
       ]}],
     }))
@@ -84,6 +88,32 @@ export class AIClient {
     return msg.content[0]?.type === 'text' ? msg.content[0].text : ''
   }
 
+  async analyzeAudit(ctx: { themes: Theme[]; score: HealthScore; signals: PositiveSignal[]; graph: CodeGraph }): Promise<AuditThinkResult> {
+    const { model, maxTokens, cacheSystemPrompt } = selectModel('audit-think')
+    const systemText = 'You are a senior engineering consultant. Write a concise 3-paragraph executive summary and a 2-sentence "what is working well" narrative. Respond ONLY with JSON: {"executiveSummary":"<HTML paragraphs>","workingWellNarrative":"<plain text>"}'
+    const payload = {
+      healthScore:    ctx.score.score,
+      grade:          ctx.score.grade,
+      themes:         ctx.themes.map(t => ({ title: t.title, severity: t.severity, count: t.findings.length, whatFound: t.whatFound })),
+      positiveSignals: ctx.signals.map(s => s.title),
+      graphNodes:     ctx.graph.node_count,
+      completeness:   ctx.graph.completeness_pct,
+    }
+    const msg = await this.callWithRetry('analyzeAudit', () => this.client.messages.create({
+      model, max_tokens: maxTokens,
+      system:   cacheSystemPrompt ? [{ type: 'text', text: systemText, cache_control: { type: 'ephemeral' } }] as unknown as Anthropic.Messages.TextBlockParam[] : systemText,
+      messages: [{ role: 'user', content: JSON.stringify(payload) }],
+    }))
+    const text   = msg.content[0]?.type === 'text' ? msg.content[0].text : '{}'
+    const parsed = safeParseJson<{ executiveSummary?: string; workingWellNarrative?: string }>(text, {})
+    return {
+      executiveSummary:     parsed.executiveSummary     ?? '',
+      workingWellNarrative: parsed.workingWellNarrative ?? '',
+      model,
+      tokensUsed: msg.usage.input_tokens + msg.usage.output_tokens,
+    }
+  }
+
   async triageError(sanitizedInput: string): Promise<{ symbols: string[]; likely_domain: string }> {
     const { model, maxTokens, cacheSystemPrompt } = selectModel('forensics-triage')
     const systemText = 'Classify this error. Respond JSON: {"symbols":[],"likely_domain":"CODE|INFRA|CONFIG|NETWORK|UNKNOWN"}'
@@ -95,6 +125,17 @@ export class AIClient {
     const text   = msg.content[0]?.type === 'text' ? msg.content[0].text : '{}'
     const parsed = safeParseJson<{ symbols?: string[]; likely_domain?: string }>(text, {})
     return { symbols: parsed.symbols ?? [], likely_domain: parsed.likely_domain ?? 'UNKNOWN' }
+  }
+
+  async rawText(task: import('./models').AITask, content: string, sys?: string): Promise<RawTextResult> {
+    const { model, maxTokens } = selectModel(task)
+    const msg = await this.callWithRetry('rawText', () => this.client.messages.create({
+      model, max_tokens: maxTokens,
+      ...(sys ? { system: sys } : {}),
+      messages: [{ role: 'user', content }],
+    }))
+    const text = msg.content[0]?.type === 'text' ? msg.content[0].text : ''
+    return { text, tokensUsed: msg.usage.input_tokens + msg.usage.output_tokens, model }
   }
 
   private async callWithRetry<T>(label: string, fn: () => Promise<T>): Promise<T> {
@@ -118,11 +159,10 @@ export class AIClient {
   }
 }
 
-function safeParseJson<T>(text: string, fallback: T): T {
-  try {
-    const match = text.match(/\{[\s\S]*\}|\[[\s\S]*\]/)
-    return match ? (JSON.parse(match[0]) as T) : fallback
-  } catch { return fallback }
+export interface RawTextResult {
+  text:       string
+  tokensUsed: number
+  model:      string
 }
 
 /** Structural summary passed to Opus — contains NO source code (INV-005). */
