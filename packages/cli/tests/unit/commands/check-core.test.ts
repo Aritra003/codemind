@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { UserConfig, BlastRadius, CodeGraph, GraphNode } from '@codemind/shared'
+import type { UserConfig, BlastRadius, CodeGraph, GraphNode } from '@stinkit/shared'
 
 vi.mock('../../../src/lib/graph/store')
 vi.mock('../../../src/lib/analysis')

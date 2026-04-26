@@ -1,4 +1,4 @@
-# EVENT-STORM.md — CodeMind Domain Model
+# EVENT-STORM.md — StinKit Domain Model
 # Mode: EVENT-STORM | Agent: ORACLE (co-owner: TITAN)
 # Pipeline position: First gate — precedes SPEC and ARCHITECT
 # Last updated: 2026-04-23
@@ -19,7 +19,7 @@ Method: Event Storming — Orange = Domain Event, Blue = Command, Yellow = Aggre
 ================================================================================
 
 ### Graph Context Events
-  GE-01  CodebaseIndexingStarted         (trigger: user runs `codemind index`)
+  GE-01  CodebaseIndexingStarted         (trigger: user runs `stinkit index`)
   GE-02  SourceFileDiscovered            (each file found during walk)
   GE-03  FileParseSucceeded              (tree-sitter produced AST)
   GE-04  FileParseFailedWithWarning      (syntax error — node added with error flag)
@@ -27,12 +27,12 @@ Method: Event Storming — Orange = Domain Event, Blue = Command, Yellow = Aggre
   GE-06  StaticEdgeResolved              (tree-sitter resolved call site deterministically)
   GE-07  AmbiguousCallSiteDetected       (interface/DI/dynamic dispatch — unresolved)
   GE-08  LLMEdgeInferred                 (Opus inferred call target via --think)
-  GE-09  TeamDeclaredConnectionLoaded    (from .codemind/connections.yaml)
+  GE-09  TeamDeclaredConnectionLoaded    (from .stinkit/connections.yaml)
   GE-10  GitHistoryLoadedPerNode         (change_count_6mo, last_changed_by populated)
   GE-11  CoverageFileDetected            (nyc_output / lcov / coverage.json found)
   GE-12  MeasuredCoverageLoaded          (line/branch % populated from coverage file)
   GE-13  HeuristicCoverageFlagged        (test file exists but no measurement)
-  GE-14  GraphPersistedToStorage         (graph.msgpack written to .codemind/)
+  GE-14  GraphPersistedToStorage         (graph.msgpack written to .stinkit/)
   GE-15  IndexCompleted                  (full index with completeness metric)
   GE-16  GraphStalenessDetected          (>7 days since last index — triggers warning)
   GE-17  IncrementalUpdateApplied        (changed files re-parsed without full re-index)
@@ -54,7 +54,7 @@ Method: Event Storming — Orange = Domain Event, Blue = Command, Yellow = Aggre
   AE-13  PreCommitCheckFlaggedHighRisk   (risk HIGH+, hook exits 0 with warning — never blocks)
 
 ### Vision/Drift Context Events
-  VE-01  DiagramUploadReceived           (image path provided to `codemind see`)
+  VE-01  DiagramUploadReceived           (image path provided to `stinkit see`)
   VE-02  VisionExtractionStarted        (Opus 4.7 Vision API called)
   VE-03  DiagramComponentsExtracted     (JSON of components + connections returned)
   VE-04  ExtractionSchemaValidationFailed (JSON invalid — retry with stricter prompt)
@@ -74,7 +74,7 @@ Method: Event Storming — Orange = Domain Event, Blue = Command, Yellow = Aggre
   VE-18  IntermediaryFound               (diagram A→B, code has A→X→B)
   VE-19  DriftAccuracyCalculated         (% of diagram connections that match code)
   VE-20  CorrectedMermaidDiagramGenerated (updated .mermaid file produced)
-  VE-21  DriftMappingsFileSaved          (.codemind/see-mappings.yaml updated)
+  VE-21  DriftMappingsFileSaved          (.stinkit/see-mappings.yaml updated)
   VE-22  DriftUIOpened                   (browser opened with side-by-side view)
 
 ### Forensics Context Events
@@ -92,8 +92,8 @@ Method: Event Storming — Orange = Domain Event, Blue = Command, Yellow = Aggre
   FE-12  ConfidenceCapApplied            (raw score capped at 80% — static analysis limit)
 
 ### Integration Context Events
-  IE-01  MCPServerStarted                (codemind serve)
-  IE-02  MCPToolInvoked                  (Claude Code called codemind_* tool)
+  IE-01  MCPServerStarted                (stinkit serve)
+  IE-02  MCPToolInvoked                  (Claude Code called stinkit_* tool)
   IE-03  MCPResponseReturned             (result serialized and returned to Claude)
   IE-04  PreCommitHookInstalled          (--install-hook added to .git/hooks/pre-commit)
   IE-05  CICheckConfigured               (GitHub Actions / GitLab CI step written)
@@ -252,7 +252,7 @@ Method: Event Storming — Orange = Domain Event, Blue = Command, Yellow = Aggre
     Integration seams → Analysis BC: GraphQueried event (read model)
     Integration seams → Vision BC: GraphQueried event (read model)
     Integration seams → Forensics BC: GraphQueried event (read model)
-    Data: .codemind/graph.msgpack (local), optional cloud sync
+    Data: .stinkit/graph.msgpack (local), optional cloud sync
     Language: TypeScript (Node.js)
 
   BC-02  ANALYSIS
@@ -268,7 +268,7 @@ Method: Event Storming — Orange = Domain Event, Blue = Command, Yellow = Aggre
     Responsibility: diagram extraction, entity resolution, structural comparison, drift report
     External dependency: Opus 4.7 Vision API (extraction + entity resolution)
     Reads from: GRAPH BC (read-only)
-    Data: .codemind/see-mappings.yaml (entity override persistence)
+    Data: .stinkit/see-mappings.yaml (entity override persistence)
     Language: TypeScript
 
   BC-04  FORENSICS
@@ -350,7 +350,7 @@ Method: Event Storming — Orange = Domain Event, Blue = Command, Yellow = Aggre
 ================================================================================
 
   NC-01  "graph" overloaded
-    Used in: BC-01 (the internal data structure), `codemind graph` command (export/visualize)
+    Used in: BC-01 (the internal data structure), `stinkit graph` command (export/visualize)
     Resolution: internal = CodeGraph (type/class name), user-facing = `graph` (CLI verb)
     TITAN: use CodeGraph in all internal interfaces, never expose the implementation type name
 

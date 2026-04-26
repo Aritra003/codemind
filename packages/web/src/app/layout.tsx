@@ -23,28 +23,28 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: { default: "CodeMind — Ship without fear", template: "%s | CodeMind" },
+  title: { default: "StinKit — Ship without fear", template: "%s | StinKit" },
   description: "X-ray vision for your codebase. See the blast radius of any change before it ships. Trace errors to their origin. Compare architecture diagrams against real code.",
   keywords: ["code analysis", "blast radius", "dependency graph", "MCP", "developer tools", "Claude"],
   authors: [{ name: "Atnia Solutions Pvt Limited" }],
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://codemind.dev",
-    title: "CodeMind — Ship without fear",
+    url: "https://stinkit.dev",
+    title: "StinKit — Ship without fear",
     description: "X-ray vision for your codebase. Locally indexed. Offline. Free.",
-    siteName: "CodeMind",
+    siteName: "StinKit",
   },
   twitter: {
     card: "summary_large_image",
-    title: "CodeMind — Ship without fear",
+    title: "StinKit — Ship without fear",
     description: "X-ray vision for your codebase. Locally indexed. Offline. Free.",
   },
   robots: { index: true, follow: true },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#020205",
+  themeColor: "#04040A",
   width: "device-width",
   initialScale: 1,
 };
@@ -52,7 +52,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${jakarta.variable} ${jetbrains.variable}`}>
-      <body className="bg-[--bg] text-[--ink] font-body antialiased">{children}</body>
+      <body className="bg-[var(--bg-void)] text-[var(--ink-secondary)] font-display antialiased">{children}</body>
     </html>
   );
 }

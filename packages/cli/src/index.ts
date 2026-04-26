@@ -17,7 +17,7 @@ async function main(): Promise<void> {
   const config = await loadConfig()
 
   const program = new Command()
-    .name('codemind')
+    .name('stinkit')
     .description('Know the blast radius of every change before it ships.')
     .version('0.1.0')
     .option('--json', 'Output machine-readable JSON instead of formatted text')
@@ -54,7 +54,7 @@ async function main(): Promise<void> {
   // Install pre-commit hook
   program
     .command('--install-hook')
-    .description('Install the CodeMind pre-commit hook in .git/hooks/pre-commit')
+    .description('Install the StinKit pre-commit hook in .git/hooks/pre-commit')
     .action(async () => {
       const { installPreCommitHook } = await import('./hooks/install')
       await installPreCommitHook()

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import * as path from 'path'
 import * as os from 'os'
 import * as fs from 'fs/promises'
-import type { GraphNode } from '@codemind/shared'
+import type { GraphNode } from '@stinkit/shared'
 import { loadCoverage } from '../../../src/graph/coverage'
 
 const FIXTURES = path.join(__dirname, '../../fixtures/coverage')

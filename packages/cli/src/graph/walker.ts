@@ -16,7 +16,7 @@ export interface DiscoveredFile {
 
 const SKIP_DIRS = new Set([
   'node_modules', '.git', 'dist', 'build', 'coverage',
-  '.codemind', '.next', '__pycache__', '.turbo', 'out', '.cache',
+  '.stinkit', '.next', '__pycache__', '.turbo', 'out', '.cache',
 ])
 
 const LANG_MAP: Record<string, string> = {

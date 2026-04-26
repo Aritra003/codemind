@@ -1,5 +1,5 @@
 import simpleGit from 'simple-git'
-import type { GraphNode } from '@codemind/shared'
+import type { GraphNode } from '@stinkit/shared'
 
 export interface GitNodeHistory {
   node_id:          string

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import type { UserConfig, BlastRadius } from '@codemind/shared'
+import type { UserConfig, BlastRadius } from '@stinkit/shared'
 import type { GraphSummaryForAI } from '../../../../src/lib/ai/client'
 
 const mockCreate = vi.hoisted(() => vi.fn())

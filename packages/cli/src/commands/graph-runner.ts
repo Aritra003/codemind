@@ -1,7 +1,7 @@
 import ora from 'ora'
 import * as fs   from 'fs/promises'
 import * as path from 'path'
-import type { UserConfig, CodeGraph, NodeId } from '@codemind/shared'
+import type { UserConfig, CodeGraph, NodeId } from '@stinkit/shared'
 import type { GraphOptions } from './graph'
 import { GraphStore }    from '../lib/graph/store'
 import { GraphTraversal } from '../lib/graph/traversal'
@@ -28,14 +28,14 @@ export async function runGraph(
   }
 
   const repoRoot = process.cwd()
-  const store    = new GraphStore(`${repoRoot}/.codemind`)
+  const store    = new GraphStore(`${repoRoot}/.stinkit`)
   const spinner  = ora('Loading graph…').start()
 
   try {
     const graph = await store.load()
     if (!graph) {
       spinner.fail('No graph found.')
-      process.stderr.write(formatError('NO_GRAPH', 'Run `codemind index` first.') + '\n')
+      process.stderr.write(formatError('NO_GRAPH', 'Run `stinkit index` first.') + '\n')
       process.exit(1)
     }
 
@@ -169,7 +169,7 @@ function graphToDot(graph: CodeGraph, scope?: string): string {
   const topSet   = new Set(topNodes)
 
   const sanitize = (s: string) => `"${s.replace(/"/g, '\\"').slice(0, 60)}"`
-  const lines = ['digraph codemind {', '  rankdir=LR;', '  node [shape=box fontsize=10];']
+  const lines = ['digraph stinkit {', '  rankdir=LR;', '  node [shape=box fontsize=10];']
 
   const edges = g.edges.filter(
     e => e.kind === 'calls' && topSet.has(e.from) && topSet.has(e.to)

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import type { NodeId } from '@codemind/shared'
+import type { NodeId } from '@stinkit/shared'
 import { rankCommits, type GitCommit } from '../../../src/forensics/ranking'
 
 function makeCommit(hash: string, files: string[], message = 'fix', daysAgo = 1, authorName = 'Alice', authorEmail = 'alice@example.com'): GitCommit {

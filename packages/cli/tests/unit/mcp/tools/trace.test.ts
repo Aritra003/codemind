@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { UserConfig, CodemindResult } from '@codemind/shared'
+import type { UserConfig, StinKitResult } from '@stinkit/shared'
 import type { ForensicsTrace } from '../../../../src/commands/trace'
 
 vi.mock('../../../../src/commands/trace')
@@ -24,8 +24,8 @@ const TRACE: ForensicsTrace = {
 }
 
 describe('TOOL_DEF', () => {
-  it('name is codemind_trace', () => {
-    expect(TOOL_DEF.name).toBe('codemind_trace')
+  it('name is stinkit_trace', () => {
+    expect(TOOL_DEF.name).toBe('stinkit_trace')
   })
 
   it('error is a required param', () => {
@@ -33,7 +33,7 @@ describe('TOOL_DEF', () => {
   })
 })
 
-describe('handle (codemind_trace)', () => {
+describe('handle (stinkit_trace)', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
   it('returns content array with type=text on success', async () => {
@@ -65,7 +65,7 @@ describe('handle (codemind_trace)', () => {
   })
 
   it('shows error text for failed result', async () => {
-    const failed: CodemindResult<ForensicsTrace> = {
+    const failed: StinKitResult<ForensicsTrace> = {
       status: 'failed', data: null, meta: META,
       error: { code: 'GRAPH_NOT_FOUND', message: 'Graph not found.' },
     }

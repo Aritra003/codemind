@@ -1,4 +1,4 @@
-/** Core graph data structures. Serialised as MessagePack in .codemind/graph/. */
+/** Core graph data structures. Serialised as MessagePack in .stinkit/graph/. */
 
 export interface CodeGraph {
   version:         number           // schema version for migration
@@ -39,7 +39,7 @@ export type NodeKind =
 export type ResolutionKind =
   | 'static'     // resolved by tree-sitter (certain)
   | 'inferred'   // LLM-inferred (< 80% confidence per INV-004)
-  | 'declared'   // from .codemind/connections.yaml
+  | 'declared'   // from .stinkit/connections.yaml
   | 'ambiguous'  // could not be resolved
 
 export interface GraphEdge {

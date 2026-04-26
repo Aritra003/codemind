@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { UserConfig, CodeGraph, GraphNode } from '@codemind/shared'
+import type { UserConfig, CodeGraph, GraphNode } from '@stinkit/shared'
 import type { DriftReport } from '../../../src/commands/see'
 
 vi.mock('../../../src/lib/graph/store')

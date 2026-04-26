@@ -1,4 +1,4 @@
-import type { CodeGraph } from '@codemind/shared'
+import type { CodeGraph } from '@stinkit/shared'
 import type { AIClient, DiagramExtractionResult, EntityResolutionResult } from '../lib/ai/client'
 
 const CAP = 0.8  // INV-004

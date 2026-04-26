@@ -33,8 +33,8 @@ export default async function SettingsPage() {
       <ProfileEditor initial={profile} />
 
       {/* Quick links */}
-      <div className="glass rounded-2xl p-6 mb-5">
-        <p className="font-mono text-[10px] text-ink-dim uppercase tracking-widest mb-3">Quick links</p>
+      <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] p-6 mb-5">
+        <p className="font-mono text-xs text-ink-muted uppercase tracking-widest mb-3">Quick links</p>
         <div className="space-y-2">
           {[
             { label: "Manage API Keys", href: "/dashboard/apikeys", desc: "Create and revoke agent authentication keys" },
@@ -53,11 +53,11 @@ export default async function SettingsPage() {
       </div>
 
       {/* CLI config */}
-      <div className="glass rounded-2xl p-6">
-        <p className="font-mono text-[10px] text-ink-dim uppercase tracking-widest mb-3">CLI configuration</p>
-        <p className="font-body text-sm text-ink-muted mb-3">The CLI reads config from <code className="font-mono text-brand text-xs">~/.codemind/config.yaml</code>.</p>
+      <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] p-6">
+        <p className="font-mono text-xs text-ink-muted uppercase tracking-widest mb-3">CLI configuration</p>
+        <p className="font-body text-sm text-ink-muted mb-3">The CLI reads config from <code className="font-mono text-brand text-xs">~/.stinkit/config.yaml</code>.</p>
         <div className="bg-[#05050B] rounded-xl p-3 font-mono text-xs border border-border text-ink-muted leading-relaxed">
-          <div className="text-ink-dim mb-1"># ~/.codemind/config.yaml</div>
+          <div className="text-ink-dim mb-1"># ~/.stinkit/config.yaml</div>
           <div>anthropic_api_key: sk-ant-…</div>
           <div>default_language: typescript</div>
         </div>

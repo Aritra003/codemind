@@ -1,5 +1,5 @@
 import type { Command } from 'commander'
-import type { UserConfig, CodemindResult, NodeId } from '@codemind/shared'
+import type { UserConfig, StinKitResult, NodeId } from '@stinkit/shared'
 import { GraphStore }     from '../lib/graph/store'
 import { AIClient }       from '../lib/ai/client'
 import { ForensicsModule } from '../lib/forensics'
@@ -53,9 +53,9 @@ export async function runTraceCore(
   errorInput: string,
   options: TraceOptions,
   config: UserConfig,
-): Promise<CodemindResult<ForensicsTrace>> {
+): Promise<StinKitResult<ForensicsTrace>> {
   const repoRoot = process.cwd()
-  const store    = new GraphStore(`${repoRoot}/.codemind`)
+  const store    = new GraphStore(`${repoRoot}/.stinkit`)
   const startMs  = Date.now()
 
   const graph = await store.load()
@@ -63,7 +63,7 @@ export async function runTraceCore(
     return {
       status: 'failed', data: null,
       meta:  { completeness_pct: 0, duration_ms: Date.now() - startMs },
-      error: { code: 'GRAPH_NOT_FOUND', message: 'No graph found. Run `codemind index` first.' },
+      error: { code: 'GRAPH_NOT_FOUND', message: 'No graph found. Run `stinkit index` first.' },
     }
   }
 
@@ -71,7 +71,7 @@ export async function runTraceCore(
     return {
       status: 'failed', data: null,
       meta:  { completeness_pct: graph.completeness_pct, external_calls_excluded: graph.external_calls_excluded, ambiguous_local_calls: graph.ambiguous_local_calls, duration_ms: Date.now() - startMs },
-      error: { code: 'AI_UNAVAILABLE', message: '`trace` requires an Anthropic API key.', hint: 'Set ANTHROPIC_API_KEY in ~/.codemind/config.yaml.' },
+      error: { code: 'AI_UNAVAILABLE', message: '`trace` requires an Anthropic API key.', hint: 'Set ANTHROPIC_API_KEY in ~/.stinkit/config.yaml.' },
     }
   }
 

@@ -1,4 +1,4 @@
-import type { NodeId } from '@codemind/shared'
+import type { NodeId } from '@stinkit/shared'
 import type { NodeCoverage } from '../graph/coverage'
 
 export function detectCoverageGaps(

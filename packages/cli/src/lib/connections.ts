@@ -1,7 +1,7 @@
 import * as fs   from 'fs/promises'
 import * as path from 'path'
 import * as yaml from 'js-yaml'
-import { CodemindError } from './errors'
+import { StinKitError } from './errors'
 
 export interface ConnectionDeclaration {
   from:   string
@@ -16,7 +16,7 @@ export interface ConnectionsFile {
 }
 
 export async function loadConnections(repoRoot: string): Promise<ConnectionsFile | null> {
-  const filePath = path.join(repoRoot, '.codemind', 'connections.yaml')
+  const filePath = path.join(repoRoot, '.stinkit', 'connections.yaml')
   let raw: string
   try {
     raw = await fs.readFile(filePath, 'utf8')
@@ -28,10 +28,10 @@ export async function loadConnections(repoRoot: string): Promise<ConnectionsFile
     const parsed = yaml.load(raw) as ConnectionsFile
     return parsed
   } catch (err) {
-    throw new CodemindError(
+    throw new StinKitError(
       'CONNECTIONS_PARSE_ERROR',
-      `Failed to parse .codemind/connections.yaml: ${String(err)}`,
-      'Check the YAML syntax. See .codemind/connections.yaml.example for reference.',
+      `Failed to parse .stinkit/connections.yaml: ${String(err)}`,
+      'Check the YAML syntax. See .stinkit/connections.yaml.example for reference.',
     )
   }
 }

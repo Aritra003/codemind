@@ -2,9 +2,9 @@
 Date: 2026-04-23 | Status: ACCEPTED | Author: TITAN
 
 ## Context
-The CodeMind CLI has 4 bounded contexts (Graph, Analysis, Vision, Forensics) identified
+The StinKit CLI has 4 bounded contexts (Graph, Analysis, Vision, Forensics) identified
 in EVENT-STORM.md. The key deployment constraint is: the CLI must be a single installable
-npm package (`npx codemind`) with zero-config setup, < 200ms startup, and full offline
+npm package (`npx stinkit`) with zero-config setup, < 200ms startup, and full offline
 operation. The typical alternative — microservices or a plugin architecture — would
 require a running daemon, network ports, or subprocess management, all of which add
 complexity and fragility on developer machines.
@@ -28,7 +28,7 @@ internals — only its interface. This boundary is enforced by `hygiene-check.ts
 
 ## Consequences
 Positive:
-- Single `npx codemind` install, no daemon, no config, < 200ms startup
+- Single `npx stinkit` install, no daemon, no config, < 200ms startup
 - Graph loaded once per process → Analysis, Vision, Forensics all query same in-memory graph
 - Module boundaries enforced statically by hygiene-check.ts — no runtime overhead
 - TypeScript strict mode catches cross-module type violations at compile time

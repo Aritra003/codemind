@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import type { CodeGraph } from '@codemind/shared'
+import type { CodeGraph } from '@stinkit/shared'
 import type { AIClient, DiagramExtractionResult, EntityResolutionResult } from '../../../src/lib/ai/client'
 import { VisionModule } from '../../../src/lib/vision/vision-module'
 

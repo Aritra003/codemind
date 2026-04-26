@@ -1,4 +1,4 @@
-import type { CodeGraph, GraphNode, GraphEdge } from '@codemind/shared'
+import type { CodeGraph, GraphNode, GraphEdge } from '@stinkit/shared'
 
 export interface GenerateMermaidOptions {
   scope?:  string   // path prefix filter on node.file

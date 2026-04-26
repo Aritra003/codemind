@@ -58,16 +58,16 @@ GET /health returns:
 Step 1 — Identify scope:
   ```bash
   # Check which ECS tasks are running
-  aws ecs list-tasks --cluster codemind-prod --service-name codemind-api \
+  aws ecs list-tasks --cluster stinkit-prod --service-name stinkit-api \
     --desired-status RUNNING
   # If 0 running tasks: immediate ECS restart
-  aws ecs update-service --cluster codemind-prod --service codemind-api \
+  aws ecs update-service --cluster stinkit-prod --service stinkit-api \
     --force-new-deployment
   ```
 
 Step 2 — Check for recent deployment (most common cause):
   ```bash
-  aws ecs describe-services --cluster codemind-prod --services codemind-api \
+  aws ecs describe-services --cluster stinkit-prod --services stinkit-api \
     --query 'services[0].deployments[*].[status,createdAt,taskDefinition]'
   ```
   Active deployment in LAST 30 MINUTES + health degraded = rollback candidate.
@@ -75,10 +75,10 @@ Step 2 — Check for recent deployment (most common cause):
 Step 3 — Rollback (if deploy is cause):
   ```bash
   # Find previous stable task definition
-  aws ecs list-task-definitions --family-prefix codemind-api --sort DESC --max-items 5
+  aws ecs list-task-definitions --family-prefix stinkit-api --sort DESC --max-items 5
   # Roll back
-  aws ecs update-service --cluster codemind-prod --service codemind-api \
-    --task-definition codemind-api:[PREVIOUS_REVISION]
+  aws ecs update-service --cluster stinkit-prod --service stinkit-api \
+    --task-definition stinkit-api:[PREVIOUS_REVISION]
   ```
 
 Step 4 — If NOT a deploy issue (infra failure):
@@ -91,7 +91,7 @@ Step 4 — If NOT a deploy issue (infra failure):
 
 1. **Failed deployment (bad code)**
    - ECS deployment events align with error spike
-   - Check CloudWatch Logs: /codemind/prod/api → ERROR level events around deploy time
+   - Check CloudWatch Logs: /stinkit/prod/api → ERROR level events around deploy time
    - Fix: rollback. Write fix. Re-deploy with proper test coverage.
 
 2. **RDS connection pool exhaustion**
@@ -140,7 +140,7 @@ If AWS Cost Anomaly Detection fires (bill > 3× daily average):
 1. Deploy fix or rollback verified.
 2. All ECS tasks running and healthy:
    ```bash
-   aws ecs describe-services --cluster codemind-prod --services codemind-api \
+   aws ecs describe-services --cluster stinkit-prod --services stinkit-api \
      --query 'services[0].runningCount'
    # Should equal desired count (e.g., 2)
    ```

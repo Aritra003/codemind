@@ -94,7 +94,7 @@ export function renderThemesSection(themes: Theme[]): string {
   <div class="container">
     <h2 class="danger">Findings by Theme</h2>
     <p>Click any card to expand. Each card contains: what we found · why it is dangerous · how to fix it · consequences of inaction · affected files.</p>
-    ${cards || '<p>No findings detected. Run <code>codemind index</code> to build a fresh graph.</p>'}
+    ${cards || '<p>No findings detected. Run <code>stinkit index</code> to build a fresh graph.</p>'}
   </div>
 </section>`
 }
@@ -134,8 +134,8 @@ export function renderRoadmap(themes: Theme[], data: AuditData): string {
       <div class="tl-card">
         <div class="tl-tier ongoing">ONGOING</div>
         <ul class="tl-items">
-          <li>Run codemind audit monthly</li>
-          <li>Add codemind check to CI/CD</li>
+          <li>Run stinkit audit monthly</li>
+          <li>Add stinkit check to CI/CD</li>
           ${uncovered > 0 ? `<li>Add tests to ${uncovered} uncovered hotspot${uncovered > 1 ? 's' : ''}</li>` : ''}
           ${topSpot ? `<li>Monitor blast radius of ${esc(topSpot.file.split('/').pop() ?? topSpot.file)}</li>` : ''}
         </ul>

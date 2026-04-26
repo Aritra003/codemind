@@ -1,8 +1,8 @@
-import type { UserConfig } from '@codemind/shared'
+import type { UserConfig } from '@stinkit/shared'
 import { runPlanCore } from '../../../commands/plan'
 
 export const TOOL_DEF = {
-  name:        'codemind_plan',
+  name:        'stinkit_plan',
   description: 'Generate a sequenced, risk-aware refactoring plan. Analyses the code graph to determine safe change order, PR boundaries, effort estimates, and rollback points. Use when the developer wants to refactor, migrate, replace, or restructure code.',
   inputSchema: {
     type: 'object' as const,

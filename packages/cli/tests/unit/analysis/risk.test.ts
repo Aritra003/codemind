@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import type { BlastRadius } from '@codemind/shared'
+import type { BlastRadius } from '@stinkit/shared'
 import { classifyRisk, THRESHOLDS } from '../../../src/analysis/risk'
 
 function makeRadius(overrides: Partial<Omit<BlastRadius, 'risk_level'>> = {}): Omit<BlastRadius, 'risk_level'> {

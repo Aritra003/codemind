@@ -1,4 +1,4 @@
-# CONTENT-GUIDE.md — CodeMind Brand Voice + Copy Standards
+# CONTENT-GUIDE.md — StinKit Brand Voice + Copy Standards
 # Mode: CONTENT | Agent: QUILL
 # Last updated: 2026-04-23
 # Rule: No user-facing string ships without a QUILL-approved entry here or explicit QUILL sign-off.
@@ -25,7 +25,7 @@ Not hype:   Never "revolutionary," "game-changing," "blazing-fast," "AI-powered 
             Developers have seen it all. Hype is the fastest way to lose credibility.
 
 Not corporate: Never "leverage," "robust solution," "seamlessly integrate," "empower your team."
-               Humans speak in plain English. So does CodeMind.
+               Humans speak in plain English. So does StinKit.
 
 Not apologetic: "Something went wrong on our end" is honest.
                 "We're so sorry for the inconvenience!" is noise.
@@ -33,8 +33,8 @@ Not apologetic: "Something went wrong on our end" is honest.
 ```
 
 Reading level: Grade 9–10 (technical audience — precise is fine, jargon for its own sake is not).
-               Short sentences win. Prefer: "Run `codemind index` to start." over "To initiate
-               the indexing process, execute the `codemind index` command."
+               Short sentences win. Prefer: "Run `stinkit index` to start." over "To initiate
+               the indexing process, execute the `stinkit index` command."
 
 ================================================================================
 ## Canonical Terminology
@@ -50,7 +50,7 @@ BUILDER must use these exact strings. Deviations require QUILL approval.
 | Graph completeness | "graph completeness" | "accuracy," "coverage" (reserved for test coverage) |
 | Affected downstream code | "dependents" | "dependencies" (those are what you depend ON) |
 | The code graph data structure | "graph" | "map," "model," "codebase graph" |
-| The product | "CodeMind" | "codemind" (unless in CLI command context), "CM" |
+| The product | "StinKit" | "stinkit" (unless in CLI command context), "CM" |
 | Subscription tiers | "Free," "Pro," "Team," "Enterprise" | all lowercase, "Basic," "Starter" |
 | The graph index file | "graph index" | "cache," "database," "local store" |
 | Pre-commit integration | "pre-commit hook" | "git hook," "commit hook" |
@@ -58,7 +58,7 @@ BUILDER must use these exact strings. Deviations require QUILL approval.
 | CLI command for drift | `see` | "compare," "diff," "check diagram" |
 | CLI command for tracing | `trace` | "debug," "trace back," "find root cause" |
 | CLI command for graph | `graph` | "visualize," "map" |
-| The cloud product | "CodeMind Cloud" | "the dashboard," "the app," "the server" |
+| The cloud product | "StinKit Cloud" | "the dashboard," "the app," "the server" |
 | API authentication key | "API key" | "token," "secret key" (for external API keys — internal tokens use "token") |
 | Deep analysis usage limit | "deep analysis calls" | "tokens," "credits," "AI uses" |
 
@@ -85,7 +85,7 @@ Email label:         "Email"
 Password label:      "Password"
 CTA button:          "Sign in"
 Forgot link:         "Forgot password?"
-No account yet:      "New to CodeMind? Create an account"
+No account yet:      "New to StinKit? Create an account"
 ```
 
 ### Password reset — request
@@ -122,9 +122,9 @@ Resend link:         "Didn't receive it? Resend verification email"
 ### Step 1: Install CLI
 ```
 Heading:    "Install the CLI"
-Body:       "CodeMind runs locally on your machine. Your code never leaves your environment."
-Code block: "npm install -g codemind"
-Or:         "npx codemind"
+Body:       "StinKit runs locally on your machine. Your code never leaves your environment."
+Code block: "npm install -g stinkit"
+Or:         "npx stinkit"
 Step label: "1 of 3"
 CTA:        "I've installed it →"
 ```
@@ -133,8 +133,8 @@ CTA:        "I've installed it →"
 ```
 Heading:    "Index your repo"
 Body:       "Run this in your project root. Takes 10–45 seconds depending on size."
-Code block: "cd your-project && codemind index"
-Hint:       "What's indexing? CodeMind builds a graph of your codebase — functions,
+Code block: "cd your-project && stinkit index"
+Hint:       "What's indexing? StinKit builds a graph of your codebase — functions,
              dependencies, and call paths. It runs locally. No code is uploaded."
 CTA:        "My repo is indexed →"
 ```
@@ -143,9 +143,9 @@ CTA:        "My repo is indexed →"
 ```
 Heading:    "Run your first check"
 Body:       "Stage a change and see its blast radius before you commit."
-Code block: "git add authService.ts\ncodemind check authService.ts"
+Code block: "git add authService.ts\nstinkit check authService.ts"
 Hint:       "Or install the pre-commit hook to run automatically on every commit:"
-Code:       "codemind --install-hook"
+Code:       "stinkit --install-hook"
 CTA:        "I'm set up →"
 Skip link:  "Set this up later"
 ```
@@ -160,7 +160,7 @@ Skip link:  "Set this up later"
 ```
 Illustration:  key icon (outlined, not filled)
 Heading:       "No API keys yet"
-Body:          "Create an API key to authenticate the CLI with your CodeMind account."
+Body:          "Create an API key to authenticate the CLI with your StinKit account."
 CTA:           "Create API key"
 ```
 
@@ -182,7 +182,7 @@ Body:          "Your billing history will appear here after your first payment."
 **No activity (new account):**
 ```
 Heading:       "No checks yet"
-Body:          "Run `codemind check` in your terminal to start seeing results here."
+Body:          "Run `stinkit check` in your terminal to start seeing results here."
 ```
 
 ### Billing + subscription copy
@@ -193,7 +193,7 @@ Label:         "Deep analysis calls"
 Format:        "12 / 50 used this month"
 Near limit:    "42 / 50 used — 8 remaining"   (warning color at 84%+)
 At limit:      "50 / 50 used — limit reached"  (critical color)
-Tooltip:       "Deep analysis runs `codemind check --think`, powered by Claude claude-opus-4-7."
+Tooltip:       "Deep analysis runs `stinkit check --think`, powered by Claude claude-opus-4-7."
 ```
 
 **Upgrade prompt (at limit):**
@@ -265,7 +265,7 @@ Team name taken:        "That team name is already taken. Try a different one."
 404 Not found:          "We couldn't find what you were looking for. It may have been deleted."
 429 Rate limited:       "Too many requests. Wait a moment and try again."
 500 Server error:       "Something went wrong on our end. We've been notified. Try again in a few minutes."
-503 Unavailable:        "CodeMind is briefly unavailable. We're working on it. Check status.codemind.dev."
+503 Unavailable:        "StinKit is briefly unavailable. We're working on it. Check status.stinkit.dev."
 Stripe error:           "We couldn't process your payment. Check your card details, or try a different card."
 Stripe unavailable:     "Payment processing is temporarily unavailable. Try again in a few minutes."
 ```
@@ -301,19 +301,19 @@ Exporting data:         "Preparing your data export..."
 
 ### First-run telemetry prompt
 ```
-Help improve CodeMind? Send anonymous usage data.
+Help improve StinKit? Send anonymous usage data.
 No code, no file paths, no personal data — only feature usage counts.
 
-  [Y] Yes, help improve CodeMind
+  [Y] Yes, help improve StinKit
   [n] No thanks
 
-You can change this any time in ~/.codemind/config.yaml
+You can change this any time in ~/.stinkit/config.yaml
 ```
 
 ### Pre-commit hook install prompt
 ```
-Install the CodeMind pre-commit hook?
-Runs `codemind check` on staged files before every commit.
+Install the StinKit pre-commit hook?
+Runs `stinkit check` on staged files before every commit.
 The hook never blocks your commit — it warns, then exits 0.
 
   [Y] Install hook
@@ -332,26 +332,26 @@ The hook never blocks your commit — it warns, then exits 0.
   ⚠ Index complete with gaps
     1,247 nodes · 68% completeness
     High number of dynamic call sites detected. Results may undercount blast radius.
-    Declare dynamic connections in .codemind/connections.yaml to improve accuracy.
-    Run: codemind --help connections
+    Declare dynamic connections in .stinkit/connections.yaml to improve accuracy.
+    Run: stinkit --help connections
 ```
 
 ### Check — no changes staged
 ```
-  No staged files. Stage changes with `git add` before running `codemind check`.
+  No staged files. Stage changes with `git add` before running `stinkit check`.
 ```
 
 ### Graph stale warning
 ```
   ⚠ Graph is 8 days old. Results may not reflect recent changes.
-  Run `codemind index` to refresh.
+  Run `stinkit index` to refresh.
 ```
 
 ### Deep analysis limit reached (CLI)
 ```
   ✗ Deep analysis limit reached (50/50 this month).
-  Upgrade to Pro for 50 calls/month: codemind.dev/upgrade
-  Or run `codemind check` without --think for instant local analysis.
+  Upgrade to Pro for 50 calls/month: stinkit.dev/upgrade
+  Or run `stinkit check` without --think for instant local analysis.
 ```
 
 ### Offline mode notice
@@ -364,56 +364,56 @@ The hook never blocks your commit — it warns, then exits 0.
 ## Email Templates
 ================================================================================
 
-From name:      CodeMind
-From address:   hello@codemind.dev (transactional), noreply@codemind.dev (receipts)
+From name:      StinKit
+From address:   hello@stinkit.dev (transactional), noreply@stinkit.dev (receipts)
 Tone:           Direct + warm. Shorter than you think. Developers skim emails.
 
 ### Welcome email (on registration)
 ```
-Subject:   "Welcome to CodeMind"
+Subject:   "Welcome to StinKit"
 Body:
 Hi,
 
 You're all set. Here's how to get started in 3 minutes:
 
 1. Install the CLI:
-   npm install -g codemind
+   npm install -g stinkit
 
 2. Index your repo:
-   cd your-project && codemind index
+   cd your-project && stinkit index
 
 3. Run your first check:
-   codemind check src/authService.ts
+   stinkit check src/authService.ts
 
 That's it. The pre-commit hook is optional but recommended:
-   codemind --install-hook
+   stinkit --install-hook
 
 Questions? Reply to this email.
 
-— The CodeMind team
+— The StinKit team
 ```
 
 ### Team invite email
 ```
-Subject:   "[inviter name] invited you to [team name] on CodeMind"
+Subject:   "[inviter name] invited you to [team name] on StinKit"
 Body:
 Hi,
 
-[inviter name] has invited you to join the [team name] team on CodeMind.
+[inviter name] has invited you to join the [team name] team on StinKit.
 
 [Accept invitation →]  (button)
 
-This invite expires in 7 days. If you don't have a CodeMind account, you'll
+This invite expires in 7 days. If you don't have a StinKit account, you'll
 create one when you accept.
 
 If you weren't expecting this, ignore this email.
 
-— The CodeMind team
+— The StinKit team
 ```
 
 ### Password reset email
 ```
-Subject:   "Reset your CodeMind password"
+Subject:   "Reset your StinKit password"
 Body:
 Hi,
 
@@ -423,16 +423,16 @@ Someone requested a password reset for this email address.
 
 If you didn't request this, your account is safe — ignore this email.
 
-— The CodeMind team
+— The StinKit team
 ```
 
 ### Payment receipt
 ```
-Subject:   "CodeMind receipt for [Month Year]"
+Subject:   "StinKit receipt for [Month Year]"
 Body:
 Hi,
 
-Your payment of $[amount] for CodeMind [Pro|Team] has been processed.
+Your payment of $[amount] for StinKit [Pro|Team] has been processed.
 
 Plan:       [Pro|Team]
 Amount:     $[amount]
@@ -440,14 +440,14 @@ Date:       [date]
 Invoice:    [invoice number]
 
 View full invoice: [link]
-Manage billing: codemind.dev/billing
+Manage billing: stinkit.dev/billing
 
-— The CodeMind team
+— The StinKit team
 ```
 
 ### Trial ending (3 days before)
 ```
-Subject:   "Your CodeMind trial ends in 3 days"
+Subject:   "Your StinKit trial ends in 3 days"
 Body:
 Hi,
 
@@ -462,7 +462,7 @@ Free plan limits:
 
 If you're happy with the Free plan, no action needed.
 
-— The CodeMind team
+— The StinKit team
 ```
 
 ### Usage limit warning (80% used)
@@ -473,7 +473,7 @@ Hi,
 
 You've used [X] of your [Y] deep analysis calls this month.
 
-Deep analysis runs when you use `codemind check --think`. It gives you
+Deep analysis runs when you use `stinkit check --think`. It gives you
 Opus-powered blast radius insights beyond what the fast check provides.
 
 [Upgrade to Pro →]  (if on Free)
@@ -481,7 +481,7 @@ Opus-powered blast radius insights beyond what the fast check provides.
 
 Your limit resets on [reset date].
 
-— The CodeMind team
+— The StinKit team
 ```
 
 ================================================================================

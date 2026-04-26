@@ -1,4 +1,4 @@
-# IMPLEMENTATION-PLAN.md — CodeMind CLI v1
+# IMPLEMENTATION-PLAN.md — StinKit CLI v1
 # Mode: PLANNER | Agent: BUILDER (co-owner TITAN)
 # Scope: Hackathon — packages/cli + packages/shared ONLY
 # Canonical reference: ARCHITECTURE.md (canonical file tree + DECISIONS LOCKED)
@@ -37,8 +37,8 @@ in several ways. TITAN must explicitly approve the resolution before BUILDER beg
 | `output/renderer.ts` | replaced with `output/format.ts` | KEEP format.ts name (aligns with existing format.ts) |
 | `output/themes.ts` | not created (colors inline in format.ts) | CREATE: extract color constants per DL-006 boundary |
 | `output/html-report.ts` | not created | CREATE: needed for --report flags |
-| `lib/errors.ts` | not created (throws new Error() inline) | CREATE: CodemindError types — needed for typed errors |
-| `lib/connections.ts` | not created | CREATE: .codemind/connections.yaml reader |
+| `lib/errors.ts` | not created (throws new Error() inline) | CREATE: StinKitError types — needed for typed errors |
+| `lib/connections.ts` | not created | CREATE: .stinkit/connections.yaml reader |
 | `lib/ai.ts` | created as `lib/ai/client.ts` + `lib/ai/models.ts` | KEEP split (cleaner separation) |
 | `lib/telemetry.ts` | created as `lib/telemetry/client.ts` | KEEP (cleaner) |
 | Runner files (check-runner.ts etc.) | created during SCAFFOLD | KEEP — these bridge CLI layer to service layer |
@@ -48,7 +48,7 @@ BUILDER recommendation: SPLIT to match ARCHITECTURE.md. DL-006 fitness-check.sh 
 no direct msgpack outside graph/persist.ts — which currently fails since we have msgpack in store.ts.
 
 ================================================================================
-## FEATURE: CodeMind CLI v1 — Local Tool Implementation
+## FEATURE: StinKit CLI v1 — Local Tool Implementation
 ================================================================================
 
 Scope: BC-01 (Graph) + BC-02 (Analysis) + BC-03 (Vision) + BC-04 (Forensics) + BC-05 (MCP)
@@ -63,16 +63,16 @@ SPEC INVARIANTS enforced: INV-001, INV-002, INV-003, INV-004, INV-005
 ### A-01 | src/lib/errors.ts
 Layer: infrastructure | Depends on: none
 Contract:
-  export class CodemindError extends Error {
+  export class StinKitError extends Error {
     constructor(public readonly code: string, message: string, public readonly hint?: string)
   }
-  export class AITimeoutError extends CodemindError {}
-  export class GraphStaleError extends CodemindError {}
-  export class GraphMissingError extends CodemindError {}
-  export class InjectionAttemptError extends CodemindError {}
+  export class AITimeoutError extends StinKitError {}
+  export class GraphStaleError extends StinKitError {}
+  export class GraphMissingError extends StinKitError {}
+  export class InjectionAttemptError extends StinKitError {}
 Max lines: 60
 TDD plan: test each error class has correct code + message + instanceof chain
-Acceptance: all 4 error types constructable; CodemindError.code is always set; AITimeoutError instanceof CodemindError
+Acceptance: all 4 error types constructable; StinKitError.code is always set; AITimeoutError instanceof StinKitError
 
 ### A-02 | src/lib/connections.ts
 Layer: infrastructure | Depends on: A-01
@@ -80,18 +80,18 @@ Contract:
   export interface ConnectionDeclaration { from: string; to: string; kind: string; note?: string }
   export interface ConnectionsFile { version: number; connections: ConnectionDeclaration[] }
   export async function loadConnections(repoRoot: string): Promise<ConnectionsFile | null>
-  // Returns null if .codemind/connections.yaml does not exist — not an error
+  // Returns null if .stinkit/connections.yaml does not exist — not an error
 Max lines: 50
-TDD plan: fixture yaml → parses correctly; missing file → null; invalid yaml → CodemindError
-Acceptance: valid yaml parses; missing file returns null (not throws); malformed yaml throws CodemindError
+TDD plan: fixture yaml → parses correctly; missing file → null; invalid yaml → StinKitError
+Acceptance: valid yaml parses; missing file returns null (not throws); malformed yaml throws StinKitError
 
 ### A-03 | src/lib/config.ts (implement stub)
 Layer: infrastructure | Depends on: A-01
 Contract:
-  export interface CodemindConfig { anthropic_api_key?: string; telemetry: TelemetryConfig; ai: AIConfig; limits: LimitConfig }
-  export async function loadConfig(): Promise<CodemindConfig>
-  export async function saveConfig(patch: Partial<CodemindConfig>): Promise<void>
-  // Config location: ~/.codemind/config.yaml
+  export interface StinKitConfig { anthropic_api_key?: string; telemetry: TelemetryConfig; ai: AIConfig; limits: LimitConfig }
+  export async function loadConfig(): Promise<StinKitConfig>
+  export async function saveConfig(patch: Partial<StinKitConfig>): Promise<void>
+  // Config location: ~/.stinkit/config.yaml
   // NEVER throws on missing file — returns safe defaults
 Max lines: 80
 TDD plan: missing file → safe defaults; valid file → parsed correctly; API key in env var → honoured
@@ -148,7 +148,7 @@ Contract:
   export function detectLanguage(filePath: string): string | null
   // Supported: TypeScript (.ts, .tsx), JavaScript (.js, .jsx). Python deferred to Sprint 2.
   // Respects .gitignore (use ignore package)
-  // Skips: node_modules, .codemind, dist, build, coverage
+  // Skips: node_modules, .stinkit, dist, build, coverage
 Max lines: 100
 TDD plan: fixture dir → finds .ts files; node_modules → excluded; .gitignore patterns → honoured
 Acceptance: finds all .ts/.tsx files; skips node_modules; detectLanguage('foo.ts') = 'typescript'
@@ -406,7 +406,7 @@ Contract:
   export interface SeeMappings { version: number; mappings: Record<string, string> }
   export async function loadMappings(repoRoot: string): Promise<SeeMappings | null>
   export async function saveMappings(repoRoot: string, mappings: SeeMappings): Promise<void>
-  // Reads/writes .codemind/see-mappings.yaml (user-provided diagram→graph label overrides)
+  // Reads/writes .stinkit/see-mappings.yaml (user-provided diagram→graph label overrides)
 Max lines: 50
 TDD plan: valid yaml → parsed; missing file → null; round-trip save+load → identical
 Acceptance: missing file → null not throw; round-trip fidelity
@@ -527,11 +527,11 @@ Acceptance: INV-002 — completeness always shown; CV-004 — AI attribution sho
 ### G-02 | src/lib/output/html-report.ts (new file)
 Layer: infrastructure | Depends on: shared types, Sprint C/E/F types
 Contract:
-  export function generateCheckReport(result: CodemindResult<BlastRadius>): string
-  export function generateSeeReport(result: CodemindResult<DriftReport>): string
-  export function generateTraceReport(result: CodemindResult<ForensicsTrace>): string
+  export function generateCheckReport(result: StinKitResult<BlastRadius>): string
+  export function generateSeeReport(result: StinKitResult<DriftReport>): string
+  export function generateTraceReport(result: StinKitResult<ForensicsTrace>): string
   // Returns a self-contained HTML string (no external deps — inline CSS)
-  // Written to .codemind/reports/[command]-[timestamp].html by runners
+  // Written to .stinkit/reports/[command]-[timestamp].html by runners
 Max lines: 150
 TDD plan: result with CRITICAL risk → HTML contains 'CRITICAL'; HTML is valid (no unclosed tags)
 Acceptance: self-contained HTML (no CDN links); each result type generates unique output
@@ -545,7 +545,7 @@ Acceptance: self-contained HTML (no CDN links); each result type generates uniqu
 Layer: service | Depends on: Sprint C, G, A-06
 Contract:
   export function createCheckTool(): Tool
-  // MCP tool: codemind_check
+  // MCP tool: stinkit_check
   // Input schema: { files: string[], think: boolean }
   // Calls runCheckCore() and formats for MCP response
   // Returns MCP ToolResult with text content
@@ -555,28 +555,28 @@ Max lines: 60
 Layer: service | Depends on: Sprint E, G, A-06
 Contract:
   export function createSeeTool(): Tool
-  // MCP tool: codemind_see; Input: { diagram_path: string }
+  // MCP tool: stinkit_see; Input: { diagram_path: string }
 Max lines: 50
 
 ### H-03 | src/mcp/tools/trace.ts (new file)
 Layer: service | Depends on: Sprint F, G, A-06
 Contract:
   export function createTraceTool(): Tool
-  // MCP tool: codemind_trace; Input: { error_input: string, lookback_days: number }
+  // MCP tool: stinkit_trace; Input: { error_input: string, lookback_days: number }
 Max lines: 50
 
 ### H-04 | src/mcp/tools/graph.ts (new file)
 Layer: service | Depends on: Sprint B, G
 Contract:
   export function createGraphTool(): Tool
-  // MCP tool: codemind_graph; Input: { hotspots: boolean, focus: string, depth: number }
+  // MCP tool: stinkit_graph; Input: { hotspots: boolean, focus: string, depth: number }
 Max lines: 50
 
 ### H-05 | src/mcp/tools/status.ts (new file)
 Layer: service | Depends on: Sprint B
 Contract:
   export function createStatusTool(): Tool
-  // MCP tool: codemind_status — returns graph age, node count, completeness_pct, CLI version
+  // MCP tool: stinkit_status — returns graph age, node count, completeness_pct, CLI version
 Max lines: 40
 
 ### H-06 | src/mcp/server.ts (implement stub)
@@ -596,7 +596,7 @@ Max lines: 70
 Layer: CLI | Depends on: B-07, B-08, G-01
 Status: scaffolded. No changes needed if Sprint B compiles correctly.
 TDD: integration test with fixture repo → graph built + saved; --force flag forces rebuild
-Acceptance: graph file created in .codemind/; completeness shown; progress spinner fires
+Acceptance: graph file created in .stinkit/; completeness shown; progress spinner fires
 
 ### I-02 | src/commands/check-runner.ts (finalise — already scaffolded)
 Layer: CLI | Depends on: C-05, D-02, G-01, A-06

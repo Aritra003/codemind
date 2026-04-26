@@ -61,14 +61,14 @@ SLO breach warning: any purge job with createdAt > 25 days ago still in pending/
 Step 1 — Identify the failed job:
   ```bash
   # BullMQ inspection
-  # Via Bull Board admin UI (if configured): http://admin.codemind.dev/queues
+  # Via Bull Board admin UI (if configured): http://admin.stinkit.dev/queues
   # Or via code:
   npx ts-node packages/server/scripts/inspect-gdpr-queue.ts
   # Shows: jobId, userId, scheduledAt, attempts, lastError
   ```
 
 Step 2 — Read the error:
-  CloudWatch Logs → /codemind/prod/api → filter: `jobId: [jobId]`
+  CloudWatch Logs → /stinkit/prod/api → filter: `jobId: [jobId]`
   Most common errors:
     a. DB connection failure → retry manually (see Step 3)
     b. User not found (already deleted?) → verify and close

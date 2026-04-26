@@ -1,4 +1,4 @@
-import type { CodeGraph, GraphNode, NodeId } from '@codemind/shared'
+import type { CodeGraph, GraphNode, NodeId } from '@stinkit/shared'
 
 const STOPWORDS = new Set([
   'how', 'does', 'the', 'what', 'would', 'break', 'if', 'i', 'to', 'a', 'an',

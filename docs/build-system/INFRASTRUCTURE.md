@@ -1,4 +1,4 @@
-# INFRASTRUCTURE.md — CodeMind Infrastructure Design
+# INFRASTRUCTURE.md — StinKit Infrastructure Design
 # Mode: INFRA-DESIGN | Agent: TITAN
 # Input: ARCHITECTURE.md + THREAT-MODEL.md + API-DESIGN.md
 # Last updated: 2026-04-23
@@ -7,18 +7,18 @@
 
 ## Critical Finding: AI Cost Model
 
-⚠️ The CLI uses the DEVELOPER'S OWN Anthropic API key (stored in ~/.codemind/config.yaml).
-CodeMind does NOT pay for Opus API calls in the CLI product.
+⚠️ The CLI uses the DEVELOPER'S OWN Anthropic API key (stored in ~/.stinkit/config.yaml).
+StinKit does NOT pay for Opus API calls in the CLI product.
 
 Implications:
-  1. CodeMind's infrastructure AI cost is $0 for CLI users
-  2. Users bear their own API costs — CodeMind must publish token budgets per feature
+  1. StinKit's infrastructure AI cost is $0 for CLI users
+  2. Users bear their own API costs — StinKit must publish token budgets per feature
      so users can predict their spend
   3. Prompt caching maximizes user savings (cache hits at $1.50/1M vs $15/1M input)
-  4. A future "managed AI" tier (CodeMind provides API access for a monthly fee) is
+  4. A future "managed AI" tier (StinKit provides API access for a monthly fee) is
      a viable Pro/Enterprise upsell — but not in v1
 
-Server-side AI usage (by CodeMind, billed to CodeMind):
+Server-side AI usage (by StinKit, billed to StinKit):
   - None in v1. All Opus calls originate from the user's CLI with their API key.
   - If cloud-hosted forensics or CI-based drift detection is added post-v1,
     this section must be updated with a cost model and SENTINEL review.
@@ -67,7 +67,7 @@ Rationale for model split:
 | `trace --think` | forensics-narrate | 2K (500 cached) | 2K | ~$0.16 | N/A |
 
 *Estimates. Prompt caching applied to system prompts (cacheSystemPrompt: true).
- Actual cost shown to user via `codemind check --think --estimate-cost` flag (shows token count, no API call).
+ Actual cost shown to user via `stinkit check --think --estimate-cost` flag (shows token count, no API call).
  Anthropic pricing current as of 2026-04-23 — review quarterly.
 
 ### Prompt Caching Strategy
@@ -107,7 +107,7 @@ messages: [
 ### AI Cost Guard Rails (protect user from accidental spend)
 
 1. `--estimate-cost` flag: count tokens locally, print estimate, do NOT call API.
-2. Monthly token budget warning: if ~/.codemind/config.yaml has `monthly_token_budget: N`,
+2. Monthly token budget warning: if ~/.stinkit/config.yaml has `monthly_token_budget: N`,
    warn when estimated cumulative spend exceeds 80%, block at 100%.
 3. Retry limit: max 2 retries on API error. Never infinite retry. Total max spend per
    CLI invocation: 3× the single-call estimate.
@@ -197,7 +197,7 @@ const QUEUE_CONFIGS = {
       // Delayed by 30 days from account deletion (timestamp passed as job option delay)
     },
     // Worker: delete identity rows, cancel subscriptions, purge tokens, log completion.
-    // On final failure: alert ops@codemind.dev — GDPR purge failure is a legal incident.
+    // On final failure: alert ops@stinkit.dev — GDPR purge failure is a legal incident.
   },
 }
 ```
@@ -223,7 +223,7 @@ const prisma = new PrismaClient({
     ? ['error']
     : ['query', 'warn', 'error'],
 })
-// DATABASE_URL format: postgresql://user:password@host:5432/codemind?schema=identity
+// DATABASE_URL format: postgresql://user:password@host:5432/stinkit?schema=identity
 // For billing schema: separate BILLING_DATABASE_URL or use Prisma datasource aliases
 ```
 
@@ -318,17 +318,17 @@ Partition management:
 | Monitoring | Sentry (errors) | Team plan | ~$26 |
 | **Total** | | | **~$716/month** |
 
-### AI Cost (User-Borne — Not CodeMind's Spend)
+### AI Cost (User-Borne — Not StinKit's Spend)
 
 Per-user cost estimates (with prompt caching active):
-  `codemind check --think` per call: ~$0.16  (Opus 4.7 with cached system prompt)
-  `codemind see` per call:           ~$0.11  (Opus 4.7 vision + Haiku entity resolution)
-  `codemind trace` full analysis:    ~$0.16  (Haiku triage + Opus narrative)
+  `stinkit check --think` per call: ~$0.16  (Opus 4.7 with cached system prompt)
+  `stinkit see` per call:           ~$0.11  (Opus 4.7 vision + Haiku entity resolution)
+  `stinkit trace` full analysis:    ~$0.16  (Haiku triage + Opus narrative)
 
-Average developer using CodeMind 50×/month (mix of features):
+Average developer using StinKit 50×/month (mix of features):
   Estimated Anthropic spend: ~$3–8/month
 
-This is the user's cost. CodeMind has zero AI cost in the CLI model.
+This is the user's cost. StinKit has zero AI cost in the CLI model.
 IMPORTANT: Document this clearly in pricing page and README.
 
 ### Revenue vs Infrastructure at Scale
@@ -354,8 +354,8 @@ NODE_ENV=production
 PORT=3000
 
 # PostgreSQL
-DATABASE_URL=postgresql://user:pass@host:5432/codemind?schema=identity
-BILLING_DATABASE_URL=postgresql://user:pass@host:5432/codemind?schema=billing
+DATABASE_URL=postgresql://user:pass@host:5432/stinkit?schema=identity
+BILLING_DATABASE_URL=postgresql://user:pass@host:5432/stinkit?schema=billing
 
 # Redis
 REDIS_HOST=xxx.cache.amazonaws.com
@@ -369,7 +369,7 @@ CLICKHOUSE_PASSWORD=
 
 # Auth
 APP_JWT_SECRET=<min 32 random bytes — generate: openssl rand -hex 32>
-APP_JWT_ISSUER=api.codemind.dev
+APP_JWT_ISSUER=api.stinkit.dev
 
 # Stripe
 STRIPE_SECRET_KEY=sk_live_...
@@ -380,7 +380,7 @@ STRIPE_PRICE_ID_TEAM_MONTHLY=price_...
 
 # Email
 RESEND_API_KEY=re_...
-EMAIL_FROM=noreply@codemind.dev
+EMAIL_FROM=noreply@stinkit.dev
 
 # OAuth
 GITHUB_CLIENT_ID=
@@ -397,14 +397,14 @@ SENTRY_DSN=https://...
 LOG_LEVEL=info
 ```
 
-### CLI (user-created: ~/.codemind/config.yaml — NOT .env)
+### CLI (user-created: ~/.stinkit/config.yaml — NOT .env)
 
 ```yaml
-# ~/.codemind/config.yaml — chmod 600 enforced at write time
+# ~/.stinkit/config.yaml — chmod 600 enforced at write time
 api_key: ant_...          # Anthropic API key (user's own)
 telemetry: true           # opt-in; set to false to disable
 monthly_token_budget: 50  # optional: warn at 80%, block at 100% (USD)
-codemind_api_key: cm_live_...  # CodeMind cloud API key (for team features)
+stinkit_api_key: cm_live_...  # StinKit cloud API key (for team features)
 thresholds:               # optional: override risk classification
   critical_min_direct: 50
   high_min_direct: 30
@@ -496,8 +496,8 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: codemind
-      POSTGRES_USER: codemind
+      POSTGRES_DB: stinkit
+      POSTGRES_USER: stinkit
       POSTGRES_PASSWORD: devpassword
     ports: ["5432:5432"]
     volumes: [postgres_data:/var/lib/postgresql/data]

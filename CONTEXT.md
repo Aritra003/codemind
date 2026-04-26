@@ -42,7 +42,7 @@ SLO status:       pre-production
 2026-04-24 | Hackathon scope declared | Source: user instruction
 Delta:     v1 = local CLI only (BC-01..BC-05). packages/server + packages/web = OUT of scope.
            No auth, no billing, no team management, no cloud storage, no user accounts, no PII.
-           CLI uses user's own Anthropic API key from ~/.codemind/config.yaml.
+           CLI uses user's own Anthropic API key from ~/.stinkit/config.yaml.
 Overrides: All CLOUD-tier pipeline gates (auth service, billing, GDPR, web dashboard) are DEFERRED.
            ESCALATION-TREE / LEGAL-REVIEW / OBSERVABILITY cloud sections = post-hackathon only.
 Status:    ACTIVE
@@ -52,8 +52,8 @@ Delta:     DELETE /auth/account + POST /auth/data-export deferred — no user ac
            GDPR right-to-erasure not applicable: no PII stored, local-only tool.
 Status:    ACTIVE — revisit when cloud tier ships.
 
-2026-04-24 | FEATURE: codemind see --generate | Source: user instruction
-Delta:     New flag --generate on `codemind see` — generates Mermaid diagram FROM the graph
+2026-04-24 | FEATURE: stinkit see --generate | Source: user instruction
+Delta:     New flag --generate on `stinkit see` — generates Mermaid diagram FROM the graph
            (no input image required). Complements existing compare flow; does not replace it.
            New flags: --scope <path-prefix>, --output <file> (default stdout).
            <diagram> positional made optional when --generate present; mutually exclusive.
@@ -62,7 +62,7 @@ Delta:     New flag --generate on `codemind see` — generates Mermaid diagram F
            (ASCII-safe node IDs), INV-GEN-04 (prefix match, no glob), INV-GEN-05 (GRAPH_NOT_FOUND).
            Telemetry: see_generate_completed (scope_provided, node_count, edge_count, output_to_file).
            Files: see.ts, see-runner.ts, + new vision/generate.ts (3 files, blast radius clean).
-Overrides: SPEC.md BC-04 `codemind see` — <diagram> positional is now optional.
+Overrides: SPEC.md BC-04 `stinkit see` — <diagram> positional is now optional.
 Status:    ACTIVE
 ================================================================================
 
@@ -75,7 +75,7 @@ DECISIONS THIS SESSION:
   # Pipeline profile: PRODUCTION — user confirmed full pipeline, no fast-start skips
   # BRD v5 accepted as SPEC input — EVENT-STORM.md and SPEC.md produced from it
   # 500K MAU target treated as NFR — informs ARCHITECT, INFRA-DESIGN, SLO-DESIGN
-  # CRITIC pass: CodeMind_Critical_Review.md (April 2026) accepted as CRITIC output
+  # CRITIC pass: StinKit_Critical_Review.md (April 2026) accepted as CRITIC output
   # SPEC.md confirms v5 BRD + 14 Critical Review corrections integrated
 
 ================================================================================
@@ -114,7 +114,7 @@ RECENTLY COMPLETED:
   # SCAFFOLD — full monorepo skeleton: pnpm workspace, turbo, shared types, 6 CLI commands +
   #            runners, graph/ai/telemetry/output/mcp/vision/forensics/analysis libs,
   #            hygiene-check.ts (SV-002), pre-commit hook (INV-001), vitest.config.ts,
-  #            .codemind/connections.yaml.example
+  #            .stinkit/connections.yaml.example
 
 ================================================================================
 AGENT QUALITY METRICS THIS SPRINT:
@@ -137,7 +137,7 @@ EXECUTION PLAN (written by PLANNER mode — do not edit manually):
   # Pipeline sequence so far:
   Task 1: EVENT-STORM   | Agent: ORACLE | Status: DONE
   Task 2: SPEC          | Agent: ORACLE | Status: DONE
-  Task 3: CRITIC        | Agent: ORACLE | Status: DONE (external — CodeMind_Critical_Review.md)
+  Task 3: CRITIC        | Agent: ORACLE | Status: DONE (external — StinKit_Critical_Review.md)
   Task 4: ARCHITECT     | Agent: TITAN  | Status: DONE
   Task 5: ADR           | Agent: TITAN  | Status: DONE (ADR-001 through ADR-007)
   Task 6: API-DESIGN    | Agent: TITAN  | Status: DONE (26 endpoints, all rate limits + SLO tiers)
@@ -185,7 +185,7 @@ EXECUTION PLAN (written by PLANNER mode — do not edit manually):
   Task 30: LAUNCH-READY | Agent: ALL     | Status: DONE (2026-04-24)
            TECH-DEBT.md written (7 items, none CRITICAL). Hackathon scope PASS.
            Post-hackathon deferred: CI/CD, cloud deploy, GDPR, web dashboard
-  Task 31: FEATURE — codemind see --generate | Agent: BUILDER | Status: DONE (2026-04-24)
+  Task 31: FEATURE — stinkit see --generate | Agent: BUILDER | Status: DONE (2026-04-24)
            SPEC DELTA → CRITIC PASS → TDD (28 tests RED→GREEN) → BUILDER → Tier 1 PASS
            Files: vision/generate.ts (new), commands/see.ts, commands/see-runner.ts
            Tests: 360/360 green (5 pre-existing MCP server timeouts, BUG-1 keepalive — unrelated)

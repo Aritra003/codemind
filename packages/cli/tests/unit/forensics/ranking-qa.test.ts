@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import type { NodeId } from '@codemind/shared'
+import type { NodeId } from '@stinkit/shared'
 import { rankCommits, type GitCommit } from '../../../src/forensics/ranking'
 
 const MAX_LOOKBACK_DAYS = 180

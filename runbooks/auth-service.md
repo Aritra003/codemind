@@ -6,7 +6,7 @@
 
 ## Symptoms
 
-Dashboard signals (Grafana "Is CodeMind healthy?" Row 2):
+Dashboard signals (Grafana "Is StinKit healthy?" Row 2):
   - Auth p99 latency > 600ms
   - Auth error rate > 0.1% 5xx per minute
   - auth_logins_total{status: failure} spike (may indicate credential stuffing)
@@ -39,7 +39,7 @@ P2: Error rate < 10% + p99 slightly elevated + no user reports
 Step 1 — Check for recent deployment:
   ```
   # List recent ECS task deployments
-  aws ecs describe-services --cluster codemind-prod --services codemind-api \
+  aws ecs describe-services --cluster stinkit-prod --services stinkit-api \
     --query 'services[0].deployments'
   ```
   If a deploy happened in the last 30 minutes → ROLLBACK IMMEDIATELY (see below).
@@ -48,7 +48,7 @@ Step 2 — Check RDS connection count:
   Grafana: Row 4 → "DB connection pool"
   If connections at max (100): restart ECS tasks to release hung connections.
   ```
-  aws ecs update-service --cluster codemind-prod --service codemind-api \
+  aws ecs update-service --cluster stinkit-prod --service stinkit-api \
     --force-new-deployment
   ```
 
@@ -59,10 +59,10 @@ Step 3 — Check Redis availability:
 
 Rollback command (ECS rolling deploy):
   ```
-  aws ecs update-service --cluster codemind-prod --service codemind-api \
-    --task-definition codemind-api:[PREVIOUS_REVISION]
+  aws ecs update-service --cluster stinkit-prod --service stinkit-api \
+    --task-definition stinkit-api:[PREVIOUS_REVISION]
   # Find previous revision:
-  aws ecs list-task-definitions --family-prefix codemind-api --sort DESC --max-items 3
+  aws ecs list-task-definitions --family-prefix stinkit-api --sort DESC --max-items 3
   ```
   Rollback takes ~3 minutes. Confirm with: GET /health → 200 + auth smoke test.
 
@@ -121,14 +121,14 @@ If credential stuffing is confirmed AND passwords may have been compromised:
 1. Deploy fix or roll back to last known good revision.
 2. Verify ECS tasks are healthy:
    ```
-   aws ecs describe-tasks --cluster codemind-prod \
-     --tasks $(aws ecs list-tasks --cluster codemind-prod --service-name codemind-api \
+   aws ecs describe-tasks --cluster stinkit-prod \
+     --tasks $(aws ecs list-tasks --cluster stinkit-prod --service-name stinkit-api \
                --query 'taskArns[]' --output text)
    ```
 3. Run auth smoke test:
    ```
    # POST /auth/login with test credentials (from Secrets Manager: test-account creds)
-   curl -X POST https://api.codemind.dev/auth/login \
+   curl -X POST https://api.stinkit.dev/auth/login \
      -H "Content-Type: application/json" \
      -d '{"email": "$TEST_EMAIL", "password": "$TEST_PASSWORD"}'
    # Expected: 200 + accessToken

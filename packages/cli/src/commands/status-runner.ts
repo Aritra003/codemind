@@ -15,7 +15,7 @@ function formatAge(ageMs: number): string {
 
 export async function runStatus(json = false): Promise<void> {
   const repoRoot = process.cwd()
-  const store    = new GraphStore(`${repoRoot}/.codemind`)
+  const store    = new GraphStore(`${repoRoot}/.stinkit`)
 
   const graph  = await store.load()
   const ageMs  = graph ? (await store.ageMs() ?? 0) : 0
@@ -36,11 +36,11 @@ export async function runStatus(json = false): Promise<void> {
   }
 
   process.stdout.write('\n')
-  process.stdout.write(chalk.bold('CodeMind') + chalk.dim(` — ${repoRoot}`) + '\n')
+  process.stdout.write(chalk.bold('StinKit') + chalk.dim(` — ${repoRoot}`) + '\n')
   process.stdout.write(formatSeparator() + '\n')
 
   if (!graph) {
-    process.stdout.write(chalk.yellow('  No graph found. Run ') + chalk.white('codemind index') + chalk.yellow(' to build the code graph.') + '\n')
+    process.stdout.write(chalk.yellow('  No graph found. Run ') + chalk.white('stinkit index') + chalk.yellow(' to build the code graph.') + '\n')
     process.stdout.write(formatSeparator() + '\n')
     process.stdout.write('\n')
     return
@@ -56,9 +56,9 @@ export async function runStatus(json = false): Promise<void> {
   process.stdout.write(`  Freshness: ${chalk.dim(formatAge(ageMs))}\n`)
   process.stdout.write(formatSeparator() + '\n')
   process.stdout.write(
-    chalk.dim(`\n  Try:  ${chalk.white('codemind check')}           blast radius of staged changes\n`) +
-    chalk.dim(`        ${chalk.white('codemind graph --hotspots')}  rank files by risk\n`) +
-    chalk.dim(`        ${chalk.white('codemind index')}             refresh the graph\n`)
+    chalk.dim(`\n  Try:  ${chalk.white('stinkit check')}           blast radius of staged changes\n`) +
+    chalk.dim(`        ${chalk.white('stinkit graph --hotspots')}  rank files by risk\n`) +
+    chalk.dim(`        ${chalk.white('stinkit index')}             refresh the graph\n`)
   )
   process.stdout.write('\n')
 }

@@ -1,9 +1,9 @@
-import type { UserConfig } from '@codemind/shared'
+import type { UserConfig } from '@stinkit/shared'
 import { runCheckCore } from '../../../commands/check'
 import { formatCheckResult } from '../../output/format'
 
 export const TOOL_DEF = {
-  name:        'codemind_check',
+  name:        'stinkit_check',
   description: 'Show the blast radius of changed files against the code graph.',
   inputSchema: {
     type: 'object' as const,

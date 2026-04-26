@@ -8,7 +8,7 @@ export function renderPositiveSignals(signals: PositiveSignal[]): string {
   <h3>✓ ${esc(s.title)}</h3>
   <p style="margin:0;margin-top:.3rem">${esc(s.description)}</p>
 </div>`).join('')
-    : '<p>Run <code>codemind index</code> to unlock positive signal detection.</p>'
+    : '<p>Run <code>stinkit index</code> to unlock positive signal detection.</p>'
 
   return `
 <section class="section" id="s6">
@@ -88,7 +88,7 @@ export function renderMetadata(data: AuditData): string {
     <h2>Report Metadata</h2>
     <table class="meta-table">
       <tbody>
-        <tr><td>CodeMind Version</td><td>5.0.0</td></tr>
+        <tr><td>StinKit Version</td><td>5.0.0</td></tr>
         <tr><td>Report Generated</td><td>${esc(data.generatedAt)}</td></tr>
         <tr><td>Repository</td><td>${esc(data.repoName)}</td></tr>
         <tr><td>Files Indexed</td><td>${data.fileCount.toLocaleString()}</td></tr>

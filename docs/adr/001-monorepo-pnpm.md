@@ -2,7 +2,7 @@
 Date: 2026-04-23 | Status: ACCEPTED | Author: TITAN
 
 ## Context
-CodeMind has four distinct packages with different deployment targets:
+StinKit has four distinct packages with different deployment targets:
 - `shared` — TypeScript types shared by CLI and server (zero runtime, compile-time only)
 - `cli` — npm package, runs on developer machines, offline-first
 - `server` — cloud API, runs on AWS

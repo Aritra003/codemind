@@ -1,5 +1,5 @@
 import chalk from 'chalk'
-import type { RiskLevel } from '@codemind/shared'
+import type { RiskLevel } from '@stinkit/shared'
 
 /** All CLI color constants live here. Never inline chalk calls in other output files. */
 

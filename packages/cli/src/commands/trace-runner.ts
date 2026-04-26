@@ -1,5 +1,5 @@
 import ora from 'ora'
-import type { UserConfig } from '@codemind/shared'
+import type { UserConfig } from '@stinkit/shared'
 import type { TraceOptions } from './trace'
 import { GraphStore }      from '../lib/graph/store'
 import { ForensicsModule } from '../lib/forensics'
@@ -25,7 +25,7 @@ export async function runTrace(
   }
 
   const repoRoot  = process.cwd()
-  const store     = new GraphStore(`${repoRoot}/.codemind`)
+  const store     = new GraphStore(`${repoRoot}/.stinkit`)
   const telemetry = new TelemetryClient(config.telemetry)
   const spinner   = ora('Loading graph…').start()
 
@@ -34,7 +34,7 @@ export async function runTrace(
     if (!graph) {
       spinner.fail('No graph found.')
       process.stderr.write(
-        formatError('NO_GRAPH', 'Run `codemind index` first.') + '\n'
+        formatError('NO_GRAPH', 'Run `stinkit index` first.') + '\n'
       )
       process.exit(1)
     }
@@ -47,7 +47,7 @@ export async function runTrace(
         formatError(
           'NO_API_KEY',
           '`trace` requires an Anthropic API key for error triage.',
-          'Set ANTHROPIC_API_KEY in ~/.codemind/config.yaml or as an env var.'
+          'Set ANTHROPIC_API_KEY in ~/.stinkit/config.yaml or as an env var.'
         ) + '\n'
       )
       process.exit(1)

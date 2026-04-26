@@ -1,5 +1,5 @@
 "use client";
-// NOVA — CodeMind Graph Explorer
+// NOVA — StinKit Graph Explorer
 // Dual-canvas bloom architecture: blurred glow layer + crisp sharp layer
 // D3 force simulation · bezier edges · animated particles · convex hull clusters
 import { useEffect, useRef, useState } from "react";

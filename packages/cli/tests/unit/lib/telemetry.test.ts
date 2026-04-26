@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { TelemetryClient } from '../../../src/lib/telemetry/client'
-import type { TelemetryConfig } from '@codemind/shared'
+import type { TelemetryConfig } from '@stinkit/shared'
 
 const ENABLED_CONFIG:  TelemetryConfig = { enabled: true,  install_id: 'test-id' }
 const DISABLED_CONFIG: TelemetryConfig = { enabled: false, install_id: 'test-id' }

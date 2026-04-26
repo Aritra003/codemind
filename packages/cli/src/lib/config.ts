@@ -3,11 +3,11 @@ import * as path from 'path'
 import * as os   from 'os'
 import * as yaml from 'js-yaml'
 import { v4 as uuidv4 } from 'uuid'
-import { DEFAULT_CONFIG } from '@codemind/shared'
-import type { UserConfig } from '@codemind/shared'
+import { DEFAULT_CONFIG } from '@stinkit/shared'
+import type { UserConfig } from '@stinkit/shared'
 
 // Computed lazily inside functions so that process.env.HOME changes (e.g. in tests) are respected
-function getConfigDir():  string { return path.join(process.env['HOME'] ?? os.homedir(), '.codemind') }
+function getConfigDir():  string { return path.join(process.env['HOME'] ?? os.homedir(), '.stinkit') }
 function getConfigFile(): string { return path.join(getConfigDir(), 'config.yaml') }
 
 export async function loadConfig(): Promise<UserConfig> {
@@ -64,7 +64,7 @@ export async function saveConfig(patch: Partial<UserConfig>): Promise<void> {
 }
 
 export function getGraphDir(repoRoot: string): string {
-  return path.join(repoRoot, '.codemind', 'graph')
+  return path.join(repoRoot, '.stinkit', 'graph')
 }
 
 export async function ensureConfigDir(): Promise<void> {

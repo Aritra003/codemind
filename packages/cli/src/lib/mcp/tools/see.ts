@@ -1,9 +1,9 @@
-import type { UserConfig } from '@codemind/shared'
+import type { UserConfig } from '@stinkit/shared'
 import { runSeeCore } from '../../../commands/see'
 import { formatSeeResult } from '../../output/format'
 
 export const TOOL_DEF = {
-  name:        'codemind_see',
+  name:        'stinkit_see',
   description: 'Compare an architecture diagram against the live code graph.',
   inputSchema: {
     type: 'object' as const,

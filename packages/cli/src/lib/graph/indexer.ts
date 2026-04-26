@@ -1,4 +1,4 @@
-import type { CodeGraph, GraphNode, GraphEdge } from '@codemind/shared'
+import type { CodeGraph, GraphNode, GraphEdge } from '@stinkit/shared'
 import { walkFiles }          from '../../graph/walker'
 import { parseFile }          from '../../graph/parser'
 import { loadCoverage }       from '../../graph/coverage'

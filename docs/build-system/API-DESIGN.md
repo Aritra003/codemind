@@ -1,8 +1,8 @@
-# API-DESIGN.md — CodeMind REST API Contract
+# API-DESIGN.md — StinKit REST API Contract
 # Mode: API-DESIGN | Agent: TITAN
 # Hard block: BUILDER cannot implement any route without a matching entry here.
 # Last updated: 2026-04-23
-# Base URL: https://api.codemind.dev/api/v1
+# Base URL: https://api.stinkit.dev/api/v1
 # All responses: Content-Type: application/json
 # All timestamps: ISO 8601 UTC (e.g. "2026-04-23T20:00:00Z")
 ================================================================================

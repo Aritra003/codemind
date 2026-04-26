@@ -43,6 +43,6 @@ describe('BRAND_COLOR', () => {
   })
 
   it('returns a string when called', () => {
-    expect(typeof BRAND_COLOR('CodeMind')).toBe('string')
+    expect(typeof BRAND_COLOR('StinKit')).toBe('string')
   })
 })

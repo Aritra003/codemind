@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import type { CodeGraph, GraphNode } from '@codemind/shared'
+import type { CodeGraph, GraphNode } from '@stinkit/shared'
 import { AnalysisModule } from '../../../src/lib/analysis/analysis-module'
 
 vi.mock('../../../src/graph/git', () => ({

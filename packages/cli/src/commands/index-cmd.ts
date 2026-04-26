@@ -1,7 +1,7 @@
 import type { Command } from 'commander'
-import type { UserConfig } from '@codemind/shared'
-import type { CodemindResult } from '@codemind/shared'
-import type { CodeGraph } from '@codemind/shared'
+import type { UserConfig } from '@stinkit/shared'
+import type { StinKitResult } from '@stinkit/shared'
+import type { CodeGraph } from '@stinkit/shared'
 
 export function registerIndexCommand(program: Command, config: UserConfig): void {
   program
@@ -21,12 +21,12 @@ const STALE_MS = 7 * 24 * 60 * 60 * 1000
 export async function runIndexIfNeeded(
   repoRoot: string,
   config: UserConfig,
-): Promise<CodemindResult<CodeGraph>> {
+): Promise<StinKitResult<CodeGraph>> {
   const startMs = Date.now()
   const { GraphStore }   = await import('../lib/graph/store')
   const { GraphIndexer } = await import('../lib/graph/indexer')
 
-  const store = new GraphStore(`${repoRoot}/.codemind`)
+  const store = new GraphStore(`${repoRoot}/.stinkit`)
   const ageMs = await store.ageMs()
 
   if (ageMs !== null && ageMs <= STALE_MS) {

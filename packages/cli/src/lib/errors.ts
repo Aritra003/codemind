@@ -1,46 +1,46 @@
-export class CodemindError extends Error {
+export class StinKitError extends Error {
   constructor(
     public readonly code:  string,
     message:               string,
     public readonly hint?: string,
   ) {
     super(message)
-    this.name = 'CodemindError'
+    this.name = 'StinKitError'
     // Restore prototype chain broken by extending Error in TypeScript
     Object.setPrototypeOf(this, new.target.prototype)
   }
 }
 
-export class AITimeoutError extends CodemindError {
+export class AITimeoutError extends StinKitError {
   constructor(message: string) {
     super('AI_TIMEOUT', message, 'Check your network connection or try again.')
     this.name = 'AITimeoutError'
   }
 }
 
-export class GraphStaleError extends CodemindError {
+export class GraphStaleError extends StinKitError {
   constructor(ageDays: number) {
     super(
       'GRAPH_STALE',
       `Code graph is ${ageDays} days old.`,
-      'Run `codemind index` to rebuild.',
+      'Run `stinkit index` to rebuild.',
     )
     this.name = 'GraphStaleError'
   }
 }
 
-export class GraphMissingError extends CodemindError {
+export class GraphMissingError extends StinKitError {
   constructor(repoRoot: string) {
     super(
       'GRAPH_MISSING',
       `No code graph found for ${repoRoot}.`,
-      'Run `codemind index` to build the graph first.',
+      'Run `stinkit index` to build the graph first.',
     )
     this.name = 'GraphMissingError'
   }
 }
 
-export class InjectionAttemptError extends CodemindError {
+export class InjectionAttemptError extends StinKitError {
   constructor(detectedPattern: string) {
     super(
       'INJECTION_ATTEMPT',
@@ -51,12 +51,12 @@ export class InjectionAttemptError extends CodemindError {
   }
 }
 
-export class UnsupportedFormatError extends CodemindError {
+export class UnsupportedFormatError extends StinKitError {
   constructor(format: string) {
     super(
       'UNSUPPORTED_FORMAT',
       `Image format not supported: ${format}`,
-      'Convert to PNG or JPG before using codemind see.',
+      'Convert to PNG or JPG before using stinkit see.',
     )
     this.name = 'UnsupportedFormatError'
   }

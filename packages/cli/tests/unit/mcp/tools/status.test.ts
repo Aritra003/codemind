@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { UserConfig } from '@codemind/shared'
+import type { UserConfig } from '@stinkit/shared'
 
 vi.mock('../../../../src/lib/graph/store')
 
@@ -13,12 +13,12 @@ const CONFIG: UserConfig = {
 }
 
 describe('TOOL_DEF', () => {
-  it('name is codemind_status', () => {
-    expect(TOOL_DEF.name).toBe('codemind_status')
+  it('name is stinkit_status', () => {
+    expect(TOOL_DEF.name).toBe('stinkit_status')
   })
 })
 
-describe('handle (codemind_status)', () => {
+describe('handle (stinkit_status)', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
   it('returns content with type=text', async () => {

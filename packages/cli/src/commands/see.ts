@@ -1,5 +1,5 @@
 import type { Command } from 'commander'
-import type { UserConfig, CodemindResult } from '@codemind/shared'
+import type { UserConfig, StinKitResult } from '@stinkit/shared'
 import { GraphStore }    from '../lib/graph/store'
 import { AIClient }      from '../lib/ai/client'
 import { VisionModule }  from '../lib/vision'
@@ -68,9 +68,9 @@ export async function runSeeCore(
   diagramPath: string,
   _options: SeeOptions,
   config: UserConfig,
-): Promise<CodemindResult<DriftReport>> {
+): Promise<StinKitResult<DriftReport>> {
   const repoRoot = process.cwd()
-  const store    = new GraphStore(`${repoRoot}/.codemind`)
+  const store    = new GraphStore(`${repoRoot}/.stinkit`)
   const startMs  = Date.now()
 
   const graph = await store.load()
@@ -78,7 +78,7 @@ export async function runSeeCore(
     return {
       status: 'failed', data: null,
       meta:  { completeness_pct: 0, duration_ms: Date.now() - startMs },
-      error: { code: 'GRAPH_NOT_FOUND', message: 'No graph found. Run `codemind index` first.' },
+      error: { code: 'GRAPH_NOT_FOUND', message: 'No graph found. Run `stinkit index` first.' },
     }
   }
 
@@ -86,7 +86,7 @@ export async function runSeeCore(
     return {
       status: 'failed', data: null,
       meta:  { completeness_pct: graph.completeness_pct, external_calls_excluded: graph.external_calls_excluded, ambiguous_local_calls: graph.ambiguous_local_calls, duration_ms: Date.now() - startMs },
-      error: { code: 'AI_UNAVAILABLE', message: '`see` requires an Anthropic API key.', hint: 'Set ANTHROPIC_API_KEY in ~/.codemind/config.yaml.' },
+      error: { code: 'AI_UNAVAILABLE', message: '`see` requires an Anthropic API key.', hint: 'Set ANTHROPIC_API_KEY in ~/.stinkit/config.yaml.' },
     }
   }
 
@@ -106,9 +106,9 @@ export async function runSeeCore(
 export async function runSeeGenerateCore(
   options:  SeeGenerateOptions,
   _config:  UserConfig,
-): Promise<CodemindResult<GenerateReport>> {
+): Promise<StinKitResult<GenerateReport>> {
   const repoRoot = process.cwd()
-  const store    = new GraphStore(`${repoRoot}/.codemind`)
+  const store    = new GraphStore(`${repoRoot}/.stinkit`)
   const startMs  = Date.now()
 
   const graph = await store.load()
@@ -116,7 +116,7 @@ export async function runSeeGenerateCore(
     return {
       status: 'failed', data: null,
       meta:  { completeness_pct: 0, duration_ms: Date.now() - startMs },
-      error: { code: 'GRAPH_NOT_FOUND', message: 'No graph found. Run `codemind index` first.' },
+      error: { code: 'GRAPH_NOT_FOUND', message: 'No graph found. Run `stinkit index` first.' },
     }
   }
 

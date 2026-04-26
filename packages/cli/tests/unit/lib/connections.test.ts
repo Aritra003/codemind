@@ -3,13 +3,13 @@ import * as fs   from 'fs/promises'
 import * as path from 'path'
 import * as os   from 'os'
 import { loadConnections } from '../../../src/lib/connections'
-import { CodemindError }   from '../../../src/lib/errors'
+import { StinKitError }   from '../../../src/lib/errors'
 
 let tmpDir: string
 
 beforeEach(async () => {
-  tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'codemind-test-'))
-  await fs.mkdir(path.join(tmpDir, '.codemind'), { recursive: true })
+  tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'stinkit-test-'))
+  await fs.mkdir(path.join(tmpDir, '.stinkit'), { recursive: true })
 })
 
 afterEach(async () => {
@@ -24,7 +24,7 @@ describe('loadConnections', () => {
 
   it('parses a valid connections.yaml', async () => {
     const yaml = `version: 1\nconnections:\n  - from: "src/a.ts:fn"\n    to: "src/b.ts:fn"\n    kind: dynamic\n`
-    await fs.writeFile(path.join(tmpDir, '.codemind', 'connections.yaml'), yaml)
+    await fs.writeFile(path.join(tmpDir, '.stinkit', 'connections.yaml'), yaml)
     const result = await loadConnections(tmpDir)
     expect(result).not.toBeNull()
     expect(result!.version).toBe(1)
@@ -37,17 +37,17 @@ describe('loadConnections', () => {
     await expect(loadConnections('/nonexistent-path-xyz')).resolves.toBeNull()
   })
 
-  it('throws CodemindError on invalid YAML', async () => {
+  it('throws StinKitError on invalid YAML', async () => {
     await fs.writeFile(
-      path.join(tmpDir, '.codemind', 'connections.yaml'),
+      path.join(tmpDir, '.stinkit', 'connections.yaml'),
       'this: is: not: valid: yaml: :\n  bad indentation\n    wrong'
     )
-    await expect(loadConnections(tmpDir)).rejects.toBeInstanceOf(CodemindError)
+    await expect(loadConnections(tmpDir)).rejects.toBeInstanceOf(StinKitError)
   })
 
   it('handles connection with optional note field', async () => {
     const yaml = `version: 1\nconnections:\n  - from: "a:x"\n    to: "b:y"\n    kind: event\n    note: "emitted at runtime"\n`
-    await fs.writeFile(path.join(tmpDir, '.codemind', 'connections.yaml'), yaml)
+    await fs.writeFile(path.join(tmpDir, '.stinkit', 'connections.yaml'), yaml)
     const result = await loadConnections(tmpDir)
     expect(result!.connections[0]!.note).toBe('emitted at runtime')
   })

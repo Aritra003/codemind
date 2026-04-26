@@ -1,4 +1,4 @@
-import type { BlastRadius, RiskLevel } from '@codemind/shared'
+import type { BlastRadius, RiskLevel } from '@stinkit/shared'
 
 export const THRESHOLDS = {
   CRITICAL_TRANSITIVE:   50,

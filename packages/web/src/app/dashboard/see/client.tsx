@@ -48,13 +48,13 @@ function GenerateTab() {
 
   return (
     <div className="space-y-4">
-      <div className="glass rounded-2xl p-6 space-y-4">
+      <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] p-6 space-y-4">
         {repos.length > 0 ? (
           <div>
             <label className="font-mono text-xs text-ink-muted block mb-2">Repository</label>
             <div className="relative">
               <select value={repoId} onChange={e => { setRepoId(e.target.value); setDiagram(null); }}
-                className="w-full bg-surface border border-border rounded-xl px-4 py-3 font-mono text-sm text-ink focus:outline-none focus:border-brand/60 appearance-none transition-colors">
+                className="w-full bg-[var(--bg-glass)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-[20px] px-4 py-3 font-mono text-sm text-ink focus:outline-none focus:border-brand/60 appearance-none transition-colors">
                 {repos.map(r => <option key={r.id} value={r.id}>{r.fullName}</option>)}
               </select>
               <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-dim pointer-events-none" />
@@ -68,7 +68,7 @@ function GenerateTab() {
         <div>
           <label className="font-mono text-xs text-ink-muted block mb-2">Scope <span className="text-ink-dim">(optional path prefix, e.g. src/auth)</span></label>
           <input value={scope} onChange={e => setScope(e.target.value)} placeholder="src/auth"
-            className="w-full bg-surface border border-border rounded-xl px-4 py-3 font-mono text-sm text-ink placeholder:text-ink-dim focus:outline-none focus:border-brand/60 transition-colors" />
+            className="w-full bg-[var(--bg-glass)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-[20px] px-4 py-3 font-mono text-sm text-ink placeholder:text-ink-dim focus:outline-none focus:border-brand/60 transition-colors" />
         </div>
         <button onClick={() => void generate()} disabled={loading || repos.length === 0}
           className="w-full flex items-center justify-center gap-2 py-3 text-sm font-body font-semibold text-white bg-brand hover:bg-brand/90 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed">
@@ -83,11 +83,11 @@ function GenerateTab() {
       )}
 
       {diagram && meta && (
-        <div className="glass rounded-2xl border border-brand/20 overflow-hidden">
+        <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] border border-brand/20 overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-surface-raised">
             <div className="flex items-center gap-3">
               <span className="font-mono text-xs text-ink-muted">{meta.repoName}</span>
-              <span className="font-mono text-[10px] text-ink-dim">{meta.nodeCount} nodes · {meta.edgeCount} edges</span>
+              <span className="font-mono text-xs text-ink-muted">{meta.nodeCount} nodes · {meta.edgeCount} edges</span>
             </div>
             <button onClick={copy} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs text-ink-muted hover:text-ink bg-surface hover:bg-surface-raised border border-border transition-all">
               {copied ? <><Check size={11} className="text-neon" /> Copied</> : <><Copy size={11} /> Copy</>}
@@ -96,7 +96,7 @@ function GenerateTab() {
           {meta.warning && (
             <div className="px-4 py-2 border-b border-border bg-solar/5 flex items-center gap-2">
               <AlertTriangle size={11} className="text-solar flex-shrink-0" />
-              <span className="font-mono text-[11px] text-solar">{meta.warning}</span>
+              <span className="font-mono text-xs text-solar">{meta.warning}</span>
             </div>
           )}
           <pre className="p-4 font-mono text-xs text-ink leading-relaxed overflow-x-auto max-h-[50vh] overflow-y-auto bg-surface/50">{diagram}</pre>
@@ -110,7 +110,7 @@ function HistoryCard({ item }: { item: HistoryItem }) {
   const [open, setOpen] = useState(false);
   const snippet = item.analysisText.replace(/^#+\s*/gm, "").replace(/\*\*/g, "").replace(/`/g, "").slice(0, 110).trim();
   return (
-    <div className="glass rounded-xl border border-border overflow-hidden">
+    <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[16px] border border-border overflow-hidden">
       <button onClick={() => setOpen(o => !o)}
         className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-surface-raised transition-colors">
         <div className="w-7 h-7 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0">
@@ -121,7 +121,7 @@ function HistoryCard({ item }: { item: HistoryItem }) {
           <p className="font-body text-xs text-ink-dim truncate">{snippet}…</p>
         </div>
         <div className="flex items-center gap-2 ml-2 flex-shrink-0">
-          <span className="font-mono text-[10px] text-ink-dim whitespace-nowrap">
+          <span className="font-mono text-xs text-ink-muted whitespace-nowrap">
             {new Date(item.createdAt).toLocaleTimeString()}
           </span>
           {open ? <ChevronDown size={13} className="text-ink-dim" /> : <ChevronRight size={13} className="text-ink-dim" />}
@@ -192,7 +192,7 @@ export function SeeClient({ history: initialHistory, hasApiKey }: { history: His
         <div className="w-9 h-9 rounded-xl bg-accent/12 border border-accent/25 flex items-center justify-center">
           <Eye size={16} className="text-accent" />
         </div>
-        <h1 className="font-display text-xl font-bold text-ink">CodeMind See</h1>
+        <h1 className="font-display text-2xl font-bold text-ink">StinKit See</h1>
       </div>
       <p className="font-body text-sm text-ink-muted mb-6 pl-12">Upload an architecture diagram for AI analysis, or generate a Mermaid diagram from your indexed code graph.</p>
 
@@ -207,7 +207,7 @@ export function SeeClient({ history: initialHistory, hasApiKey }: { history: His
       </div>
 
       {!hasApiKey && tab === "analyse" && (
-        <div className="glass rounded-xl p-4 border border-solar/25 mb-6 flex items-start gap-3">
+        <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[16px] p-4 border border-solar/25 mb-6 flex items-start gap-3">
           <AlertTriangle size={15} className="text-solar flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-body text-sm font-medium text-ink mb-1">ANTHROPIC_API_KEY not set</p>
@@ -226,7 +226,7 @@ export function SeeClient({ history: initialHistory, hasApiKey }: { history: His
             {!file ? (
               <div onDragOver={e => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)}
                 onDrop={onDrop} onClick={() => inputRef.current?.click()}
-                className={`glass rounded-2xl p-10 flex flex-col items-center justify-center gap-3 border-2 border-dashed cursor-pointer transition-all ${dragging ? "border-brand/60 bg-brand/5" : "border-border hover:border-border/80 hover:bg-surface-raised/40"}`}>
+                className={`bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] p-10 flex flex-col items-center justify-center gap-3 border-2 border-dashed cursor-pointer transition-all ${dragging ? "border-brand/60 bg-brand/5" : "border-border hover:border-border/80 hover:bg-surface-raised/40"}`}>
                 <div className="w-12 h-12 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center">
                   <Upload size={20} className="text-brand" />
                 </div>
@@ -239,13 +239,13 @@ export function SeeClient({ history: initialHistory, hasApiKey }: { history: His
                   className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) void handleFile(f); }} />
               </div>
             ) : preview ? (
-              <div className="relative glass rounded-2xl overflow-hidden border border-border">
+              <div className="relative bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] overflow-hidden border border-border">
                 <img src={preview} alt="Preview" className="w-full object-contain max-h-72" />
                 <button onClick={clear} className="absolute top-2 right-2 p-1.5 bg-surface/80 rounded-lg text-ink-muted hover:text-ink transition-colors"><X size={13} /></button>
                 <div className="p-3 border-t border-border flex items-center justify-between">
                   <div>
                     <p className="font-mono text-xs text-ink">{file.name}</p>
-                    <p className="font-body text-[11px] text-ink-dim">{(file.size / 1024).toFixed(1)} KB</p>
+                    <p className="font-body text-xs text-ink-muted">{(file.size / 1024).toFixed(1)} KB</p>
                   </div>
                   <button onClick={analyse} disabled={loading || !hasApiKey}
                     className="flex items-center gap-2 px-4 py-2 text-sm font-body font-medium text-white bg-brand hover:bg-brand/90 rounded-xl transition-all disabled:opacity-50">
@@ -255,7 +255,7 @@ export function SeeClient({ history: initialHistory, hasApiKey }: { history: His
                 </div>
               </div>
             ) : (
-              <div className="glass rounded-2xl p-5 border border-border flex items-center gap-4">
+              <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] p-5 border border-border flex items-center gap-4">
                 <div className="w-10 h-10 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center flex-shrink-0">
                   <FileText size={18} className="text-brand" />
                 </div>
@@ -280,7 +280,7 @@ export function SeeClient({ history: initialHistory, hasApiKey }: { history: His
             )}
           </div>
 
-          <div className="glass rounded-2xl border border-border min-h-48 overflow-hidden">
+          <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] border border-border min-h-48 overflow-hidden">
             {loading ? (
               <div className="flex flex-col items-center justify-center h-full p-8 gap-3">
                 <Loader2 size={24} className="animate-spin text-brand" />
@@ -299,8 +299,8 @@ export function SeeClient({ history: initialHistory, hasApiKey }: { history: His
       {tab === "analyse" && history.length > 0 && (
         <div className="mt-8">
           <div className="flex items-center justify-between mb-3">
-            <p className="font-mono text-[10px] text-ink-dim uppercase tracking-widest">Recent analyses</p>
-            <span className="font-mono text-[10px] text-ink-dim">{history.length}</span>
+            <p className="font-mono text-xs text-ink-muted uppercase tracking-widest">Recent analyses</p>
+            <span className="font-mono text-xs text-ink-muted">{history.length}</span>
           </div>
           <div className="space-y-2">
             {history.map(item => <HistoryCard key={item.id} item={item} />)}

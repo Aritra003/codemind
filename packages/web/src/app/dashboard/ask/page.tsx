@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import AskClient from "./client";
 
-export const metadata = { title: "Ask | CodeMind" };
+export const metadata = { title: "Ask | StinKit" };
 
 export default async function AskPage() {
   const session = await auth();

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import type { BlastRadius } from '@codemind/shared'
+import type { BlastRadius } from '@stinkit/shared'
 import { formatWatchAlert } from '../../../src/watch/watch-format'
 
 function makeBlast(overrides: Partial<BlastRadius> = {}): BlastRadius {
@@ -66,9 +66,9 @@ describe('formatWatchAlert', () => {
     expect(out).toContain('src/auth/middleware.ts')
   })
 
-  it('HIGH box contains a `codemind check` hint', () => {
+  it('HIGH box contains a `stinkit check` hint', () => {
     const out = formatWatchAlert('src/auth/middleware.ts', makeBlast({ risk_level: 'HIGH' }))
-    expect(out).toContain('codemind check')
+    expect(out).toContain('stinkit check')
   })
 
   it('HIGH box does NOT contain --think', () => {

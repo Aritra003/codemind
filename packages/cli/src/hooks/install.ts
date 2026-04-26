@@ -3,9 +3,9 @@ import * as path from 'path'
 import { formatSuccess, formatError } from '../lib/output/format'
 
 const HOOK_CONTENT = `#!/bin/sh
-# CodeMind pre-commit hook
+# StinKit pre-commit hook
 # INV-001: this hook NEVER blocks. It always exits 0.
-codemind check $(git diff --cached --name-only) || true
+stinkit check $(git diff --cached --name-only) || true
 `
 
 export async function installPreCommitHook(): Promise<void> {

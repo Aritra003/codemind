@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { computeCompleteness } from '../../../src/graph/completeness'
-import type { GraphEdge } from '@codemind/shared'
+import type { GraphEdge } from '@stinkit/shared'
 
 function edge(from: string, to: string, resolved: boolean): GraphEdge {
   return { from, to: resolved ? to : `UNRESOLVED::${to}`, kind: 'calls', weight: 1 }

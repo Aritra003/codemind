@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { UserConfig, CodemindResult, BlastRadius } from '@codemind/shared'
+import type { UserConfig, StinKitResult, BlastRadius } from '@stinkit/shared'
 import type { ForensicsTrace } from '../../../../src/commands/trace'
 import type { DriftReport } from '../../../../src/commands/see'
 
@@ -22,7 +22,7 @@ const CONFIG: UserConfig = {
 
 const META = { completeness_pct: 90, duration_ms: 5 }
 
-function blastResult(): CodemindResult<BlastRadius> {
+function blastResult(): StinKitResult<BlastRadius> {
   return {
     status: 'success',
     data: { changed_nodes: [], direct_dependents: [], transitive_dependents: [],
@@ -44,7 +44,7 @@ const DRIFT: DriftReport = {
 describe('MCP tool adversarial inputs', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
-  describe('codemind_check — bad arg types', () => {
+  describe('stinkit_check — bad arg types', () => {
     it('files as string (not array) defaults to empty array', async () => {
       vi.mocked(checkCmd.runCheckCore).mockResolvedValue(blastResult())
       await checkHandle({ files: 'src/auth.ts' }, CONFIG)
@@ -68,7 +68,7 @@ describe('MCP tool adversarial inputs', () => {
     })
   })
 
-  describe('codemind_trace — missing/wrong error arg', () => {
+  describe('stinkit_trace — missing/wrong error arg', () => {
     it('missing error arg coerces to empty string and does not throw', async () => {
       vi.mocked(traceCmd.runTraceCore).mockResolvedValue({ status: 'success', data: TRACE, meta: META })
       await expect(traceHandle({}, CONFIG)).resolves.toBeDefined()
@@ -93,7 +93,7 @@ describe('MCP tool adversarial inputs', () => {
     })
   })
 
-  describe('codemind_see — missing/wrong diagram arg', () => {
+  describe('stinkit_see — missing/wrong diagram arg', () => {
     it('missing diagram arg coerces to empty string', async () => {
       vi.mocked(seeCmd.runSeeCore).mockResolvedValue({ status: 'success', data: DRIFT, meta: META })
       await expect(seeHandle({}, CONFIG)).resolves.toBeDefined()

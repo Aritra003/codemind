@@ -2,7 +2,7 @@
 Date: 2026-04-23 | Status: ACCEPTED | Author: TITAN
 
 ## Context
-The CodeMind cloud API serves three concerns: identity/auth, billing management, and
+The StinKit cloud API serves three concerns: identity/auth, billing management, and
 telemetry ingestion. At 500K MAU with 10 opt-in telemetry events per active session,
 peak telemetry ingestion is ~1,200 RPS (with burst to ~5,000 RPS during business hours).
 Auth endpoints are lower volume (~200 RPS peak) but latency-sensitive (< 200ms p99).

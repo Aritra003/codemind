@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { UserConfig, CodemindResult } from '@codemind/shared'
+import type { UserConfig, StinKitResult } from '@stinkit/shared'
 import type { DriftReport } from '../../../../src/commands/see'
 
 vi.mock('../../../../src/commands/see')
@@ -21,8 +21,8 @@ const DRIFT: DriftReport = {
 }
 
 describe('TOOL_DEF', () => {
-  it('name is codemind_see', () => {
-    expect(TOOL_DEF.name).toBe('codemind_see')
+  it('name is stinkit_see', () => {
+    expect(TOOL_DEF.name).toBe('stinkit_see')
   })
 
   it('diagram is a required param', () => {
@@ -30,7 +30,7 @@ describe('TOOL_DEF', () => {
   })
 })
 
-describe('handle (codemind_see)', () => {
+describe('handle (stinkit_see)', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
   it('returns content array with type=text on success', async () => {
@@ -52,7 +52,7 @@ describe('handle (codemind_see)', () => {
   })
 
   it('shows error text for failed result', async () => {
-    const failed: CodemindResult<DriftReport> = {
+    const failed: StinKitResult<DriftReport> = {
       status: 'failed', data: null, meta: META,
       error: { code: 'FILE_NOT_FOUND', message: 'Diagram file not found.' },
     }

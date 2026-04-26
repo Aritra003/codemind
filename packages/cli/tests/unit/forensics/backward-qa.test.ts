@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import type { CodeGraph, GraphNode } from '@codemind/shared'
+import type { CodeGraph, GraphNode } from '@stinkit/shared'
 import { findCodePaths } from '../../../src/forensics/backward'
 
 function makeGraph(nodeIds: string[], edges: [string, string][]): CodeGraph {

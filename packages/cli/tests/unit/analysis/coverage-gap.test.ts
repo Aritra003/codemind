@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import type { NodeId } from '@codemind/shared'
+import type { NodeId } from '@stinkit/shared'
 import type { NodeCoverage } from '../../../src/graph/coverage'
 import { detectCoverageGaps } from '../../../src/analysis/coverage-gap'
 

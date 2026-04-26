@@ -1,4 +1,4 @@
-import type { CodeGraph, NodeId } from '@codemind/shared'
+import type { CodeGraph, NodeId } from '@stinkit/shared'
 
 const MAX_DEPTH = 10
 

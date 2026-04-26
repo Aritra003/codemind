@@ -62,7 +62,7 @@ export function WebhookPanel({ repoId, hasWebhook: initialHasWebhook }: Props) {
             <div className="space-y-1.5">
               <CopyRow label="Webhook URL" value={webhookUrl} which="url" copied={copied} onCopy={copy} />
               <CopyRow label="Secret" value={secret} which="secret" copied={copied} onCopy={copy} />
-              <p className="font-body text-[11px] text-solar">Copy the secret now — it won{"'"}t be shown again.</p>
+              <p className="font-body text-xs text-solar">Copy the secret now — it won{"'"}t be shown again.</p>
             </div>
           )}
 
@@ -95,8 +95,8 @@ function CopyRow({ label, value, which, copied, onCopy }: {
 }) {
   return (
     <div className="flex items-center gap-1.5">
-      <span className="font-body text-[10px] text-ink-dim w-16 flex-shrink-0">{label}</span>
-      <code className="font-mono text-[10px] text-ink bg-[#05050B] rounded px-2 py-1 flex-1 truncate">{value}</code>
+      <span className="font-body text-xs text-ink-muted w-16 flex-shrink-0">{label}</span>
+      <code className="font-mono text-xs text-ink bg-[#05050B] rounded px-2 py-1 flex-1 truncate">{value}</code>
       <button onClick={() => onCopy(value, which)}
         className="p-1 text-ink-dim hover:text-ink transition-colors flex-shrink-0">
         {copied === which ? <Check size={11} className="text-neon" /> : <Copy size={11} />}

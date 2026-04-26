@@ -1,4 +1,4 @@
-import type { NodeId } from '@codemind/shared'
+import type { NodeId } from '@stinkit/shared'
 import type { GitNodeHistory } from '../graph/git'
 
 export const HIGH_CHURN_THRESHOLD = 3

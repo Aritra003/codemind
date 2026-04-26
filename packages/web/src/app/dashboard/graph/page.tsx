@@ -24,7 +24,7 @@ export default async function GraphPage() {
       <p className="font-body text-sm text-ink-muted mb-6 pl-12">Interactive force-directed visualization of your code dependency graph.</p>
 
       {repos.length === 0 ? (
-        <div className="glass rounded-2xl p-10 text-center border border-dashed border-border">
+        <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] p-10 text-center border border-dashed border-border">
           <Network size={36} className="text-ink-dim mx-auto mb-4" />
           <h3 className="font-display font-semibold text-ink mb-2">No indexed repos</h3>
           <p className="font-body text-sm text-ink-muted mb-5 max-w-sm mx-auto">Connect and index a GitHub repo first to explore its graph here.</p>

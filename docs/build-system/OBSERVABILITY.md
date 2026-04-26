@@ -1,4 +1,4 @@
-# OBSERVABILITY.md — CodeMind Observability Design
+# OBSERVABILITY.md — StinKit Observability Design
 # Mode: OBSERVABILITY | Agent: TITAN
 # Rule: BUILDER cannot start a feature without its observability spec defined here.
 # Input: SLO.md + API-DESIGN.md + INFRASTRUCTURE.md
@@ -276,7 +276,7 @@ Log events:
 ## On-Call Dashboard Layout
 ================================================================================
 
-Primary dashboard ("Is CodeMind healthy?"): — opens in < 5 seconds on incident
+Primary dashboard ("Is StinKit healthy?"): — opens in < 5 seconds on incident
 
   Row 1 — Service health:
     [ API availability % (last 1h) ]  [ Error rate % (last 1h) ]  [ Active incidents ]

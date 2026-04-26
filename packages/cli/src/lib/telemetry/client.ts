@@ -1,8 +1,8 @@
-import type { TelemetryConfig } from '@codemind/shared'
+import type { TelemetryConfig } from '@stinkit/shared'
 
 const BATCH_SIZE    = 50
 const FLUSH_INTERVAL_MS = 60_000
-const ENDPOINT      = 'https://telemetry.codemind.dev/v1/events'
+const ENDPOINT      = 'https://telemetry.stinkit.dev/v1/events'
 
 export interface TelemetryEvent {
   event_name:  string

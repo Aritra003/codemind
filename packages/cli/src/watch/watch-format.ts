@@ -1,5 +1,5 @@
 import chalk from 'chalk'
-import type { BlastRadius, RiskLevel } from '@codemind/shared'
+import type { BlastRadius, RiskLevel } from '@stinkit/shared'
 import { RISK_COLOR, RISK_SYMBOL } from '../lib/output/themes'
 
 const BOX_INNER_WIDTH = 60
@@ -57,7 +57,7 @@ export function formatWatchAlert(file: string, blast: BlastRadius): string {
     lines.push(color(boxLine(`Gaps:  ${gapList}`)))
   }
 
-  const checkCmd = `codemind check --file ${file}${risk_level === 'CRITICAL' ? ' --think' : ''}`
+  const checkCmd = `stinkit check --file ${file}${risk_level === 'CRITICAL' ? ' --think' : ''}`
   lines.push(color(boxLine(`Run:   ${checkCmd}`)))
 
   if (risk_level === 'CRITICAL') {

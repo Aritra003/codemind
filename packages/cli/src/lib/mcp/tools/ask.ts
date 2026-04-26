@@ -1,8 +1,8 @@
-import type { UserConfig } from '@codemind/shared'
+import type { UserConfig } from '@stinkit/shared'
 import { runAskCore } from '../../../commands/ask'
 
 export const TOOL_DEF = {
-  name:        'codemind_ask',
+  name:        'stinkit_ask',
   description: 'Ask a natural language question about codebase architecture. Uses the code graph + Opus to explain how code connects, what depends on what, and what is safe to change. Use when the developer asks HOW something works, WHY code is structured a certain way, or WHERE to start reading unfamiliar code.',
   inputSchema: {
     type: 'object' as const,

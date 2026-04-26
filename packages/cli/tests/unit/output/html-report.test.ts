@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { CodemindResult, BlastRadius } from '@codemind/shared'
+import type { StinKitResult, BlastRadius } from '@stinkit/shared'
 import type { DriftReport } from '../../../src/commands/see'
 import type { ForensicsTrace } from '../../../src/commands/trace'
 
@@ -32,9 +32,9 @@ const TRACE: ForensicsTrace = {
 describe('writeCheckReport', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
-  it('returns a path inside .codemind/reports/', async () => {
+  it('returns a path inside .stinkit/reports/', async () => {
     const path = await writeCheckReport({ status: 'success', data: BLAST, meta: META }, '/repo')
-    expect(path).toContain('.codemind/reports/')
+    expect(path).toContain('.stinkit/reports/')
   })
 
   it('filename starts with "check-"', async () => {
@@ -50,7 +50,7 @@ describe('writeCheckReport', () => {
   it('creates the reports directory before writing', async () => {
     await writeCheckReport({ status: 'success', data: BLAST, meta: META }, '/repo')
     expect(fs.mkdir).toHaveBeenCalledWith(
-      expect.stringContaining('.codemind/reports'),
+      expect.stringContaining('.stinkit/reports'),
       expect.objectContaining({ recursive: true }),
     )
   })

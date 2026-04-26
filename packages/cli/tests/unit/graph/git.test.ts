@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { GraphNode } from '@codemind/shared'
+import type { GraphNode } from '@stinkit/shared'
 import { loadNodeHistory } from '../../../src/graph/git'
 
 vi.mock('simple-git')

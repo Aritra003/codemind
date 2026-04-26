@@ -1,6 +1,6 @@
 import * as fs   from 'fs/promises'
 import * as path from 'path'
-import type { CodeGraph } from '@codemind/shared'
+import type { CodeGraph } from '@stinkit/shared'
 import type { AuditData, AuditThinkResult } from './report-types'
 import { scanRepo }                         from './scanner'
 import { detectCircularDependencies }       from './circular-detector'
@@ -10,7 +10,7 @@ import { groupFindingsIntoThemes }         from './theme-grouper'
 import { detectPositiveSignals, computeGraphStats } from './positive-detector'
 import { buildReport }                      from './report-template'
 
-const REPORTS_DIR = '.codemind/reports'
+const REPORTS_DIR = '.stinkit/reports'
 
 export interface AuditReportOptions {
   output?: string

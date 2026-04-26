@@ -1,4 +1,4 @@
-import type { CodeGraph } from '@codemind/shared'
+import type { CodeGraph } from '@stinkit/shared'
 import type { CircularChain } from './report-types'
 
 export function detectCircularDependencies(graph: CodeGraph): CircularChain[] {

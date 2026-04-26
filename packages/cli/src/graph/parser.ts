@@ -8,7 +8,7 @@ const TypeScriptTsxLang = require('tree-sitter-typescript').tsx
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const JavaScriptLang = require('tree-sitter-javascript')
 
-import type { GraphNode, GraphEdge, NodeKind } from '@codemind/shared'
+import type { GraphNode, GraphEdge, NodeKind } from '@stinkit/shared'
 import type { DiscoveredFile } from './walker'
 import { logger } from '../lib/logger'
 

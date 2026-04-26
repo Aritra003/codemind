@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import type { NodeId } from '@codemind/shared'
+import type { NodeId } from '@stinkit/shared'
 import type { GitNodeHistory } from '../../../src/graph/git'
 import { correlateIncidents, HIGH_CHURN_THRESHOLD } from '../../../src/analysis/incident'
 

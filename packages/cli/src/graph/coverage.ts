@@ -1,6 +1,6 @@
 import * as fs   from 'fs/promises'
 import * as path from 'path'
-import type { GraphNode } from '@codemind/shared'
+import type { GraphNode } from '@stinkit/shared'
 
 export type CoverageFormat = 'lcov' | 'v8' | 'istanbul' | 'none'
 

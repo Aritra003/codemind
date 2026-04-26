@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import type { CodeGraph, GraphNode } from '@codemind/shared'
+import type { CodeGraph, GraphNode } from '@stinkit/shared'
 import type { EntityResolutionResult } from '../../../src/lib/ai/client'
 import { compareToGraph } from '../../../src/vision/compare'
 

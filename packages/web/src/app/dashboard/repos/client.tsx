@@ -13,7 +13,7 @@ function timeAgo(date: Date | string): string {
 function FreshnessTag({ indexedAt }: { indexedAt: Date | string }) {
   const secs = Math.floor((Date.now() - new Date(indexedAt).getTime()) / 1000);
   const color = secs < 3600 ? "text-neon" : secs < 86400 ? "text-solar" : "text-ink-dim";
-  return <span className={`font-mono text-[10px] ${color}`}>· indexed {timeAgo(indexedAt)}</span>;
+  return <span className={`font-mono text-xs ${color}`}>· indexed {timeAgo(indexedAt)}</span>;
 }
 import { GitBranch, Plus, Loader2, RefreshCw, CheckCircle, AlertTriangle, ExternalLink, ChevronDown, ChevronUp, Lock, Globe } from "lucide-react";
 import type { Repo } from "@prisma/client";
@@ -98,12 +98,12 @@ export function ReposClient({ repos: initial, hasGithubToken }: Props) {
         <div className="w-9 h-9 rounded-xl bg-brand/12 border border-brand/25 flex items-center justify-center">
           <GitBranch size={16} className="text-brand" />
         </div>
-        <h1 className="font-display text-xl font-bold text-ink">Repositories</h1>
+        <h1 className="font-display text-2xl font-bold text-ink">Repositories</h1>
       </div>
       <p className="font-body text-sm text-ink-muted mb-8 pl-12">Connect GitHub repos to analyze blast radius and run web-based checks.</p>
 
       {!hasGithubToken && (
-        <div className="glass rounded-xl p-4 border border-solar/25 mb-6 flex items-start gap-3">
+        <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[16px] p-4 border border-solar/25 mb-6 flex items-start gap-3">
           <AlertTriangle size={16} className="text-solar flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-body text-sm font-medium text-ink mb-1">GitHub not connected</p>
@@ -121,14 +121,14 @@ export function ReposClient({ repos: initial, hasGithubToken }: Props) {
 
       {/* Browse GitHub Repos */}
       {hasGithubToken && (
-        <div className="glass rounded-2xl mb-4 overflow-hidden">
+        <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] mb-4 overflow-hidden">
           <button onClick={toggleBrowse}
             className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-surface-raised transition-colors">
             <div className="flex items-center gap-3">
               <GitBranch size={15} className="text-brand" />
               <span className="font-body text-sm font-medium text-ink">Browse my GitHub repos</span>
               {githubRepos.length > 0 && (
-                <span className="font-mono text-[11px] text-ink-dim bg-surface px-2 py-0.5 rounded">{githubRepos.length} repos</span>
+                <span className="font-mono text-xs text-ink-muted bg-surface px-2 py-0.5 rounded">{githubRepos.length} repos</span>
               )}
             </div>
             {browseLoading ? <Loader2 size={14} className="animate-spin text-ink-dim" /> : browsing ? <ChevronUp size={14} className="text-ink-dim" /> : <ChevronDown size={14} className="text-ink-dim" />}
@@ -147,10 +147,10 @@ export function ReposClient({ repos: initial, hasGithubToken }: Props) {
                         {repo.isPrivate ? <Lock size={11} className="text-ink-dim flex-shrink-0" /> : <Globe size={11} className="text-ink-dim flex-shrink-0" />}
                         <span className="font-mono text-sm text-ink truncate">{repo.fullName}</span>
                       </div>
-                      {repo.description && <p className="font-body text-xs text-ink-dim truncate">{repo.description}</p>}
+                      {repo.description && <p className="font-body text-xs text-ink-muted truncate">{repo.description}</p>}
                     </div>
                     {repo.language && (
-                      <span className="font-mono text-[10px] text-ink-dim bg-surface px-1.5 py-0.5 rounded flex-shrink-0">{repo.language}</span>
+                      <span className="font-mono text-xs text-ink-muted bg-surface px-1.5 py-0.5 rounded flex-shrink-0">{repo.language}</span>
                     )}
                     <button onClick={() => quickAdd(repo.fullName)}
                       disabled={alreadyAdded || addingRepo === repo.fullName}
@@ -170,13 +170,13 @@ export function ReposClient({ repos: initial, hasGithubToken }: Props) {
       )}
 
       {/* Manual add */}
-      <div className="glass rounded-2xl p-5 mb-6">
+      <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] p-5 mb-6">
         <p className="font-mono text-xs text-ink-muted mb-3">ADD BY NAME</p>
         <div className="flex gap-3">
           <input value={repoInput} onChange={e => setRepoInput(e.target.value)}
             onKeyDown={e => e.key === "Enter" && addRepo(repoInput)}
             placeholder="owner/repo-name"
-            className="flex-1 bg-surface border border-border rounded-xl px-4 py-2.5 font-mono text-sm text-ink placeholder:text-ink-dim focus:outline-none focus:border-brand/60 transition-colors" />
+            className="flex-1 bg-[var(--bg-glass)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-[20px] px-4 py-2.5 font-mono text-sm text-ink placeholder:text-ink-dim focus:outline-none focus:border-brand/60 transition-colors" />
           <button onClick={() => addRepo(repoInput)} disabled={adding || !repoInput.trim() || !hasGithubToken}
             className="flex items-center gap-2 px-4 py-2.5 text-sm font-body font-medium text-white bg-brand hover:bg-brand/90 rounded-xl transition-all disabled:opacity-50">
             {adding ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
@@ -188,19 +188,19 @@ export function ReposClient({ repos: initial, hasGithubToken }: Props) {
       {/* Repos list */}
       <div className="space-y-3">
         {repos.length === 0 ? (
-          <div className="glass rounded-2xl p-10 text-center border border-dashed border-border">
+          <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] p-10 text-center border border-dashed border-border">
             <GitBranch size={32} className="text-ink-dim mx-auto mb-3" />
             <p className="font-body text-sm text-ink-muted">No repos connected yet. Browse your GitHub repos above.</p>
           </div>
         ) : repos.map(repo => (
-          <div key={repo.id} className="glass rounded-xl p-4 border border-border flex items-center gap-4 card-hover-effect">
+          <div key={repo.id} className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[16px] p-4 border border-border flex items-center gap-4 card-hover-effect">
             <div className="w-9 h-9 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center flex-shrink-0">
               <GitBranch size={15} className="text-brand" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
                 <span className="font-mono text-sm font-medium text-ink">{repo.fullName}</span>
-                {repo.isPrivate && <span className="font-mono text-[10px] text-ink-dim bg-surface px-1.5 py-0.5 rounded">private</span>}
+                {repo.isPrivate && <span className="font-mono text-xs text-ink-muted bg-surface px-1.5 py-0.5 rounded">private</span>}
               </div>
               {repo.indexedAt ? (
                 <p className="font-body text-xs text-ink-muted flex items-center gap-1 flex-wrap">

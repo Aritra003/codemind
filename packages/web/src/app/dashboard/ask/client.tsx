@@ -12,7 +12,7 @@ function RepoPicker({ repos, value, onChange }: { repos: Repo[]; value: string; 
       <label className="font-mono text-xs text-ink-muted block mb-2">Repository</label>
       <div className="relative">
         <select value={value} onChange={e => onChange(e.target.value)}
-          className="w-full bg-surface border border-border rounded-xl px-4 py-3 font-mono text-sm text-ink focus:outline-none focus:border-brand/60 appearance-none transition-colors">
+          className="w-full bg-[var(--bg-glass)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-[20px] px-4 py-3 font-mono text-sm text-ink focus:outline-none focus:border-brand/60 appearance-none transition-colors">
           {repos.map(r => <option key={r.id} value={r.id}>{r.fullName}</option>)}
         </select>
         <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-dim pointer-events-none" />
@@ -28,15 +28,16 @@ function stripMd(text: string): string {
 function AnswerBlock({ answer, meta }: { answer: string; meta: { nodesMatched: number; model: string; repoName: string } }) {
   const lines = answer.split('\n');
   return (
-    <div className="glass rounded-2xl border border-brand/20 overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-surface-raised">
+    <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] border border-[var(--accent)]/20 overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--border-subtle)] bg-[var(--bg-elevated)]">
         <div className="flex items-center gap-2">
-          <MessageSquare size={13} className="text-brand" />
-          <span className="font-mono text-xs text-ink-muted">{meta.repoName}</span>
+          <MessageSquare size={14} className="text-[var(--accent)]" />
+          <span className="font-mono text-[var(--ink-tertiary)]" style={{ fontSize: "14px" }}>{meta.repoName}</span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="font-mono text-[10px] text-ink-dim">{meta.nodesMatched} nodes matched</span>
-          <span className="font-mono text-[10px] bg-brand/10 text-brand px-2 py-0.5 rounded border border-brand/20">{meta.model}</span>
+          <span className="font-mono text-[var(--ink-tertiary)]" style={{ fontSize: "13px" }}>{meta.nodesMatched} nodes matched</span>
+          <span className="font-mono bg-[var(--accent-glow)] text-[var(--accent)] px-2 py-0.5 rounded border border-[var(--accent)]/20"
+            style={{ fontSize: "13px" }}>{meta.model}</span>
         </div>
       </div>
       <div className="p-5 space-y-1 max-h-[60vh] overflow-y-auto">
@@ -45,12 +46,12 @@ function AnswerBlock({ answer, meta }: { answer: string; meta: { nodesMatched: n
           const clean  = stripMd(isList ? line.replace(/^[-*]\s+/, '') : line);
           if (isList) return (
             <div key={i} className="flex gap-2 py-0.5">
-              <span className="text-brand/60 font-mono text-xs mt-0.5 flex-shrink-0">·</span>
-              <p className="font-mono text-sm text-ink leading-relaxed">{clean}</p>
+              <span className="text-[var(--accent)]/60 font-mono flex-shrink-0 mt-0.5" style={{ fontSize: "13px" }}>·</span>
+              <p className="font-mono text-[var(--ink-secondary)] leading-relaxed" style={{ fontSize: "15px" }}>{clean}</p>
             </div>
           );
           if (line.trim() === '') return <div key={i} className="h-2" />;
-          return <p key={i} className="font-mono text-sm text-ink leading-relaxed">{clean}</p>;
+          return <p key={i} className="font-mono text-[var(--ink-secondary)] leading-relaxed" style={{ fontSize: "15px" }}>{clean}</p>;
         })}
       </div>
     </div>
@@ -94,43 +95,52 @@ export default function AskClient({ hasApiKey }: { hasApiKey: boolean }) {
   return (
     <div className="p-6 lg:p-8 max-w-3xl">
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-9 h-9 rounded-xl bg-brand/12 border border-brand/25 flex items-center justify-center">
-            <MessageSquare size={16} className="text-brand" />
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 rounded-[14px] bg-[var(--accent-glow)] border border-[var(--accent)]/25 flex items-center justify-center">
+            <MessageSquare size={18} className="text-[var(--accent)]" />
           </div>
-          <h1 className="font-display text-xl font-bold text-ink">Ask Codebase</h1>
+          <h1 className="font-[800] text-[var(--ink-primary)] tracking-tight" style={{ fontSize: "32px" }}>Ask Codebase</h1>
         </div>
-        <p className="font-body text-sm text-ink-muted pl-12">Ask anything about your architecture in plain English — file names, call chains, blast radius, and more.</p>
+        <p className="pl-[52px]" style={{ fontSize: "16px", color: "var(--ink-secondary)" }}>
+          Ask anything about your architecture in plain English — file names, call chains, blast radius, and more.
+        </p>
       </div>
 
       {!hasApiKey && (
-        <div className="glass rounded-xl p-4 border border-solar/25 mb-6 flex items-start gap-3">
-          <AlertTriangle size={15} className="text-solar flex-shrink-0 mt-0.5" />
-          <p className="font-body text-xs text-ink-muted">Add <code className="font-mono text-brand">ANTHROPIC_API_KEY</code> to your <code className="font-mono text-brand">.env</code> to enable Ask.</p>
+        <div className="bg-[var(--bg-glass)] backdrop-blur-xl border border-[var(--orange)]/25 rounded-[16px] p-4 mb-6 flex items-start gap-3">
+          <AlertTriangle size={16} className="text-[var(--orange)] flex-shrink-0 mt-0.5" />
+          <p style={{ fontSize: "15px", color: "var(--ink-secondary)" }}>
+            Add <code className="font-mono text-[var(--accent)]">ANTHROPIC_API_KEY</code> to your <code className="font-mono text-[var(--accent)]">.env</code> to enable Ask.
+          </p>
         </div>
       )}
 
-      <div className="glass rounded-2xl p-6 mb-6 space-y-4">
+      <div className="bg-[var(--bg-glass)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-[20px] p-6 mb-6 space-y-5">
         <RepoPicker repos={repos} value={repoId} onChange={v => { setRepoId(v); setAnswer(null); }} />
 
         {repos.length === 0 && (
-          <div className="flex items-center gap-2 p-3 rounded-xl border border-border text-xs font-body text-ink-muted">
-            <Info size={12} /> No indexed repos. Index a repo from the <span className="text-brand ml-1">Repos</span> page first.
+          <div className="flex items-center gap-2 p-4 rounded-[12px] border border-[var(--border-default)]"
+            style={{ fontSize: "15px", color: "var(--ink-tertiary)" }}>
+            <Info size={14} /> No indexed repos. Index a repo from the <span className="text-[var(--accent)] ml-1">Repos</span> page first.
           </div>
         )}
 
         <div>
-          <label className="font-mono text-xs text-ink-muted block mb-2">Your question <span className="text-ink-dim ml-1">⌘↵ to submit</span></label>
+          <label className="font-[500] block mb-2" style={{ fontSize: "15px", color: "var(--ink-tertiary)" }}>
+            Your question <span className="text-[var(--ink-muted)] ml-1" style={{ fontSize: "13px" }}>⌘↵ to submit</span>
+          </label>
           <textarea ref={textRef} value={question} onChange={e => setQuestion(e.target.value)} onKeyDown={handleKey}
             rows={3} placeholder="How does authentication work in this codebase?"
-            className="w-full bg-surface border border-border rounded-xl px-4 py-3 font-mono text-sm text-ink placeholder:text-ink-dim focus:outline-none focus:border-brand/60 transition-colors resize-none" />
+            className="w-full bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] px-4 py-3 font-mono text-[var(--ink-primary)] placeholder:text-[var(--ink-muted)] focus:outline-none focus:border-[var(--accent)] focus:shadow-[0_0_0_3px_var(--accent-glow)] transition-all resize-none"
+            style={{ fontSize: "15px" }} />
         </div>
 
         {!question && (
           <div className="flex flex-wrap gap-2">
             {EXAMPLES.map(ex => (
               <button key={ex} onClick={() => { setQuestion(ex); textRef.current?.focus(); }}
-                className="font-mono text-[11px] text-ink-muted bg-surface-raised border border-border rounded-lg px-2.5 py-1.5 hover:border-brand/40 hover:text-brand transition-colors">
+                className="font-mono text-[var(--ink-tertiary)] bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[8px] px-3 py-1.5 hover:border-[var(--accent)]/40 hover:text-[var(--accent)] transition-colors min-h-0"
+                style={{ fontSize: "13px" }}>
                 {ex}
               </button>
             ))}
@@ -138,14 +148,16 @@ export default function AskClient({ hasApiKey }: { hasApiKey: boolean }) {
         )}
 
         <button onClick={() => void ask()} disabled={loading || !question.trim() || !hasApiKey}
-          className="w-full flex items-center justify-center gap-2 py-3 text-sm font-body font-semibold text-white bg-brand hover:bg-brand/90 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-          {loading ? <><Loader2 size={15} className="animate-spin" /> Asking CodeMind…</> : <><Send size={15} /> Ask</>}
+          className="w-full flex items-center justify-center gap-2 font-[600] text-white rounded-[12px] transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
+          style={{ height: "48px", fontSize: "15px", background: "var(--grad-brand)" }}>
+          {loading ? <><Loader2 size={16} className="animate-spin" /> Asking StinKit…</> : <><Send size={16} /> Ask</>}
         </button>
       </div>
 
       {error && (
-        <div className="flex items-center gap-3 p-4 glass rounded-xl border border-heat/25 mb-6 text-sm font-body text-heat">
-          <AlertTriangle size={15} className="flex-shrink-0" /> {error}
+        <div className="flex items-center gap-3 p-4 bg-[var(--bg-glass)] backdrop-blur-xl border border-[var(--red)]/25 rounded-[16px] mb-6 text-[var(--red)]"
+          style={{ fontSize: "15px" }}>
+          <AlertTriangle size={16} className="flex-shrink-0" /> {error}
         </div>
       )}
 

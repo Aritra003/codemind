@@ -1,5 +1,5 @@
 import chalk from 'chalk'
-import type { BlastRadius, RiskLevel, CodemindResult } from '@codemind/shared'
+import type { BlastRadius, RiskLevel, StinKitResult } from '@stinkit/shared'
 import type { DriftReport } from '../../commands/see'
 import type { ForensicsTrace } from '../../commands/trace'
 import { RISK_SYMBOL, RISK_COLOR } from './themes'
@@ -12,7 +12,7 @@ export function formatRiskBadge(level: RiskLevel): string {
   return color(`${symbol} ${level}`)
 }
 
-export function formatCheckResult(result: CodemindResult<BlastRadius>, json: boolean): string {
+export function formatCheckResult(result: StinKitResult<BlastRadius>, json: boolean): string {
   if (json) return JSON.stringify(result, null, 2)
   if (result.status === 'failed') return formatError(result.error.code, result.error.message, result.error.hint)
   const { data, meta } = result
@@ -34,7 +34,7 @@ export function formatCheckResult(result: CodemindResult<BlastRadius>, json: boo
   return lines.join('\n')
 }
 
-export function formatSeeResult(result: CodemindResult<DriftReport>, json: boolean): string {
+export function formatSeeResult(result: StinKitResult<DriftReport>, json: boolean): string {
   if (json) return JSON.stringify(result, null, 2)
   if (result.status === 'failed') return formatError(result.error.code, result.error.message, result.error.hint)
   const { data, meta } = result
@@ -54,7 +54,7 @@ export function formatSeeResult(result: CodemindResult<DriftReport>, json: boole
   return lines.join('\n')
 }
 
-export function formatTraceResult(result: CodemindResult<ForensicsTrace>, json: boolean): string {
+export function formatTraceResult(result: StinKitResult<ForensicsTrace>, json: boolean): string {
   if (json) return JSON.stringify(result, null, 2)
   if (result.status === 'failed') return formatError(result.error.code, result.error.message, result.error.hint)
   const { data, meta } = result

@@ -34,7 +34,7 @@ Corroborating signals:
   - D-04 graph_staleness_detected increasing (users not re-indexing = stale, slow checks)
 
 User-reported:
-  - "codemind check is slower after the update"
+  - "stinkit check is slower after the update"
   - GitHub issues or Discord reports of hang on large repos
 
 ================================================================================
@@ -159,7 +159,7 @@ If check_deep_completed p99 spikes but check_fast_completed is normal:
   1. Check https://status.anthropic.com
   2. Check D-03 llm_timeout rate: if > 5% of deep-analysis calls → confirm Anthropic issue
   3. Mitigation: CLI already shows offline-mode gracefully (--think falls back to fast tier message)
-  4. Action: no code change needed. Update status.codemind.dev if user-reported.
+  4. Action: no code change needed. Update status.stinkit.dev if user-reported.
   5. If persistent (> 24h): consider reducing Anthropic API timeout from 30s to 20s to
      fail faster — TITAN reviews before implementing (architecture decision).
 

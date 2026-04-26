@@ -3,17 +3,17 @@ import { motion } from "framer-motion";
 import { Zap, Eye, Shield, BarChart2, Activity, Server } from "lucide-react";
 
 const TOOLS = [
-  { name: "codemind_check",        Icon: Zap,       color: "#FF6B6B", desc: "Blast radius before any edit" },
-  { name: "codemind_see",          Icon: Eye,       color: "#A78BFA", desc: "Verify diagrams against reality" },
-  { name: "codemind_trace",        Icon: Shield,    color: "#22D3EE", desc: "Forensic error investigation" },
-  { name: "codemind_graph",        Icon: BarChart2, color: "#34D399", desc: "Export graph + find hotspots" },
-  { name: "codemind_status",       Icon: Activity,  color: "#4361EE", desc: "Current graph state" },
-  { name: "codemind_watch_status", Icon: Server,    color: "#FFB347", desc: "Real-time change feed" },
+  { name: "stinkit_check",        Icon: Zap,       color: "#FF6B6B", desc: "Blast radius before any edit" },
+  { name: "stinkit_see",          Icon: Eye,       color: "#A78BFA", desc: "Verify diagrams against reality" },
+  { name: "stinkit_trace",        Icon: Shield,    color: "#22D3EE", desc: "Forensic error investigation" },
+  { name: "stinkit_graph",        Icon: BarChart2, color: "#34D399", desc: "Export graph + find hotspots" },
+  { name: "stinkit_status",       Icon: Activity,  color: "#4361EE", desc: "Current graph state" },
+  { name: "stinkit_watch_status", Icon: Server,    color: "#FFB347", desc: "Real-time change feed" },
 ];
 
 const CONFIG = `"mcpServers": {
-  "codemind": {
-    "command": "codemind",
+  "stinkit": {
+    "command": "stinkit",
     "args": ["serve"]
   }
 }`;
@@ -70,7 +70,7 @@ export function AgentSection() {
               <p className="font-mono text-xs text-brand tracking-[0.2em] mb-5">SETUP IN 4 STEPS</p>
               <div className="space-y-3">
                 {[
-                  "Run codemind serve in your project root",
+                  "Run stinkit serve in your project root",
                   "Add the snippet above to your MCP settings",
                   "Agent checks blast radius before every edit to shared files",
                   "Skill file auto-generated on first index — agent knows when to call what",

@@ -5,7 +5,7 @@
 import * as fs   from 'fs/promises'
 import * as path from 'path'
 import { pack, unpack } from 'msgpackr'
-import type { CodeGraph } from '@codemind/shared'
+import type { CodeGraph } from '@stinkit/shared'
 
 const GRAPH_FILE = 'index.msgpack'
 

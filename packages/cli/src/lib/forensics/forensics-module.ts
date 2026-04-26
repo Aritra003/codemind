@@ -1,4 +1,4 @@
-import type { CodeGraph, NodeId } from '@codemind/shared'
+import type { CodeGraph, NodeId } from '@stinkit/shared'
 import type { AIClient } from '../ai/client'
 import type { RankedCommit, OriginClass, ForensicsTrace } from '../../commands/trace'
 import { sanitizeErrorInput } from '../../forensics/sanitize'

@@ -1,5 +1,5 @@
 import type { Command } from 'commander'
-import type { UserConfig, CodemindResult, BlastRadius } from '@codemind/shared'
+import type { UserConfig, StinKitResult, BlastRadius } from '@stinkit/shared'
 import { GraphStore }    from '../lib/graph/store'
 import { AnalysisModule } from '../lib/analysis'
 
@@ -17,7 +17,7 @@ export function registerCheckCommand(program: Command, config: UserConfig): void
     .description('Show the blast radius of staged changes')
     .option('--file <path>',   'Analyze a specific file (alternative to positional arg)')
     .option('--think',         'Deep analysis via Claude claude-opus-4-7 (uses your API key)')
-    .option('--report',        'Generate an HTML report in .codemind/reports/')
+    .option('--report',        'Generate an HTML report in .stinkit/reports/')
     .option('--estimate-cost', 'Show estimated Anthropic API cost before calling Opus')
     .option('--json',          'Output machine-readable JSON instead of formatted text')
     .action(async (files: string[], opts: Partial<CheckOptions> & { file?: string }, cmd: import('commander').Command) => {
@@ -33,9 +33,9 @@ export async function runCheckCore(
   changedFiles: string[],
   _options: CheckOptions,
   _config: UserConfig,
-): Promise<CodemindResult<BlastRadius>> {
+): Promise<StinKitResult<BlastRadius>> {
   const repoRoot = process.cwd()
-  const store    = new GraphStore(`${repoRoot}/.codemind`)
+  const store    = new GraphStore(`${repoRoot}/.stinkit`)
   const startMs  = Date.now()
 
   const graph = await store.load()
@@ -43,7 +43,7 @@ export async function runCheckCore(
     return {
       status: 'failed', data: null,
       meta:  { completeness_pct: 0, duration_ms: Date.now() - startMs },
-      error: { code: 'GRAPH_NOT_FOUND', message: 'No graph found. Run `codemind index` first.', hint: 'Run `codemind index` to build the code graph.' },
+      error: { code: 'GRAPH_NOT_FOUND', message: 'No graph found. Run `stinkit index` first.', hint: 'Run `stinkit index` to build the code graph.' },
     }
   }
 

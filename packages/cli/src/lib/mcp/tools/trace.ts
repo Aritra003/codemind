@@ -1,9 +1,9 @@
-import type { UserConfig } from '@codemind/shared'
+import type { UserConfig } from '@stinkit/shared'
 import { runTraceCore } from '../../../commands/trace'
 import { formatTraceResult } from '../../output/format'
 
 export const TOOL_DEF = {
-  name:        'codemind_trace',
+  name:        'stinkit_trace',
   description: 'Trace a production error or symptom to root-cause commits.',
   inputSchema: {
     type: 'object' as const,

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { UserConfig } from '@codemind/shared'
+import type { UserConfig } from '@stinkit/shared'
 
 vi.mock('fs/promises')
 
@@ -26,8 +26,8 @@ const RUNNING_STATUS = {
 }
 
 describe('watch-status TOOL_DEF', () => {
-  it('has name codemind_watch_status', () => {
-    expect(TOOL_DEF.name).toBe('codemind_watch_status')
+  it('has name stinkit_watch_status', () => {
+    expect(TOOL_DEF.name).toBe('stinkit_watch_status')
   })
 
   it('has empty inputSchema (no required args)', () => {

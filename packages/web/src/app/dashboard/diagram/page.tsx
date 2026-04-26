@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 // Mermaid uses browser-only APIs — must never run on the server
 const DiagramClient = dynamic(() => import("./client"), { ssr: false, loading: () => null });
 
-export const metadata = { title: "Diagram | CodeMind" };
+export const metadata = { title: "Diagram | StinKit" };
 
 export default async function DiagramPage() {
   const session = await auth();

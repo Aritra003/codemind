@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir":  "dist",
     "paths": {
-      "@codemind/shared": ["../shared/src/index.ts"],
+      "@stinkit/shared": ["../shared/src/index.ts"],
       "@modelcontextprotocol/sdk/server": ["./node_modules/@modelcontextprotocol/sdk/dist/cjs/server/index"],
       "@modelcontextprotocol/sdk/server/stdio": ["./node_modules/@modelcontextprotocol/sdk/dist/cjs/server/stdio"],
       "@modelcontextprotocol/sdk/types": ["./node_modules/@modelcontextprotocol/sdk/dist/cjs/types"]

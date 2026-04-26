@@ -1,4 +1,4 @@
-# BUSINESS-METRICS.md — CodeMind Business Intelligence Register
+# BUSINESS-METRICS.md — StinKit Business Intelligence Register
 # Mode: BUSINESS-METRICS | Agent: ANALYST
 # Input: ANALYTICS-SCHEMA.md · SLO.md · OBSERVABILITY.md · INFRASTRUCTURE.md
 # Last updated: 2026-04-23
@@ -8,7 +8,7 @@
 
 ## Measurement Philosophy
 
-1. The north star question is "Are more developers getting value from CodeMind every week?"
+1. The north star question is "Are more developers getting value from StinKit every week?"
    Everything else is diagnostic.
 2. Track leading indicators (hours signal) to catch problems before they become lagging problems (weeks signal).
 3. CLI telemetry is opt-in and anonymous. Cloud metrics come from authenticated usage.

@@ -1,4 +1,4 @@
-import type { CodeGraph } from '@codemind/shared'
+import type { CodeGraph } from '@stinkit/shared'
 import type { HotspotEntry } from './report-types'
 import { computeBlastRadius } from '../analysis/blast-radius'
 

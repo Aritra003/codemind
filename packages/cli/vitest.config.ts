@@ -4,7 +4,7 @@ import * as path from 'path'
 export default defineConfig({
   resolve: {
     alias: {
-      '@codemind/shared': path.resolve(__dirname, '../shared/src/index.ts'),
+      '@stinkit/shared': path.resolve(__dirname, '../shared/src/index.ts'),
     },
   },
   // Native Node modules must not be transformed by Vite

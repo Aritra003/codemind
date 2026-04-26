@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { CodeGraph, GraphNode, NodeId } from '@codemind/shared'
+import type { CodeGraph, GraphNode, NodeId } from '@stinkit/shared'
 import type { AIClient } from '../../../src/lib/ai/client'
 import type { RankedCommit } from '../../../src/commands/trace'
 import { InjectionAttemptError } from '../../../src/lib/errors'

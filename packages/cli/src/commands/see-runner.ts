@@ -1,7 +1,7 @@
 import ora from 'ora'
 import * as fs   from 'fs/promises'
 import * as path from 'path'
-import type { UserConfig } from '@codemind/shared'
+import type { UserConfig } from '@stinkit/shared'
 import type { SeeOptions } from './see'
 import { GraphStore }      from '../lib/graph/store'
 import { VisionModule }    from '../lib/vision'
@@ -89,14 +89,14 @@ async function runSeeDiff(
 ): Promise<void> {
   if (!oldArg) {
     process.stderr.write(
-      formatError('NO_DIAGRAM', 'Provide both diagrams: codemind see old.png --diff new.png') + '\n',
+      formatError('NO_DIAGRAM', 'Provide both diagrams: stinkit see old.png --diff new.png') + '\n',
     )
     process.exit(1)
   }
 
   if (!config.anthropic_api_key) {
     process.stderr.write(
-      formatError('NO_API_KEY', '`see --diff` requires an Anthropic API key.', 'Set ANTHROPIC_API_KEY in ~/.codemind/config.yaml.') + '\n',
+      formatError('NO_API_KEY', '`see --diff` requires an Anthropic API key.', 'Set ANTHROPIC_API_KEY in ~/.stinkit/config.yaml.') + '\n',
     )
     process.exit(1)
   }
@@ -162,7 +162,7 @@ async function runSeeCompare(
   }
 
   const repoRoot   = process.cwd()
-  const store      = new GraphStore(`${repoRoot}/.codemind`)
+  const store      = new GraphStore(`${repoRoot}/.stinkit`)
   const telemetry  = new TelemetryClient(config.telemetry)
   const spinner    = ora('Loading graph…').start()
 
@@ -173,7 +173,7 @@ async function runSeeCompare(
         formatError(
           'NO_DIAGRAM',
           'Provide a diagram path or use --generate to create one from code.',
-          'Usage: codemind see <diagram.png> | codemind see --generate',
+          'Usage: stinkit see <diagram.png> | stinkit see --generate',
         ) + '\n',
       )
       process.exit(1)
@@ -208,7 +208,7 @@ async function runSeeCompare(
     if (!graph) {
       spinner.fail('No graph found.')
       process.stderr.write(
-        formatError('NO_GRAPH', 'Run `codemind index` first.') + '\n',
+        formatError('NO_GRAPH', 'Run `stinkit index` first.') + '\n',
       )
       process.exit(1)
     }
@@ -221,7 +221,7 @@ async function runSeeCompare(
         formatError(
           'NO_API_KEY',
           '`see` requires an Anthropic API key for diagram vision analysis.',
-          'Set ANTHROPIC_API_KEY in ~/.codemind/config.yaml or as an env var.',
+          'Set ANTHROPIC_API_KEY in ~/.stinkit/config.yaml or as an env var.',
         ) + '\n',
       )
       process.exit(1)

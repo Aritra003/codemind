@@ -1,7 +1,7 @@
 import ora from 'ora'
 import * as fs   from 'fs'
 import * as path from 'path'
-import type { UserConfig } from '@codemind/shared'
+import type { UserConfig } from '@stinkit/shared'
 import type { CheckOptions } from './check'
 import { GraphStore }     from '../lib/graph/store'
 import { AnalysisModule } from '../lib/analysis'
@@ -41,7 +41,7 @@ export async function runCheck(
     }
   }
 
-  const store    = new GraphStore(`${repoRoot}/.codemind`)
+  const store    = new GraphStore(`${repoRoot}/.stinkit`)
   const telemetry = new TelemetryClient(config.telemetry)
   const spinner  = ora('Loading graph…').start()
 
@@ -50,14 +50,14 @@ export async function runCheck(
     if (!graph) {
       spinner.fail('No graph found.')
       process.stderr.write(
-        formatError('NO_GRAPH', 'Run `codemind index` first to build the code graph.') + '\n'
+        formatError('NO_GRAPH', 'Run `stinkit index` first to build the code graph.') + '\n'
       )
       process.exit(1)
     }
 
     const ageMs = await store.ageMs()
     if (ageMs !== null && ageMs > STALE_GRAPH_DAYS * 24 * 60 * 60 * 1000) {
-      spinner.warn(`Graph is ${Math.floor(ageMs / 86400000)} days old — consider running \`codemind index\``)
+      spinner.warn(`Graph is ${Math.floor(ageMs / 86400000)} days old — consider running \`stinkit index\``)
     } else {
       spinner.stop()
     }
@@ -72,7 +72,7 @@ export async function runCheck(
           formatError(
             'FILE_NOT_INDEXED',
             `${f} exists but has no indexed nodes.`,
-            'It may be in an unsupported language or excluded. Run `codemind index` to rebuild.'
+            'It may be in an unsupported language or excluded. Run `stinkit index` to rebuild.'
           ) + '\n'
         )
         process.exit(1)
@@ -109,7 +109,7 @@ export async function runCheck(
           formatError(
             'NO_API_KEY',
             'Deep analysis requires an Anthropic API key.',
-            'Set ANTHROPIC_API_KEY in ~/.codemind/config.yaml or as an env var.'
+            'Set ANTHROPIC_API_KEY in ~/.stinkit/config.yaml or as an env var.'
           ) + '\n'
         )
         process.exit(1)

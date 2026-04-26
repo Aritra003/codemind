@@ -63,7 +63,7 @@ export default function SignupPage() {
             <span className="font-mono text-xs text-neon">Free forever</span>
           </div>
           <h1 className="font-display text-2xl font-bold text-ink mb-2">Create your account</h1>
-          <p className="font-body text-sm text-ink-muted">Get full web access to CodeMind in seconds</p>
+          <p className="font-body text-sm text-ink-muted">Get full web access to StinKit in seconds</p>
         </div>
 
         <div className="glass rounded-2xl p-7 space-y-4 mb-5">
@@ -84,7 +84,7 @@ export default function SignupPage() {
           {/* Divider */}
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
-            <span className="font-mono text-[11px] text-ink-dim">or</span>
+            <span className="font-mono text-xs text-ink-muted">or</span>
             <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
           </div>
 
@@ -140,7 +140,7 @@ export default function SignupPage() {
             </button>
           </form>
 
-          <p className="font-mono text-[10px] text-ink-dim text-center leading-relaxed pt-1">
+          <p className="font-mono text-xs text-ink-muted text-center leading-relaxed pt-1">
             No credit card. No trial period. Free forever for open source.
           </p>
         </div>

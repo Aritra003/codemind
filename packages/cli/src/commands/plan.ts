@@ -1,5 +1,5 @@
 import type { Command } from 'commander'
-import type { UserConfig, CodemindResult, GraphNode, CodeGraph, NodeId } from '@codemind/shared'
+import type { UserConfig, StinKitResult, GraphNode, CodeGraph, NodeId } from '@stinkit/shared'
 import { GraphStore }      from '../lib/graph/store'
 import { GraphTraversal }  from '../lib/graph/traversal'
 import { AIClient }        from '../lib/ai/client'
@@ -136,9 +136,9 @@ PR BOUNDARY after steps N-M: "[PR title]"
 export async function runPlanCore(
   goal:   string,
   config: UserConfig,
-): Promise<CodemindResult<PlanResult>> {
+): Promise<StinKitResult<PlanResult>> {
   const repoRoot = process.cwd()
-  const store    = new GraphStore(`${repoRoot}/.codemind`)
+  const store    = new GraphStore(`${repoRoot}/.stinkit`)
   const startMs  = Date.now()
 
   const graph = await store.load()
@@ -146,7 +146,7 @@ export async function runPlanCore(
     return {
       status: 'failed', data: null,
       meta:   { completeness_pct: 0, duration_ms: Date.now() - startMs },
-      error:  { code: 'GRAPH_NOT_FOUND', message: 'No graph found. Run `codemind index` first.' },
+      error:  { code: 'GRAPH_NOT_FOUND', message: 'No graph found. Run `stinkit index` first.' },
     }
   }
 

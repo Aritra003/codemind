@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import type { CodemindResult, BlastRadius } from '@codemind/shared'
+import type { StinKitResult, BlastRadius } from '@stinkit/shared'
 import type { DriftReport } from '../../../src/commands/see'
 import type { ForensicsTrace } from '../../../src/commands/trace'
 import { formatCheckResult, formatSeeResult, formatTraceResult } from '../../../src/lib/output/format'
@@ -72,16 +72,16 @@ describe('formatCheckResult', () => {
   })
 
   it('shows error message for failed result', () => {
-    const result: CodemindResult<BlastRadius> = {
+    const result: StinKitResult<BlastRadius> = {
       status: 'failed', data: null, meta: META,
-      error: { code: 'GRAPH_NOT_FOUND', message: 'No graph found. Run codemind index first.' },
+      error: { code: 'GRAPH_NOT_FOUND', message: 'No graph found. Run stinkit index first.' },
     }
     const out = strip(formatCheckResult(result, false))
     expect(out).toContain('No graph found')
   })
 
   it('shows warnings for partial result', () => {
-    const result: CodemindResult<BlastRadius> = {
+    const result: StinKitResult<BlastRadius> = {
       status: 'partial', data: BLAST, meta: META, warnings: ['Some nodes unresolved'],
     }
     const out = strip(formatCheckResult(result, false))
@@ -116,7 +116,7 @@ describe('formatSeeResult', () => {
   })
 
   it('shows error message for failed result', () => {
-    const result: CodemindResult<DriftReport> = {
+    const result: StinKitResult<DriftReport> = {
       status: 'failed', data: null, meta: META,
       error: { code: 'FILE_NOT_FOUND', message: 'Diagram file not found.' },
     }
@@ -158,7 +158,7 @@ describe('formatTraceResult', () => {
   })
 
   it('shows error message for failed result', () => {
-    const result: CodemindResult<ForensicsTrace> = {
+    const result: StinKitResult<ForensicsTrace> = {
       status: 'failed', data: null, meta: META,
       error: { code: 'GRAPH_NOT_FOUND', message: 'Graph not found.' },
     }

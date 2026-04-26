@@ -1,6 +1,6 @@
 import * as path from 'path'
 import * as fs   from 'fs/promises'
-import type { CodeGraph, GraphNode, GraphEdge } from '@codemind/shared'
+import type { CodeGraph, GraphNode, GraphEdge } from '@stinkit/shared'
 import { parseFile }        from '../graph/parser'
 import { detectLanguage }   from '../graph/walker'
 import type { DiscoveredFile } from '../graph/walker'
@@ -10,7 +10,7 @@ import { logger }           from '../lib/logger'
 import { formatWatchAlert } from './watch-format'
 
 const IGNORE_DIRS = new Set([
-  'node_modules', '.git', '.codemind', 'dist', 'build',
+  'node_modules', '.git', '.stinkit', 'dist', 'build',
   '.next', 'out', 'coverage', '__pycache__', '.turbo', '.cache',
 ])
 
@@ -62,12 +62,12 @@ export interface WatchOptions {
 
 export async function startWatch(options: WatchOptions): Promise<void> {
   const repoRoot   = process.cwd()
-  const storeDir   = path.join(repoRoot, '.codemind')
+  const storeDir   = path.join(repoRoot, '.stinkit')
   const debounceMs = options.debounceMs ?? 2000
 
   const store = new GraphStore(storeDir)
   let graph   = await store.load()
-  if (!graph) throw new Error('Graph not found. Run `codemind index` first.')
+  if (!graph) throw new Error('Graph not found. Run `stinkit index` first.')
 
   const fileCount = new Set([...graph.nodes.values()].map(n => n.file)).size
   const nodeStr   = String(graph.node_count).padEnd(4)
@@ -75,7 +75,7 @@ export async function startWatch(options: WatchOptions): Promise<void> {
   process.stdout.write([
     '',
     ' ╭──────────────────────────────────────────────────────────╮',
-    ` │  CODEMIND WATCH                                          │`,
+    ` │  STINKIT WATCH                                          │`,
     ` │  Monitoring ${nodeStr} nodes across ${fileStr} files              │`,
     ' │  Press Ctrl+C to stop                                    │',
     ' ╰──────────────────────────────────────────────────────────╯',
@@ -94,7 +94,7 @@ export async function startWatch(options: WatchOptions): Promise<void> {
   const watchRoot = options.scope ? path.join(repoRoot, options.scope) : repoRoot
 
   const watcher = chokidar.watch(watchRoot, {
-    ignored: [/node_modules/, /\.git/, /\.codemind/, /dist\//, /build\//, /\.next\//,
+    ignored: [/node_modules/, /\.git/, /\.stinkit/, /dist\//, /build\//, /\.next\//,
               /coverage\//, /\.test\./, /\.spec\./],
     persistent:    true,
     ignoreInitial: true,

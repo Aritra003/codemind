@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { UserConfig, CodeGraph, GraphNode } from '@codemind/shared'
+import type { UserConfig, CodeGraph, GraphNode } from '@stinkit/shared'
 
 vi.mock('../../../../src/lib/graph/store')
 
@@ -25,12 +25,12 @@ function makeGraph(): CodeGraph {
 }
 
 describe('TOOL_DEF', () => {
-  it('name is codemind_graph', () => {
-    expect(TOOL_DEF.name).toBe('codemind_graph')
+  it('name is stinkit_graph', () => {
+    expect(TOOL_DEF.name).toBe('stinkit_graph')
   })
 })
 
-describe('handle (codemind_graph)', () => {
+describe('handle (stinkit_graph)', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
   it('returns content with type=text', async () => {
@@ -77,6 +77,6 @@ describe('handle (codemind_graph)', () => {
       ageMs: vi.fn().mockResolvedValue(null),
     } as unknown as GraphStore))
     const result = await handle({}, CONFIG)
-    expect(result.content[0]!.text).toContain('codemind index')
+    expect(result.content[0]!.text).toContain('stinkit index')
   })
 })

@@ -26,7 +26,7 @@ export function renderCover(data: AuditData): string {
     <h1>${esc(data.repoName)} — Engineering Audit Report</h1>
     <p class="cover-meta">
       Generated ${esc(data.generatedAt)}&nbsp;·&nbsp;
-      CodeMind v5.0&nbsp;·&nbsp;
+      StinKit v5.0&nbsp;·&nbsp;
       ${data.fileCount.toLocaleString()} files indexed&nbsp;·&nbsp;
       Languages: ${esc(data.languages.join(', ') || 'TypeScript')}
     </p>

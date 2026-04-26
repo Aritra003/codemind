@@ -13,7 +13,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand to-accent flex items-center justify-center">
             <span className="font-mono font-bold text-white text-sm">C</span>
           </div>
-          <span className="font-display font-bold text-ink text-lg">CodeMind</span>
+          <span className="font-display font-bold text-ink text-lg">StinKit</span>
         </Link>
         <Link href="/" className="text-xs font-body text-ink-dim hover:text-ink-muted transition-colors">
           ← Back to home

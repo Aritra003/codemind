@@ -36,8 +36,8 @@ export function ProfileEditor({ initial }: { initial: Profile }) {
   const isDirty = name !== (initial.name ?? "") || about !== (initial.about ?? "");
 
   return (
-    <div className="glass rounded-2xl p-6 mb-5">
-      <p className="font-mono text-[10px] text-ink-dim uppercase tracking-widest mb-5">Your profile</p>
+    <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] p-6 mb-5">
+      <p className="font-mono text-xs text-ink-muted uppercase tracking-widest mb-5">Your profile</p>
 
       {/* Avatar + identity */}
       <div className="flex items-center gap-4 mb-6">
@@ -60,7 +60,7 @@ export function ProfileEditor({ initial }: { initial: Profile }) {
           onChange={e => setName(e.target.value)}
           maxLength={100}
           placeholder="Your name"
-          className="w-full bg-surface border border-border rounded-xl px-4 py-2.5 font-body text-sm text-ink placeholder:text-ink-dim focus:outline-none focus:border-brand/60 transition-colors"
+          className="w-full bg-[var(--bg-glass)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-[20px] px-4 py-2.5 font-body text-sm text-ink placeholder:text-ink-dim focus:outline-none focus:border-brand/60 transition-colors"
         />
       </div>
 
@@ -75,7 +75,7 @@ export function ProfileEditor({ initial }: { initial: Profile }) {
           onChange={e => setAbout(e.target.value.slice(0, 500))}
           placeholder="Tell us about yourself..."
           rows={4}
-          className="w-full bg-surface border border-border rounded-xl px-4 py-3 font-body text-sm text-ink placeholder:text-ink-dim focus:outline-none focus:border-brand/60 transition-colors resize-none leading-relaxed"
+          className="w-full bg-[var(--bg-glass)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-[20px] px-4 py-3 font-body text-sm text-ink placeholder:text-ink-dim focus:outline-none focus:border-brand/60 transition-colors resize-none leading-relaxed"
         />
       </div>
 

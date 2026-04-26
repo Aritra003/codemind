@@ -11,77 +11,91 @@ const stagger = { show: { transition: { staggerChildren: 0.1 } } };
 export function Hero() {
   const [copied, setCopied] = useState(false);
   const copy = () => {
-    navigator.clipboard?.writeText("npx codemind");
+    navigator.clipboard?.writeText("npx stinkit");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <section className="relative min-h-screen flex items-center pt-16 overflow-hidden">
-      {/* Background grid */}
-      <div className="absolute inset-0 bg-dot-grid bg-dot-grid pointer-events-none" aria-hidden />
-      {/* Glow blobs */}
-      <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-brand/5 rounded-full blur-[100px] pointer-events-none" aria-hidden />
-      <div className="absolute bottom-1/4 left-1/6 w-[350px] h-[350px] bg-accent/4 rounded-full blur-[80px] pointer-events-none" aria-hidden />
-      {/* Anime scan lines */}
-      <div className="absolute inset-0 scan-lines pointer-events-none opacity-30" aria-hidden />
+    <section className="relative min-h-screen flex items-center pt-[68px] overflow-hidden">
+      {/* Background effects */}
+      <div className="absolute inset-0 bg-dot-grid bg-dot-grid pointer-events-none opacity-60" aria-hidden />
+      <div className="absolute inset-0 bg-glow-top pointer-events-none" aria-hidden />
+      <div className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-[var(--accent-glow)] rounded-full blur-[120px] pointer-events-none" aria-hidden />
+      <div className="absolute bottom-1/4 left-1/6 w-[400px] h-[400px] bg-[rgba(167,139,250,0.05)] rounded-full blur-[100px] pointer-events-none" aria-hidden />
+      <div className="absolute inset-0 scan-lines pointer-events-none opacity-25" aria-hidden />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full py-20 lg:py-28">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Left */}
+      <div className="max-w-7xl mx-auto px-6 w-full py-24 lg:py-32">
+        <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+          {/* Left — content */}
           <motion.div variants={stagger} initial="hidden" animate="show">
-            {/* Live badge */}
-            <motion.div variants={fadeUp} className="inline-flex items-center gap-2.5 mb-8 px-4 py-2 bg-surface-raised border border-border rounded-full">
-              <div className="w-2 h-2 rounded-full bg-neon animate-pulse-slow flex-shrink-0" />
-              <span className="font-mono text-xs text-ink-muted tracking-wide">Built with Claude Opus 4.7 · Open Source · v5.0</span>
+            {/* Pre-headline badge */}
+            <motion.div variants={fadeUp} className="inline-flex items-center gap-2.5 mb-10">
+              <span className="text-[13px] font-[600] tracking-[4px] uppercase text-[var(--accent)]">
+                Open Source · MIT Licensed · 11 Languages
+              </span>
             </motion.div>
 
             {/* Headline */}
             <motion.h1 variants={fadeUp}
-              className="font-display text-5xl sm:text-6xl xl:text-[72px] font-bold text-ink leading-[1.05] mb-6 tracking-tight">
-              Ship without
+              className="font-[800] leading-[1.1] mb-6 tracking-tight"
+              style={{ fontSize: "clamp(40px, 5vw, 56px)", color: "var(--ink-primary)" }}>
+              See what{" "}
+              <span className="gradient-text">breaks.</span>
               <br />
-              <span className="text-gradient">fear.</span>
+              Ship what{" "}
+              <span className="gradient-text">works.</span>
             </motion.h1>
 
-            {/* Sub */}
-            <motion.p variants={fadeUp} className="font-body text-lg text-ink-muted leading-relaxed mb-10 max-w-lg">
-              CodeMind builds a live structural graph of your entire codebase — locally, in seconds. See the blast radius of every change before it ships.
-              <span className="block mt-2 text-base text-ink-dim">No cloud. No account. No cost.</span>
+            {/* Subheadline */}
+            <motion.p variants={fadeUp}
+              className="mb-10 max-w-[480px]"
+              style={{ fontSize: "18px", color: "var(--ink-secondary)", lineHeight: "1.8" }}>
+              StinKit indexes your codebase, reads your architecture diagrams with AI vision,
+              and gives you a professional audit report — in seconds.
             </motion.p>
 
-            {/* CTAs */}
-            <motion.div variants={fadeUp} className="flex flex-wrap gap-3 mb-10">
-              <Link href="/signup"
-                className="inline-flex items-center gap-2 px-6 py-3.5 font-body font-semibold text-sm text-white bg-brand hover:bg-brand/90 rounded-xl shadow-sm hover:shadow-brand-glow transition-all duration-300 hover:scale-[1.02]">
-                Get started free <ArrowRight size={15} />
-              </Link>
-              <a href="https://github.com/Aritra003/codemind" target="_blank" rel="noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3.5 font-body font-medium text-sm text-ink-muted hover:text-ink border border-border hover:border-border-light rounded-xl hover:bg-surface-raised transition-all duration-300">
-                <Github size={15} /> GitHub ↗
-              </a>
-            </motion.div>
-
-            {/* CLI copy */}
-            <motion.div variants={fadeUp}>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="h-px flex-1 bg-border" />
-                <span className="font-mono text-xs text-ink-dim">or use the CLI directly</span>
-                <div className="h-px flex-1 bg-border" />
-              </div>
+            {/* Install block + CTA */}
+            <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
               <button onClick={copy}
-                className="group flex items-center gap-3 bg-surface-raised border border-border hover:border-border-light rounded-xl px-4 py-3 transition-all duration-300 cursor-pointer">
-                <span className="font-mono text-sm text-neon">▸</span>
-                <code className="font-mono text-sm text-ink">npx codemind</code>
-                <span className="font-mono text-xs text-ink-dim bg-surface px-2 py-0.5 rounded ml-auto group-hover:text-brand transition-colors">
+                className="group flex items-center gap-3 bg-[var(--bg-surface)] border border-[var(--border-default)] hover:border-[var(--border-hover)] rounded-[14px] px-5 transition-all duration-200 cursor-pointer min-h-[52px]"
+                style={{ minWidth: "200px" }}>
+                <span className="text-[var(--green)] font-mono text-lg">❯</span>
+                <code className="font-mono text-[18px] text-[var(--ink-primary)] flex-1">npx stinkit</code>
+                <span className="text-[13px] font-[500] text-[var(--ink-muted)] bg-[var(--bg-elevated)] px-2 py-1 rounded-[6px] group-hover:text-[var(--accent)] transition-colors">
                   {copied ? <><Check size={11} className="inline mr-1" />copied</> : <><Copy size={11} className="inline mr-1" />copy</>}
                 </span>
               </button>
+
+              <Link href="/signup"
+                className="text-[16px] font-[600] text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors whitespace-nowrap">
+                Create free account →
+              </Link>
+            </motion.div>
+
+            <motion.p variants={fadeUp}
+              style={{ fontSize: "14px", color: "var(--ink-muted)" }}>
+              No account needed for CLI · MIT License · ★ Star on GitHub
+            </motion.p>
+
+            {/* CTA buttons row */}
+            <motion.div variants={fadeUp} className="flex flex-wrap gap-3 mt-8">
+              <Link href="/signup"
+                className="inline-flex items-center gap-2 px-6 h-[48px] font-[600] text-[15px] text-white rounded-[12px] transition-all duration-200 hover:opacity-90 hover:-translate-y-px hover:shadow-[0_8px_24px_rgba(99,102,241,0.35)]"
+                style={{ background: "var(--grad-brand)" }}>
+                Get started free <ArrowRight size={15} />
+              </Link>
+              <a href="https://github.com/Aritra003/stinkit" target="_blank" rel="noreferrer"
+                className="inline-flex items-center gap-2 px-6 h-[48px] font-[500] text-[15px] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)] border border-[var(--border-default)] hover:border-[var(--border-hover)] rounded-[12px] hover:bg-[var(--bg-elevated)] transition-all duration-200">
+                <Github size={15} /> GitHub ↗
+              </a>
             </motion.div>
           </motion.div>
 
-          {/* Right: terminal */}
-          <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }}
+          {/* Right: terminal demo */}
+          <motion.div
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.9, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
             className="hidden lg:block">
             <TerminalDemo />
@@ -89,10 +103,10 @@ export function Hero() {
         </div>
       </div>
 
-      {/* Bottom scroll hint */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40 pointer-events-none" aria-hidden>
-        <div className="w-px h-10 bg-gradient-to-b from-transparent to-border" />
-        <div className="font-mono text-[10px] text-ink-dim tracking-widest">SCROLL</div>
+      {/* Scroll hint */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-30 pointer-events-none" aria-hidden>
+        <div className="w-px h-10 bg-gradient-to-b from-transparent to-[var(--border-default)]" />
+        <div className="font-mono text-[13px] text-[var(--ink-muted)] tracking-[4px]">SCROLL</div>
       </div>
     </section>
   );

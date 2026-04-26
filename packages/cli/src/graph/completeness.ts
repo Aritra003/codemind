@@ -1,4 +1,4 @@
-import type { GraphEdge } from '@codemind/shared'
+import type { GraphEdge } from '@stinkit/shared'
 
 export interface CompletenessReport {
   completeness_pct:        number   // local resolution rate — external calls excluded from denominator

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { UserConfig } from '@codemind/shared'
+import type { UserConfig } from '@stinkit/shared'
 
 const mockSetRequestHandler = vi.hoisted(() => vi.fn())
 const mockConnect           = vi.hoisted(() => vi.fn().mockResolvedValue(undefined))
@@ -54,12 +54,12 @@ describe('startMcpServer', () => {
     expect(result.tools).toHaveLength(8)
   })
 
-  it('each tool name starts with "codemind_"', async () => {
+  it('each tool name starts with "stinkit_"', async () => {
     await startMcpServer(CONFIG)
     const listHandler = mockSetRequestHandler.mock.calls[0]?.[1] as () => Promise<{ tools: Array<{ name: string }> }>
     const { tools } = await listHandler()
     for (const tool of tools) {
-      expect(tool.name).toMatch(/^codemind_/)
+      expect(tool.name).toMatch(/^stinkit_/)
     }
   })
 

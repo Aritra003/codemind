@@ -1,4 +1,4 @@
-import type { CodeGraph } from '@codemind/shared'
+import type { CodeGraph } from '@stinkit/shared'
 import type { AIClient, DiagramExtractionResult, EntityResolutionResult } from '../ai/client'
 import type { DriftReport } from '../../commands/see'
 import { extractDiagramEntities } from '../../vision/extract'

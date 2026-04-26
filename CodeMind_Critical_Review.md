@@ -1,4 +1,4 @@
-# CodeMind v4 BRD — Critical Engineering Review & Corrections
+# StinKit v4 BRD — Critical Engineering Review & Corrections
 
 > **Reviewer Lens:** Kernel-level systems developer + CTO of Google/Apple scale
 > **Date:** April 2026
@@ -50,7 +50,7 @@ Default to `has_test_file` heuristic but detect and parse coverage files if they
 
 ### GAP 3: Pre-commit hook latency will kill adoption [SEVERITY: HIGH]
 
-The BRD specifies `codemind impact` as a pre-commit hook. The v3 BRD correctly set a 5-second budget. But v4 sends full context to Opus 4.7 at xhigh effort, which takes 10–30 seconds.
+The BRD specifies `stinkit impact` as a pre-commit hook. The v3 BRD correctly set a 5-second budget. But v4 sends full context to Opus 4.7 at xhigh effort, which takes 10–30 seconds.
 
 No developer will tolerate a 30-second pre-commit hook. They'll disable it within a day. This is the #1 reason dev tools get uninstalled.
 
@@ -59,9 +59,9 @@ No developer will tolerate a 30-second pre-commit hook. They'll disable it withi
 | Tier | What runs | Latency | When |
 |---|---|---|---|
 | **Fast (default)** | Graph traversal + risk score + coverage gaps. NO LLM call. | < 2 seconds | Pre-commit hook, every commit |
-| **Deep** | Everything above + Opus 4.7 reasoning for failure scenarios, historical context, suggested tests. | 15-30 seconds | Explicit: `codemind impact --deep`, or auto-triggered when fast tier returns HIGH/CRITICAL |
+| **Deep** | Everything above + Opus 4.7 reasoning for failure scenarios, historical context, suggested tests. | 15-30 seconds | Explicit: `stinkit impact --deep`, or auto-triggered when fast tier returns HIGH/CRITICAL |
 
-The pre-commit hook runs Fast tier ONLY. If risk is HIGH+, it prints: "⚠ HIGH risk detected. Run `codemind impact --deep` for full analysis." This preserves the UX budget while keeping the LLM analysis available on demand.
+The pre-commit hook runs Fast tier ONLY. If risk is HIGH+, it prints: "⚠ HIGH risk detected. Run `stinkit impact --deep` for full analysis." This preserves the UX budget while keeping the LLM analysis available on demand.
 
 ---
 
@@ -82,7 +82,7 @@ interface EntityMapping {
 }
 ```
 
-Also add: `codemind drift --mapping-file mappings.yaml` for teams to provide explicit overrides ("Auth Service" = "src/auth/"). This persists in `.codemind/drift-mappings.yaml` and improves accuracy over time.
+Also add: `stinkit drift --mapping-file mappings.yaml` for teams to provide explicit overrides ("Auth Service" = "src/auth/"). This persists in `.stinkit/drift-mappings.yaml` and improves accuracy over time.
 
 ---
 
@@ -166,7 +166,7 @@ Static call graphs miss: event emitters (`eventBus.emit('payment.completed')`), 
 
 These are often the highest-blast-radius connections in a system — and the hardest to trace during incidents.
 
-**Correction:** Add a `.codemind/connections.yaml` file where teams declare non-static connections:
+**Correction:** Add a `.stinkit/connections.yaml` file where teams declare non-static connections:
 
 ```yaml
 # Connections that tree-sitter can't see
@@ -188,7 +188,7 @@ These are included in the graph alongside static edges. Impact and Forensics tra
 
 Three separate React views with D3.js and Mermaid.js in one day, after building three CLI modes + MCP server in the previous five days. This will be the first thing cut, which means the demo relies on terminal output only.
 
-**Correction:** Scope the UI to ONE view: Drift side-by-side. This is the most visually impressive and the hardest to convey in terminal output alone. Impact and Forensics are terminal-first (their output is structured text, which terminals display well). Generate an HTML report file for Impact and Forensics (`codemind impact --report`) that opens in any browser — no React app needed, just a static HTML file with inline CSS.
+**Correction:** Scope the UI to ONE view: Drift side-by-side. This is the most visually impressive and the hardest to convey in terminal output alone. Impact and Forensics are terminal-first (their output is structured text, which terminals display well). Generate an HTML report file for Impact and Forensics (`stinkit impact --report`) that opens in any browser — no React app needed, just a static HTML file with inline CSS.
 
 ---
 
@@ -199,7 +199,7 @@ What happens when Opus returns invalid JSON from the vision extraction? What hap
 **Correction:** Add explicit error contracts:
 
 ```typescript
-type CodemindResult<T> = 
+type StinKitResult<T> = 
   | { status: 'success'; data: T; warnings: string[] }
   | { status: 'partial'; data: Partial<T>; errors: string[]; warnings: string[] }
   | { status: 'failed'; error: string; fallback_available: boolean };
@@ -267,9 +267,9 @@ The CORRECT use of Opus in Impact is: take the deterministic graph analysis (whi
 | 6 | Forensics blames wrong commit | Added triage step (CODE/INFRA/CONFIG/DEPENDENCY/DATA classification). Capped confidence at 80%. | Confident wrong attribution is worse than no attribution |
 | 7 | JSON doesn't scale | Switched to MessagePack for hackathon; SQLite for post-hackathon | 50MB JSON files are unacceptable |
 | 8 | No offline mode | Split every mode into deterministic + LLM layers. Added `--offline` flag. | Security-conscious orgs won't send code to external APIs |
-| 9 | Misses runtime connections | Added `.codemind/connections.yaml` for event buses, queues, DI, webhooks | The hardest bugs come from the connections tree-sitter can't see |
+| 9 | Misses runtime connections | Added `.stinkit/connections.yaml` for event buses, queues, DI, webhooks | The hardest bugs come from the connections tree-sitter can't see |
 | 10 | UI overscoped | Scoped to Drift view only. Impact/Forensics get static HTML reports. | Day 6 of 7 is too late for three React views |
-| 11 | No LLM error handling | Added `CodemindResult<T>` type with success/partial/failed states + retry logic | LLMs return garbage sometimes; the tool must handle it |
+| 11 | No LLM error handling | Added `StinKitResult<T>` type with success/partial/failed states + retry logic | LLMs return garbage sometimes; the tool must handle it |
 | 12 | "Managed agent" is misnamed | Either use real Managed Agents API or rename to `--deep` | Don't claim a feature you're not using |
 | 13 | No Drift accuracy validation | Added `--verify` step showing extraction before comparison | Accuracy of a number depends on accuracy of inputs |
 | 14 | LLM predicting failures is speculation | Changed Opus prompt from "predict failures" to "explain the analysis and suggest reviewer actions" | LLMs should explain deterministic analysis, not replace it |
@@ -301,16 +301,16 @@ For the hackathon, given these corrections, the build priority shifts:
 ### Corrected Demo Script (3 minutes):
 
 **Act 1 (30s):** Setup. "One command indexes your codebase in 45 seconds."
-Show `codemind setup` with progress bar, completeness metric: "12,847 nodes, 31,204 edges. Static resolution: 83%. 417 ambiguous call sites."
+Show `stinkit setup` with progress bar, completeness metric: "12,847 nodes, 31,204 edges. Static resolution: 83%. 417 ambiguous call sites."
 This honesty IS the differentiator. Every competitor claims 100% accuracy. We show what we actually know.
 
 **Act 2 (60s):** Drift. The big wow. Whiteboard photo → side-by-side → "Your diagram is 58% accurate." Show the entity mapping step. Show the corrected Mermaid diagram. This is the "Most Creative" prize clip.
 
-**Act 3 (50s):** Impact Fast + Deep. Stage a change. `codemind impact` returns in 1.5 seconds: "HIGH risk. 47 dependents, 3 coverage gaps." Then: `codemind impact --deep` → 20 seconds of Opus reasoning → "A similar change in March caused a 2-hour session timeout. Here's a reviewer checklist." Show the split: fast is for every commit, deep is for HIGH-risk changes.
+**Act 3 (50s):** Impact Fast + Deep. Stage a change. `stinkit impact` returns in 1.5 seconds: "HIGH risk. 47 dependents, 3 coverage gaps." Then: `stinkit impact --deep` → 20 seconds of Opus reasoning → "A similar change in March caused a 2-hour session timeout. Here's a reviewer checklist." Show the split: fast is for every commit, deep is for HIGH-risk changes.
 
-**Act 4 (25s):** Claude Code integration. "What will break if I change auth.ts?" → Claude calls `codemind_impact` through MCP → answers in the coding session. No context switch. This is the "Keep Thinking" prize clip.
+**Act 4 (25s):** Claude Code integration. "What will break if I change auth.ts?" → Claude calls `stinkit_impact` through MCP → answers in the coding session. No context switch. This is the "Keep Thinking" prize clip.
 
-**Act 5 (15s):** Close. "CodeMind doesn't guess. It shows you what the graph proves, then asks Opus to explain what it means. One index. Two speeds. Three modes. Built with Opus 4.7."
+**Act 5 (15s):** Close. "StinKit doesn't guess. It shows you what the graph proves, then asks Opus to explain what it means. One index. Two speeds. Three modes. Built with Opus 4.7."
 
 ---
 

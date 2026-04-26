@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { UserConfig, CodemindResult, BlastRadius } from '@codemind/shared'
+import type { UserConfig, StinKitResult, BlastRadius } from '@stinkit/shared'
 
 vi.mock('../../../../src/commands/check')
 
@@ -24,12 +24,12 @@ const BLAST: BlastRadius = {
 }
 
 describe('TOOL_DEF', () => {
-  it('name is codemind_check', () => {
-    expect(TOOL_DEF.name).toBe('codemind_check')
+  it('name is stinkit_check', () => {
+    expect(TOOL_DEF.name).toBe('stinkit_check')
   })
 })
 
-describe('handle (codemind_check)', () => {
+describe('handle (stinkit_check)', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
   it('returns content array with type=text on success', async () => {
@@ -61,7 +61,7 @@ describe('handle (codemind_check)', () => {
   })
 
   it('shows error text for failed result', async () => {
-    const failed: CodemindResult<BlastRadius> = {
+    const failed: StinKitResult<BlastRadius> = {
       status: 'failed', data: null, meta: META,
       error: { code: 'GRAPH_NOT_FOUND', message: 'No graph found.' },
     }

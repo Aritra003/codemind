@@ -6,15 +6,15 @@
 ================================================================================
 
 ## Controller Details
-  Name:        CodeMind Inc. (TBD — legal entity to be formed)
-  Contact:     privacy@codemind.dev (TBD — must exist before EU launch)
+  Name:        StinKit Inc. (TBD — legal entity to be formed)
+  Contact:     privacy@stinkit.dev (TBD — must exist before EU launch)
   DPO:         Not appointed (< 250 employees threshold). Revisit at 50K MAU.
 
 ## Processor Relationships
   Anthropic (Opus 4.7)       — AI inference. Data sent: structural metadata only (node IDs, function names). DPA: Anthropic's standard DPA. No source code transmitted. (SENTINEL INV-005 enforced)
   AWS (RDS, ElastiCache)     — Infrastructure. Data stored: identity PII + billing data. DPA: AWS DPA. Region: us-east-1 + eu-west-1.
   ClickHouse Cloud           — Analytics. Data stored: anonymous usage events (no PII). DPA: ClickHouse DPA.
-  Stripe                     — Payment processing. Data processed: payment card data (never stored by CodeMind), subscription metadata. DPA: Stripe DPA. Stripe is controller for payment data.
+  Stripe                     — Payment processing. Data processed: payment card data (never stored by StinKit), subscription metadata. DPA: Stripe DPA. Stripe is controller for payment data.
   Resend (email)             — Transactional email. Data processed: email address for delivery only. DPA: Resend DPA.
   GitHub / Google (OAuth)    — Authentication. Data received: email, OAuth ID. DPA: Standard OAuth terms.
 
@@ -23,7 +23,7 @@
 ================================================================================
 
 ### PA-01: User Account Management
-  Purpose:        Provide authenticated access to CodeMind cloud features
+  Purpose:        Provide authenticated access to StinKit cloud features
   Legal basis:    Contract (Article 6(1)(b)) — necessary to deliver the service
   Data subjects:  Registered users
   Data categories:
@@ -75,7 +75,7 @@
                   Subscription history: 7 years.
                   Usage meters: 2 years.
   Recipients:     AWS RDS (processor), Stripe (co-controller for payment data).
-  Note:           CodeMind never sees or stores credit card numbers. Stripe handles all card data.
+  Note:           StinKit never sees or stores credit card numbers. Stripe handles all card data.
 
 ### PA-05: Opt-in Usage Telemetry
   Purpose:        Understand product usage patterns; improve the product
@@ -91,7 +91,7 @@
   Recipients:     ClickHouse Cloud (processor).
   Note:           By design, install_id is not linked to user identity (email/user_id).
                   Telemetry is truly anonymous unless user explicitly links their account.
-  Withdrawal:     User can opt out at any time: `codemind config set telemetry false`
+  Withdrawal:     User can opt out at any time: `stinkit config set telemetry false`
                   On opt-out: stop emitting. No retroactive deletion (data is anonymous).
 
 ### PA-06: Data Subject Rights Management
@@ -108,7 +108,7 @@
     Portability (Art. 20): POST /api/v1/auth/data-export → JSON file of user data
     Objection (Art. 21):   Telemetry opt-out (above). No automated profiling in v1.
   Response SLA:   30 days per GDPR Article 12.
-  Contact:        privacy@codemind.dev
+  Contact:        privacy@stinkit.dev
 
 ================================================================================
 ## Data Residency
@@ -125,9 +125,9 @@
 ================================================================================
 
   [ ] Legal entity formed with appropriate jurisdiction
-  [ ] privacy@codemind.dev mailbox operational
+  [ ] privacy@stinkit.dev mailbox operational
   [ ] DPA signed with: AWS, ClickHouse, Anthropic, Stripe, Resend
-  [ ] Privacy Policy published at codemind.dev/privacy (covers all PA-01 through PA-05)
+  [ ] Privacy Policy published at stinkit.dev/privacy (covers all PA-01 through PA-05)
   [ ] Terms of Service published (covers contract basis for PA-01 through PA-04)
   [ ] Cookie Policy (if analytics cookies used on web dashboard)
   [ ] Consent mechanism for telemetry implemented and tested

@@ -38,12 +38,12 @@ describe('loadMappings / saveMappings', () => {
     expect(loaded).toEqual(sampleMappings)
   })
 
-  it('does not throw when .codemind dir does not exist', async () => {
+  it('does not throw when .stinkit dir does not exist', async () => {
     const nonExistent = path.join(tmpDir, 'sub', 'dir')
     await expect(loadMappings(nonExistent)).resolves.toBeNull()
   })
 
-  it('saveMappings creates .codemind directory if missing', async () => {
+  it('saveMappings creates .stinkit directory if missing', async () => {
     const newDir = path.join(tmpDir, 'fresh-repo')
     await saveMappings(newDir, sampleMappings)
     const result = await loadMappings(newDir)

@@ -44,7 +44,7 @@ Step 1 — Check Stripe webhook logs:
   Note: failed event IDs. These are the events we must process.
 
 Step 2 — Check our webhook processing logs:
-  CloudWatch Logs → /codemind/prod/api → filter: `stripeEventId`
+  CloudWatch Logs → /stinkit/prod/api → filter: `stripeEventId`
   Look for: `webhook_signature_invalid` or `webhook_processing_failed` log events
 
 Step 3 — Is this a signature verification failure?

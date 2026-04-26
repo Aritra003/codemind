@@ -1,4 +1,4 @@
-import type { CodeGraph } from '@codemind/shared'
+import type { CodeGraph } from '@stinkit/shared'
 import type { EntityResolutionResult } from '../lib/ai/client'
 import type { DriftReport, EntityMatch } from '../commands/see'
 

@@ -1,4 +1,4 @@
-import type { CodeGraph } from '@codemind/shared'
+import type { CodeGraph } from '@stinkit/shared'
 import type { HotspotEntry, PositiveSignal } from './report-types'
 
 export interface GraphStats {

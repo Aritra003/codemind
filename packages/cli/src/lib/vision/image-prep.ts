@@ -28,7 +28,7 @@ export async function prepareImage(filePath: string): Promise<PreparedImage> {
     const supList = SUPPORTED_EXTS.join(', ')
     throw new Error(
       `Unsupported file format: ${ext}\n` +
-      `CodeMind See supports: ${supList}\n` +
+      `StinKit See supports: ${supList}\n` +
       `Tip: Export your diagram as PNG from your design tool and try again.`
     )
   }
@@ -113,7 +113,7 @@ async function convertPdf(filePath: string): Promise<PreparedImage> {
   try {
     // @ts-ignore -- pdf2pic is an optional peer dependency
     const { fromPath } = await import('pdf2pic')
-    const converter = fromPath(filePath, { density: 150, saveFilename: 'tmp-codemind', savePath: '/tmp', format: 'png', width: 2048, height: 2048 })
+    const converter = fromPath(filePath, { density: 150, saveFilename: 'tmp-stinkit', savePath: '/tmp', format: 'png', width: 2048, height: 2048 })
     const result = await converter(1)
     if (!result.path) throw new Error('pdf2pic returned no path')
     const data = await fs.readFile(result.path)

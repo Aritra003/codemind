@@ -3,7 +3,7 @@ import * as fs   from 'fs/promises'
 import * as path from 'path'
 import * as os   from 'os'
 import { saveGraph, loadGraph } from '../../../src/graph/persist'
-import type { CodeGraph } from '@codemind/shared'
+import type { CodeGraph } from '@stinkit/shared'
 
 let tmpDir: string
 

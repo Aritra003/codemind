@@ -46,15 +46,15 @@ export function ApiKeysClient({ keys: initial }: { keys: ApiKeyRecord[] }) {
         <div className="w-9 h-9 rounded-xl bg-neon/12 border border-neon/25 flex items-center justify-center">
           <Key size={16} className="text-neon" />
         </div>
-        <h1 className="font-display text-xl font-bold text-ink">API Keys</h1>
+        <h1 className="font-display text-2xl font-bold text-ink">API Keys</h1>
       </div>
       <p className="font-body text-sm text-ink-muted mb-8 pl-12">
-        Create API keys for AI agents (e.g. Claude Code, Cursor) to authenticate with CodeMind&apos;s HTTP API.
+        Create API keys for AI agents (e.g. Claude Code, Cursor) to authenticate with StinKit&apos;s HTTP API.
       </p>
 
       {/* New key alert */}
       {newKey && (
-        <div className="glass rounded-xl p-5 border border-neon/30 mb-6 space-y-3">
+        <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[16px] p-5 border border-neon/30 mb-6 space-y-3">
           <div className="flex items-center gap-2 text-neon font-body text-sm font-medium">
             <Check size={15} /> Key created — copy it now, it won&apos;t be shown again.
           </div>
@@ -74,12 +74,12 @@ export function ApiKeysClient({ keys: initial }: { keys: ApiKeyRecord[] }) {
       )}
 
       {/* Create form */}
-      <div className="glass rounded-2xl p-5 mb-6">
-        <p className="font-mono text-[10px] text-ink-dim uppercase tracking-widest mb-3">Create new key</p>
+      <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] p-5 mb-6">
+        <p className="font-mono text-xs text-ink-muted uppercase tracking-widest mb-3">Create new key</p>
         <div className="flex gap-3">
           <input value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === "Enter" && create()}
             placeholder="Claude Code agent" maxLength={64}
-            className="flex-1 bg-surface border border-border rounded-xl px-4 py-2.5 font-body text-sm text-ink placeholder:text-ink-dim focus:outline-none focus:border-brand/60 transition-colors" />
+            className="flex-1 bg-[var(--bg-glass)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-[20px] px-4 py-2.5 font-body text-sm text-ink placeholder:text-ink-dim focus:outline-none focus:border-brand/60 transition-colors" />
           <button onClick={create} disabled={creating || !name.trim()}
             className="flex items-center gap-2 px-4 py-2.5 text-sm font-body font-medium text-white bg-brand hover:bg-brand/90 rounded-xl transition-all disabled:opacity-50">
             {creating ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} Create
@@ -90,12 +90,12 @@ export function ApiKeysClient({ keys: initial }: { keys: ApiKeyRecord[] }) {
       {/* Keys list */}
       <div className="space-y-2">
         {keys.length === 0 ? (
-          <div className="glass rounded-2xl p-10 text-center border border-dashed border-border">
+          <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] p-10 text-center border border-dashed border-border">
             <Key size={32} className="text-ink-dim mx-auto mb-3" />
             <p className="font-body text-sm text-ink-muted">No API keys yet. Create one above for agent authentication.</p>
           </div>
         ) : keys.map(key => (
-          <div key={key.id} className="glass rounded-xl p-4 border border-border flex items-center gap-3 card-hover-effect">
+          <div key={key.id} className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[16px] p-4 border border-border flex items-center gap-3 card-hover-effect">
             <Key size={14} className="text-neon flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="font-body text-sm font-medium text-ink">{key.name}</p>

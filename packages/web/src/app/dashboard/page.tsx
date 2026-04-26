@@ -66,64 +66,65 @@ export default async function DashboardHome() {
   return (
     <div className="p-6 lg:p-8 max-w-5xl">
 
-      {/* Header ─────────────────────────────────────── */}
+      {/* Header */}
       <div className="mb-8">
-        <h1 className="font-display text-2xl font-bold text-ink mb-1">
+        <h1 className="font-[800] text-[var(--ink-primary)] mb-2 tracking-tight" style={{ fontSize: "32px" }}>
           Welcome back, {name}.
         </h1>
-        <p className="font-body text-sm text-ink-muted">Your codebase, in focus.</p>
+        <p style={{ fontSize: "16px", color: "var(--ink-secondary)" }}>Your codebase, in focus.</p>
       </div>
 
-      {/* Stats ──────────────────────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
-          { label: "Repos connected", value: repos,         color: "text-brand"  },
-          { label: "API keys",        value: keys,          color: "text-accent" },
-          { label: "Checks run",      value: checks.length, color: "text-solar"  },
-          { label: "MCP tools",       value: 6,             color: "text-violet" },
+          { label: "Repos connected", value: repos,         color: "var(--accent)" },
+          { label: "API keys",        value: keys,          color: "var(--cyan)"   },
+          { label: "Checks run",      value: checks.length, color: "var(--orange)" },
+          { label: "MCP tools",       value: 6,             color: "var(--purple)" },
         ].map(s => (
-          <div key={s.label} className="bg-surface-card border border-border rounded-xl p-4">
-            <div className={`font-mono text-3xl font-bold leading-none mb-2 ${s.color}`}>{s.value}</div>
-            <div className="font-body text-xs text-ink-muted">{s.label}</div>
+          <div key={s.label} className="bg-[var(--bg-glass)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-[20px] p-5">
+            <div className="font-mono font-[700] leading-none mb-2" style={{ fontSize: "32px", color: s.color }}>{s.value}</div>
+            <div style={{ fontSize: "15px", color: "var(--ink-secondary)" }}>{s.label}</div>
           </div>
         ))}
       </div>
 
-      {/* Quick actions ──────────────────────────────── */}
-      <p className="font-mono text-[10px] text-ink-dim uppercase tracking-widest mb-3">Quick actions</p>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+      {/* Quick actions */}
+      <p className="font-mono font-[600] uppercase tracking-[3px] mb-4 text-[var(--ink-muted)]" style={{ fontSize: "11px" }}>Quick actions</p>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {QUICK_ACTIONS.map(a => (
           <Link key={a.href} href={a.href}
-            className="bg-surface border border-border rounded-xl p-4 hover:border-border-light hover:bg-surface-raised transition-all duration-150 group">
-            <div className={`w-8 h-8 rounded-lg border flex items-center justify-center mb-3 ${a.bgClass}`}>
-              <a.Icon size={14} className={a.colorClass} />
+            className="bg-[var(--bg-glass)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-[20px] p-5 hover:border-[var(--border-hover)] hover:bg-[var(--bg-glass-hover)] hover:-translate-y-0.5 hover:shadow-[0_12px_40px_rgba(0,0,0,0.3)] transition-all duration-300 group">
+            <div className={`w-10 h-10 rounded-[12px] border flex items-center justify-center mb-4 ${a.bgClass}`}>
+              <a.Icon size={18} className={a.colorClass} />
             </div>
-            <p className="font-body font-medium text-sm text-ink mb-0.5 group-hover:text-brand transition-colors">{a.label}</p>
-            <p className="font-body text-xs text-ink-muted leading-snug">{a.desc}</p>
+            <p className="font-[600] text-[var(--ink-primary)] mb-1 group-hover:text-[var(--accent)] transition-colors" style={{ fontSize: "16px" }}>{a.label}</p>
+            <p style={{ fontSize: "14px", color: "var(--ink-tertiary)", lineHeight: "1.5" }}>{a.desc}</p>
           </Link>
         ))}
       </div>
 
-      {/* Recent checks ──────────────────────────────── */}
+      {/* Recent checks */}
       {checks.length > 0 && (
         <>
-          <div className="flex items-center justify-between mb-3">
-            <p className="font-mono text-[10px] text-ink-dim uppercase tracking-widest">Recent scans</p>
+          <div className="flex items-center justify-between mb-4">
+            <p className="font-mono font-[600] uppercase tracking-[3px] text-[var(--ink-muted)]" style={{ fontSize: "11px" }}>Recent scans</p>
             <Link href="/dashboard/check"
-              className="text-[11px] font-mono text-brand hover:text-brand/80 flex items-center gap-1 transition-colors">
-              View all <ArrowRight size={10} />
+              className="font-mono flex items-center gap-1 transition-colors text-[var(--accent)] hover:text-[var(--accent-hover)]"
+              style={{ fontSize: "14px" }}>
+              View all <ArrowRight size={12} />
             </Link>
           </div>
-          <div className="bg-surface border border-border rounded-xl overflow-hidden">
+          <div className="bg-[var(--bg-glass)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-[20px] overflow-hidden">
             {checks.map((c, i) => (
               <div key={c.id}
-                className={`flex items-center gap-3 px-4 py-3 ${i < checks.length - 1 ? "border-b border-border" : ""} hover:bg-surface-raised transition-colors`}>
-                <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${riskDot(c.riskLevel ?? "")}`} />
-                <code className="font-mono text-xs text-ink flex-1 truncate">{c.filePath}</code>
-                <span className={`font-mono text-[10px] font-bold flex-shrink-0 ${riskColor(c.riskLevel ?? "")}`}>
+                className={`flex items-center gap-3 px-5 py-4 ${i < checks.length - 1 ? "border-b border-[var(--border-subtle)]" : ""} hover:bg-[var(--bg-elevated)] transition-colors`}>
+                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${riskDot(c.riskLevel ?? "")}`} />
+                <code className="font-mono flex-1 truncate text-[var(--ink-primary)]" style={{ fontSize: "14px" }}>{c.filePath}</code>
+                <span className={`font-mono font-[700] flex-shrink-0 ${riskColor(c.riskLevel ?? "")}`} style={{ fontSize: "14px" }}>
                   {c.riskLevel}
                 </span>
-                <span className="font-body text-[10px] text-ink-dim flex-shrink-0">{c.dependents} deps</span>
+                <span className="flex-shrink-0 text-[var(--ink-tertiary)]" style={{ fontSize: "14px" }}>{c.dependents} deps</span>
               </div>
             ))}
           </div>

@@ -5,7 +5,7 @@ Repo under test: ~/test-repos/got (488 nodes, 3555 edges, 92% completeness)
 
 ---
 
-## 1. `codemind ask`
+## 1. `stinkit ask`
 
 | Test | Result |
 |------|--------|
@@ -15,14 +15,14 @@ Repo under test: ~/test-repos/got (488 nodes, 3555 edges, 92% completeness)
 | References real files in prompt | YES (verified via unit + graph query logic) |
 | Mention dependency counts | YES (hotspots show e.g. "27 dependents") |
 | Completeness disclaimer included | YES |
-| MCP tool `codemind_ask` registered | YES |
+| MCP tool `stinkit_ask` registered | YES |
 
 Note: End-to-end Opus 4.7 answers not verified — no ANTHROPIC_API_KEY in test shell.
-To verify: `export ANTHROPIC_API_KEY=sk-ant-... && codemind ask "How does the HTTP request lifecycle work?"`
+To verify: `export ANTHROPIC_API_KEY=sk-ant-... && stinkit ask "How does the HTTP request lifecycle work?"`
 
 ---
 
-## 2. `codemind plan`
+## 2. `stinkit plan`
 
 | Test | Result |
 |------|--------|
@@ -31,14 +31,14 @@ To verify: `export ANTHROPIC_API_KEY=sk-ant-... && codemind ask "How does the HT
 | Graph not found → GRAPH_NOT_FOUND error | YES |
 | Dependency tier ordering implemented | YES (computeChangeTiers: leaves first) |
 | PR boundary suggestions in output | YES (via Opus plan format) |
-| MCP tool `codemind_plan` registered | YES |
+| MCP tool `stinkit_plan` registered | YES |
 
 Note: End-to-end Opus 4.7 plan not verified — no ANTHROPIC_API_KEY in test shell.
-To verify: `export ANTHROPIC_API_KEY=sk-ant-... && codemind plan "Extract HTTP retry logic into a standalone module"`
+To verify: `export ANTHROPIC_API_KEY=sk-ant-... && stinkit plan "Extract HTTP retry logic into a standalone module"`
 
 ---
 
-## 3. `codemind see --generate`
+## 3. `stinkit see --generate`
 
 | Test | Result |
 |------|--------|
@@ -49,7 +49,7 @@ To verify: `export ANTHROPIC_API_KEY=sk-ant-... && codemind plan "Extract HTTP r
 
 ---
 
-## 4. `codemind see --diff`
+## 4. `stinkit see --diff`
 
 | Test | Result |
 |------|--------|
@@ -66,10 +66,10 @@ Note: End-to-end diff requires 2 diagram images + API key.
 
 | Command | Result |
 |---------|--------|
-| `codemind check --file source/core/options.ts` | YES — HIGH risk, 4 direct, 1 transitive |
-| `codemind graph --hotspots` | YES — 488 nodes, top hotspots listed |
-| `codemind see --generate --scope source/ --output /tmp/got-arch.mermaid` | YES |
-| `codemind serve` (starts, no crash) | YES |
+| `stinkit check --file source/core/options.ts` | YES — HIGH risk, 4 direct, 1 transitive |
+| `stinkit graph --hotspots` | YES — 488 nodes, top hotspots listed |
+| `stinkit see --generate --scope source/ --output /tmp/got-arch.mermaid` | YES |
+| `stinkit serve` (starts, no crash) | YES |
 | `pnpm test` (407/407 tests) | YES |
 | `tsc --noEmit` (zero errors) | YES |
 
@@ -80,9 +80,9 @@ Note: End-to-end diff requires 2 diagram images + API key.
 | Check | Result |
 |-------|--------|
 | Total tools registered | 8 (was 6) |
-| `codemind_ask` registered | YES |
-| `codemind_plan` registered | YES |
-| All tool names start with `codemind_` | YES |
+| `stinkit_ask` registered | YES |
+| `stinkit_plan` registered | YES |
+| All tool names start with `stinkit_` | YES |
 | MCP server test updated to expect 8 | YES |
 
 ---

@@ -174,7 +174,7 @@ function DiagramPreview({ diagram }: { diagram: string }) {
       </div>
       {/* Hint */}
       {ready && (
-        <div className="absolute bottom-3 left-3 z-10 font-mono text-[10px] text-slate-700 pointer-events-none">
+        <div className="absolute bottom-3 left-3 z-10 font-mono text-xs text-ink-dim pointer-events-none">
           scroll to zoom · drag to pan
         </div>
       )}
@@ -233,19 +233,19 @@ export default function DiagramClient() {
           <GitFork size={16} className="text-emerald-400" />
         </div>
         <div>
-          <h1 className="font-display text-xl font-bold text-ink">Diagram</h1>
-          <p className="font-body text-xs text-ink-muted">Generate and visualise your codebase as a live dependency diagram.</p>
+          <h1 className="font-display text-2xl font-bold text-ink">Diagram</h1>
+          <p className="font-body text-sm text-ink-muted">Generate and visualise your codebase as a live dependency diagram.</p>
         </div>
       </div>
 
-      <div className="glass rounded-2xl p-5 space-y-4">
+      <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] p-5 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="font-mono text-xs text-ink-muted block mb-2">Repository</label>
             {repos.length > 0 ? (
               <div className="relative">
                 <select value={repoId} onChange={e => { setRepoId(e.target.value); setResult(null); }}
-                  className="w-full bg-surface border border-border rounded-xl px-4 py-3 font-mono text-sm text-ink focus:outline-none focus:border-brand/60 appearance-none transition-colors">
+                  className="w-full bg-[var(--bg-glass)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-[20px] px-4 py-3 font-mono text-sm text-ink focus:outline-none focus:border-brand/60 appearance-none transition-colors">
                   {repos.map(r => <option key={r.id} value={r.id}>{r.fullName}</option>)}
                 </select>
                 <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-dim pointer-events-none" />
@@ -260,7 +260,7 @@ export default function DiagramClient() {
           <div>
             <label className="font-mono text-xs text-ink-muted block mb-2">Scope <span className="text-ink-dim">(optional path prefix)</span></label>
             <input value={scope} onChange={e => setScope(e.target.value)} placeholder="e.g. src/auth or pydantic_ai"
-              className="w-full bg-surface border border-border rounded-xl px-4 py-3 font-mono text-sm text-ink placeholder:text-ink-dim focus:outline-none focus:border-brand/60 transition-colors" />
+              className="w-full bg-[var(--bg-glass)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-[20px] px-4 py-3 font-mono text-sm text-ink placeholder:text-ink-dim focus:outline-none focus:border-brand/60 transition-colors" />
           </div>
         </div>
 
@@ -271,13 +271,13 @@ export default function DiagramClient() {
       </div>
 
       {error && (
-        <div className="flex items-center gap-3 p-4 glass rounded-xl border border-heat/25 text-sm font-body text-heat">
+        <div className="flex items-center gap-3 p-4 bg-[var(--bg-glass)] backdrop-blur-xl rounded-[16px] border border-heat/25 text-sm font-body text-heat">
           <AlertTriangle size={15} className="flex-shrink-0" /> {error}
         </div>
       )}
 
       {result && (
-        <div className="flex-1 glass rounded-2xl border border-emerald-500/20 overflow-hidden flex flex-col min-h-[500px]">
+        <div className="flex-1 bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] border border-emerald-500/20 overflow-hidden flex flex-col min-h-[500px]">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-surface-raised flex-shrink-0">
             <div className="flex items-center gap-3">
               <div className="flex gap-1">
@@ -288,7 +288,7 @@ export default function DiagramClient() {
                   </button>
                 ))}
               </div>
-              <span className="font-mono text-[10px] text-ink-dim">{result.nodeCount} nodes · {result.edgeCount} edges</span>
+              <span className="font-mono text-xs text-ink-muted">{result.nodeCount} nodes · {result.edgeCount} edges</span>
             </div>
             <div className="flex items-center gap-2">
               <button onClick={copy}

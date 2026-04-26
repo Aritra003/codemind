@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import type { CodeGraph, GraphNode, GraphEdge } from '@codemind/shared'
+import type { CodeGraph, GraphNode, GraphEdge } from '@stinkit/shared'
 import { generateMermaid } from '../../../src/vision/generate'
 
 function makeGraph(

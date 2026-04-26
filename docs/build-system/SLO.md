@@ -1,4 +1,4 @@
-# SLO.md — CodeMind Service Level Objectives
+# SLO.md — StinKit Service Level Objectives
 # Mode: SLO-DESIGN | Agent: TITAN
 # Input: API-DESIGN.md (SLO tiers per endpoint) + INFRASTRUCTURE.md
 # Last updated: 2026-04-23

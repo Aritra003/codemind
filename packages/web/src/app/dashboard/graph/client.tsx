@@ -22,7 +22,7 @@ export function GraphExplorer({ repos }: { repos: Repo[] }) {
           <select
             value={activeId}
             onChange={e => setActiveId(e.target.value)}
-            className="appearance-none bg-surface border border-border rounded-xl px-4 py-2.5 pr-10 font-mono text-sm text-ink focus:outline-none focus:border-brand/60 transition-colors"
+            className="appearance-none bg-[var(--bg-glass)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-[20px] px-4 py-2.5 pr-10 font-mono text-sm text-ink focus:outline-none focus:border-brand/60 transition-colors"
           >
             {repos.map(r => (
               <option key={r.id} value={r.id}>{r.fullName}</option>
@@ -45,7 +45,7 @@ export function GraphExplorer({ repos }: { repos: Repo[] }) {
       </div>
 
       {/* Tips */}
-      <div className="flex items-center gap-4 font-mono text-[11px] text-ink-dim py-1">
+      <div className="flex items-center gap-4 font-mono text-xs text-ink-muted py-1">
         <span>🖱 Drag nodes</span>
         <span>⚲ Scroll to zoom</span>
         <span>🖱 Click node to inspect</span>

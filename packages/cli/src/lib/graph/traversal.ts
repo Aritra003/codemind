@@ -1,4 +1,4 @@
-import type { CodeGraph, NodeId, BlastRadius } from '@codemind/shared'
+import type { CodeGraph, NodeId, BlastRadius } from '@stinkit/shared'
 import { computeBlastRadius } from '../../analysis/blast-radius'
 import { classifyRisk } from '../../analysis/risk'
 

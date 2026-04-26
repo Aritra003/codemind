@@ -1,8 +1,8 @@
-/** Standard result envelope for all CodeMind operations. */
-export type CodemindResult<T> =
+/** Standard result envelope for all StinKit operations. */
+export type StinKitResult<T> =
   | { status: 'success'; data: T;    meta: ResultMeta }
   | { status: 'partial'; data: T;    meta: ResultMeta; warnings: string[] }
-  | { status: 'failed';  data: null; meta: ResultMeta; error: CodemindError }
+  | { status: 'failed';  data: null; meta: ResultMeta; error: StinKitError }
 
 export interface ResultMeta {
   completeness_pct:         number   // INV-002: local resolution rate (external calls excluded)
@@ -12,7 +12,7 @@ export interface ResultMeta {
   ambiguous_local_calls?:   number | undefined
 }
 
-export interface CodemindError {
+export interface StinKitError {
   code:    ErrorCode
   message: string
   hint?:   string

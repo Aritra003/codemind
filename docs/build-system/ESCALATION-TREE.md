@@ -1,4 +1,4 @@
-# ESCALATION-TREE.md — CodeMind Production Ownership + Escalation Protocol
+# ESCALATION-TREE.md — StinKit Production Ownership + Escalation Protocol
 # Mode: ESCALATION-TREE | Agent: STEWARD
 # Input: INFRASTRUCTURE.md · SLO.md · OBSERVABILITY.md · GDPR-REGISTER.md
 # Last updated: 2026-04-23
@@ -93,7 +93,7 @@ Decision authority:
 Escalate if:    Outage > 30 minutes, or no root cause found after initial investigation.
 
 STEWARD action: Post to #status-page channel immediately.
-                Update status.codemind.dev to "Investigating" within 5 minutes.
+                Update status.stinkit.dev to "Investigating" within 5 minutes.
 DOCTOR action:  Read runbooks/api-server.md → COMPLETE OUTAGE section.
 ```
 
@@ -239,7 +239,7 @@ STEWARD action: Forward the demand unmodified to Legal Primary.
 ### P0-06: Cost Runaway (AWS or Anthropic API bill spike)
 ```
 Definition:     AWS daily spend exceeds 3× normal daily average, OR Anthropic API
-                usage (if CodeMind ever manages API keys for users) exceeds $500/day
+                usage (if StinKit ever manages API keys for users) exceeds $500/day
                 unexpectedly. Signals: runaway ECS task, recursive job loop,
                 ClickHouse scan on un-indexed column, or compromised API key.
 Category:       Cost runaway
@@ -304,7 +304,7 @@ NEXT AGENT ACTION: DOCTOR is reviewing the error logs and has a rollback command
 ## User Communication Templates (Status Page)
 ================================================================================
 
-All external communication goes via status.codemind.dev (StatusPage.io or equivalent).
+All external communication goes via status.stinkit.dev (StatusPage.io or equivalent).
 STEWARD posts. Founders approve wording for P0. On-call engineer posts for P1.
 
 ### Template: Investigating
@@ -334,7 +334,7 @@ We will publish a full post-mortem within [24/48] hours for incidents lasting > 
 
 ### Template: Security Breach (Legal must approve before posting)
 ```
-[HH:MM UTC] Security Notice — We are investigating a security incident affecting CodeMind.
+[HH:MM UTC] Security Notice — We are investigating a security incident affecting StinKit.
 We are taking immediate steps to secure affected accounts. [Legal-approved details only].
 If you believe your account may be affected, please [specific action].
 We will provide a full update by [time].

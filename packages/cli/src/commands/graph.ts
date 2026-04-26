@@ -1,5 +1,5 @@
 import type { Command } from 'commander'
-import type { UserConfig } from '@codemind/shared'
+import type { UserConfig } from '@stinkit/shared'
 
 export interface GraphOptions {
   hotspots: boolean

@@ -1,4 +1,4 @@
-# DESIGN-SYSTEM.md — CodeMind Design System
+# DESIGN-SYSTEM.md — StinKit Design System
 # Mode: DESIGNER | Agent: ARTISAN
 # Last updated: 2026-04-23
 # Rule: BUILDER implements zero UI without referencing this file first.
@@ -15,10 +15,10 @@ Anti-references:   Must NOT look like:
   - Linear (dark-trendy clone): dark for aesthetics, not clarity
   - GitHub: too familiar, zero brand identity differentiation
 
-Why different:     CodeMind is a diagnosis tool, not a project manager.
+Why different:     StinKit is a diagnosis tool, not a project manager.
                    The design language borrows from medical imaging and scientific visualisation —
                    high-contrast, data-dense, fearlessly minimal. Every element earns its pixel.
-                   When a developer opens CodeMind, they should feel the same trust they feel
+                   When a developer opens StinKit, they should feel the same trust they feel
                    opening a well-designed terminal debugger: this tool knows what it's doing.
 
 CLI design principle:  Output is a product, not a log. CLI output has information hierarchy,
@@ -370,7 +370,7 @@ UNKNOWN:   · DIM        "· UNKNOWN"
 
 **Standard check output anatomy:**
 ```
-codemind check <file>
+stinkit check <file>
 
   ● CRITICAL  authService.ts
   ┌──────────────────────────────────────────────────────────┐
@@ -400,7 +400,7 @@ This satisfies COUNSEL finding CV-004.
 
 **Error output anatomy:**
 ```
-  ✗ Error: graph not found. Run `codemind index` first.
+  ✗ Error: graph not found. Run `stinkit index` first.
 ```
 
 **Progress indicators:**

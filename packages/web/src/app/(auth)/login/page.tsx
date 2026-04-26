@@ -37,11 +37,11 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="font-display text-2xl font-bold text-ink mb-2">Welcome back</h1>
-          <p className="font-body text-sm text-ink-muted">Sign in to access your code graph dashboard</p>
+          <h1 className="font-[800] text-[var(--ink-primary)] mb-2 tracking-tight" style={{ fontSize: "32px" }}>Welcome back</h1>
+          <p style={{ fontSize: "16px", color: "var(--ink-secondary)" }}>Sign in to access your code graph dashboard</p>
         </div>
 
-        <div className="glass rounded-2xl p-7 space-y-4">
+        <div className="bg-[var(--bg-glass)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-[20px] p-7 space-y-4">
           {error && (
             <div className="flex items-center gap-2 p-3 rounded-xl border text-sm font-body"
               style={{ background: "var(--heat-dim)", borderColor: "rgba(255,107,107,0.25)", color: "var(--heat)" }}>
@@ -51,7 +51,8 @@ export default function LoginPage() {
 
           {/* GitHub OAuth */}
           <button onClick={handleGitHub} disabled={busy}
-            className="w-full flex items-center justify-center gap-3 p-3.5 bg-[#21262D] hover:bg-[#2d333b] text-white rounded-xl font-body font-medium text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border border-[#30363d] hover:border-[#8b949e]">
+            className="w-full flex items-center justify-center gap-3 bg-[#21262D] hover:bg-[#2d333b] text-white rounded-[12px] font-[600] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border border-[#30363d] hover:border-[#8b949e]"
+            style={{ height: "48px", fontSize: "15px" }}>
             {oauthLoading ? <Loader2 size={16} className="animate-spin" /> : <Github size={17} />}
             {oauthLoading ? "Connecting to GitHub..." : "Continue with GitHub"}
           </button>
@@ -59,7 +60,7 @@ export default function LoginPage() {
           {/* Divider */}
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
-            <span className="font-mono text-[11px] text-ink-dim">or</span>
+            <span className="font-mono text-xs text-ink-muted">or</span>
             <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
           </div>
 
@@ -94,30 +95,30 @@ export default function LoginPage() {
               />
             </div>
             <button type="submit" disabled={busy}
-              className="w-full flex items-center justify-center gap-2 p-3.5 rounded-xl font-body font-semibold text-sm text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ background: "var(--brand)" }}>
+              className="w-full flex items-center justify-center gap-2 rounded-[12px] font-[600] text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
+              style={{ height: "48px", fontSize: "15px", background: "var(--grad-brand)" }}>
               {credLoading ? <Loader2 size={15} className="animate-spin" /> : null}
               {credLoading ? "Signing in..." : "Sign in with email"}
             </button>
           </form>
 
-          <p className="font-mono text-[10px] text-ink-dim text-center leading-relaxed">
+          <p className="font-mono text-xs text-ink-muted text-center leading-relaxed">
             GitHub OAuth requests <code className="text-brand">repo</code> scope to analyze your repositories.
           </p>
         </div>
 
         {/* Benefits */}
-        <div className="mt-5 glass rounded-xl p-4 space-y-2">
+        <div className="mt-5 bg-[var(--bg-glass)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-[16px] p-4 space-y-2.5">
           {["Connect any GitHub repo for web analysis", "Full dashboard: check, graph, trace, see", "API keys for agent authentication"].map((b, i) => (
-            <div key={i} className="flex items-center gap-2 text-xs font-body text-ink-muted">
-              <span className="text-neon font-bold">✓</span> {b}
+            <div key={i} className="flex items-center gap-2 text-[var(--ink-secondary)]" style={{ fontSize: "14px" }}>
+              <span className="text-[var(--green)] font-[700]">✓</span> {b}
             </div>
           ))}
         </div>
 
-        <p className="text-center mt-5 text-sm font-body text-ink-muted">
+        <p className="text-center mt-5 text-[var(--ink-secondary)]" style={{ fontSize: "15px" }}>
           Don&apos;t have an account?{" "}
-          <Link href="/signup" className="text-brand hover:underline font-medium">Sign up free <ArrowRight size={12} className="inline" /></Link>
+          <Link href="/signup" className="text-[var(--accent)] hover:underline font-[500]">Sign up free <ArrowRight size={12} className="inline" /></Link>
         </p>
       </div>
     </div>

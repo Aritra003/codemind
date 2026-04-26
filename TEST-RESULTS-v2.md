@@ -1,4 +1,4 @@
-# CodeMind Integration Test Results — v2 (Post Bug-Fix Sprint)
+# StinKit Integration Test Results — v2 (Post Bug-Fix Sprint)
 
 **Date:** 2026-04-24
 **Repo tested:** Cap Software (https://github.com/CapSoftware/Cap.git)
@@ -17,7 +17,7 @@
 | BUG-2 | Completeness 15% | ✅ IMPROVED | 15% → 26% (details below) |
 | BUG-3 | No-arg shows help | ✅ FIXED | Shows status dashboard |
 | BUG-4 | MEDIUM false positive on leaf files | ✅ FIXED | Zero-dependent files → always LOW |
-| BUG-5 | Missing --file flag | ✅ FIXED | `codemind check --file <path>` works |
+| BUG-5 | Missing --file flag | ✅ FIXED | `stinkit check --file <path>` works |
 | BUG-6 | Missing --export mermaid | ✅ FIXED | mermaid / json / dot all work |
 | BUG-7 | Silent on empty repo | ✅ FIXED | Warns on no .git and zero nodes |
 
@@ -27,9 +27,9 @@
 
 ### Test 1: Index
 ```
-codemind index
+stinkit index
 ✔ Graph built — 3033 nodes, 16389 edges
-  ✓ Saved to .codemind/graph/index.msgpack
+  ✓ Saved to .stinkit/graph/index.msgpack
 ⚠ Graph completeness: 26%
 Index time: ~10s
 ```
@@ -37,22 +37,22 @@ Index time: ~10s
 
 ### Test 2: Status Dashboard (no-arg)
 ```
-codemind
-CodeMind — /Users/.../cap
+stinkit
+StinKit — /Users/.../cap
 ─────────────────────────────────────────────────────
   Graph:     3033 nodes  16389 edges  (javascript, typescript)
   ⚠ Graph completeness: 26% — some paths may be missing
   Freshness: 3m ago
 ─────────────────────────────────────────────────────
-  Try:  codemind check           blast radius of staged changes
-        codemind graph --hotspots  rank files by risk
-        codemind index             refresh the graph
+  Try:  stinkit check           blast radius of staged changes
+        stinkit graph --hotspots  rank files by risk
+        stinkit index             refresh the graph
 ```
 **PASS** — no longer shows raw Commander help text.
 
 ### Test 3: Hotspots
 ```
-codemind graph --hotspots
+stinkit graph --hotspots
    291 dependents  packages/database/index.ts:createDrizzle
    290 dependents  packages/database/index.ts:db
    149 dependents  packages/env/server.ts:boolString
@@ -63,7 +63,7 @@ codemind graph --hotspots
 
 ### Test 4: Check (fast tier) — high-blast-radius file
 ```
-codemind check packages/database/index.ts
+stinkit check packages/database/index.ts
   ● CRITICAL  (168 direct, 122 transitive, 293 gaps)
 Time: 0.48s
 ```
@@ -71,7 +71,7 @@ Time: 0.48s
 
 ### Test 5: Check (fast tier) — leaf file
 ```
-codemind check apps/web/app/embed/page.tsx
+stinkit check apps/web/app/embed/page.tsx
   ○ LOW  (0 direct, 0 transitive, 1 gap)
 Time: 0.94s
 ```
@@ -79,14 +79,14 @@ Time: 0.94s
 
 ### Test 6: Check with --file flag
 ```
-codemind check --file packages/database/index.ts
+stinkit check --file packages/database/index.ts
   ● CRITICAL
 ```
 **PASS** — --file flag works as alternative to positional argument.
 
 ### Test 7: Export Mermaid
 ```
-codemind graph --export mermaid | head -5
+stinkit graph --export mermaid | head -5
 graph LR
   apps_desktop_src_routes_editor_Timeline_["segment"] --> apps_desktop_src_routes_editor_Timeline_["segments"]
   ...
@@ -95,8 +95,8 @@ graph LR
 
 ### Test 8: Export DOT
 ```
-codemind graph --export dot | head -5
-digraph codemind {
+stinkit graph --export dot | head -5
+digraph stinkit {
   rankdir=LR;
   node [shape=box fontsize=10];
   ...
@@ -105,7 +105,7 @@ digraph codemind {
 
 ### Test 9: Export JSON (--json global flag)
 ```
-codemind --json check packages/env/server.ts | python3 -m json.tool | head -5
+stinkit --json check packages/env/server.ts | python3 -m json.tool | head -5
 {
     "status": "success",
     "data": { "risk_level": "CRITICAL", ... }
@@ -119,11 +119,11 @@ codemind --json check packages/env/server.ts | python3 -m json.tool | head -5
 
 | Operation | Time | Target | Status |
 |-----------|------|--------|--------|
-| `codemind index` (3033 nodes) | ~10s | <60s | ✅ |
-| `codemind check` (fast tier, leaf) | 0.94s | <2s | ✅ |
-| `codemind check` (fast tier, CRITICAL) | 0.48s | <2s | ✅ |
-| `codemind graph --hotspots` | ~1s | <5s | ✅ |
-| `codemind graph --export mermaid` | ~1s | <5s | ✅ |
+| `stinkit index` (3033 nodes) | ~10s | <60s | ✅ |
+| `stinkit check` (fast tier, leaf) | 0.94s | <2s | ✅ |
+| `stinkit check` (fast tier, CRITICAL) | 0.48s | <2s | ✅ |
+| `stinkit graph --hotspots` | ~1s | <5s | ✅ |
+| `stinkit graph --export mermaid` | ~1s | <5s | ✅ |
 
 ---
 

@@ -292,10 +292,10 @@ Memory triage algorithm: .claude/reference/MEMORY-TRIAGE.md — run at every ses
 CLAUDE.md — Apex Runtime v1.4 | Authors: Ashish Khandelwal, Arup Kolay | MIT License
 ================================================================================
 
-## Session Context (Last updated: 2026-04-25 — commit a45c1ea pushed to github.com/Aritra003/codemind)
+## Session Context (Last updated: 2026-04-25 — commit a45c1ea pushed to github.com/Aritra003/stinkit)
 
 ### Current State
-- CodeMind v6 — all features shipped and pushed to GitHub (main branch)
+- StinKit v6 — all features shipped and pushed to GitHub (main branch)
 - CLI: ask, plan, audit --report, see (multi-format), MCP server, watch, pre-commit hook
 - Web: full Next.js 14 dashboard — Graph (NOVA), Ask, Plan, See, Diagram, Reports, Settings, API Keys
 - Both packages TypeScript-clean with zero errors
@@ -304,10 +304,10 @@ CLAUDE.md — Apex Runtime v1.4 | Authors: Ashish Khandelwal, Arup Kolay | MIT L
 **Web platform additions:**
 - `packages/web/src/lib/indexer.ts` — FIXED type mismatch: GraphNode now has `name`, `file`, `kind`
   fields (was missing → Ask/Plan/Mermaid crashed on real graph data). Edge `type` renamed to `kind`.
-- `dashboard/diagram/` — NEW page: live Mermaid preview (mermaid.js, dark CodeMind theme),
+- `dashboard/diagram/` — NEW page: live Mermaid preview (mermaid.js, dark StinKit theme),
   repo selector, scope filter, zoom controls, copy + download .mmd. Sidebar: "Diagram" (GitFork icon, `g d`).
-- `ask/client.tsx` — loading text: "Asking CodeMind…"; stripMd() strips ###/** from answers
-- `plan/client.tsx` — loading text: "Planning with CodeMind…"; stripMd() strips ###/** from plan output
+- `ask/client.tsx` — loading text: "Asking StinKit…"; stripMd() strips ###/** from answers
+- `plan/client.tsx` — loading text: "Planning with StinKit…"; stripMd() strips ###/** from plan output
 - `mermaid` package installed in packages/web
 
 **Web platform (prior sessions — complete):**

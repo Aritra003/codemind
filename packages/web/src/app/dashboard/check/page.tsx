@@ -36,12 +36,12 @@ function FilePicker({ nodes, value, onChange }: { nodes: FileNode[]; value: stri
   return (
     <div ref={ref} className="relative">
       <button onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between bg-surface border border-border rounded-xl px-4 py-3 text-left hover:border-brand/40 focus:outline-none focus:border-brand/60 transition-colors">
+        className="w-full flex items-center justify-between bg-[var(--bg-glass)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-[20px] px-4 py-3 text-left hover:border-brand/40 focus:outline-none focus:border-brand/60 transition-colors">
         <div className="min-w-0 flex-1">
           {selected ? (
             <>
               <span className="font-mono text-sm text-ink block truncate">{basename(selected.id)}</span>
-              <span className="font-mono text-[10px] text-ink-dim block truncate">{dirname(selected.id)}</span>
+              <span className="font-mono text-xs text-ink-muted block truncate">{dirname(selected.id)}</span>
             </>
           ) : (
             <span className="font-mono text-sm text-ink-dim">Select a file…</span>
@@ -49,7 +49,7 @@ function FilePicker({ nodes, value, onChange }: { nodes: FileNode[]; value: stri
         </div>
         <div className="flex items-center gap-2 ml-3 flex-shrink-0">
           {selected && selected.deps > 0 && (
-            <span className="px-1.5 py-0.5 rounded font-mono text-[10px] font-bold" style={{ background: bg, color: fg }}>
+            <span className="px-1.5 py-0.5 rounded font-mono text-xs font-bold" style={{ background: bg, color: fg }}>
               {selected.deps} dep{selected.deps !== 1 ? "s" : ""}
             </span>
           )}
@@ -58,7 +58,7 @@ function FilePicker({ nodes, value, onChange }: { nodes: FileNode[]; value: stri
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-surface border border-border rounded-xl shadow-xl z-20 flex flex-col" style={{ maxHeight: 340 }}>
+        <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--bg-glass)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-[20px] shadow-xl z-20 flex flex-col" style={{ maxHeight: 340 }}>
           <div className="p-2 border-b border-border flex-shrink-0">
             <div className="relative">
               <Search size={11} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ink-dim" />
@@ -77,11 +77,11 @@ function FilePicker({ nodes, value, onChange }: { nodes: FileNode[]; value: stri
                     <button key={n.id} onMouseDown={() => { onChange(n.id); setOpen(false); setQ(""); }}
                       className={`w-full flex items-center justify-between px-4 py-2.5 hover:bg-surface-raised transition-colors border-b border-border/40 last:border-0 ${n.id === value ? "bg-brand/8" : ""}`}>
                       <div className="min-w-0 text-left">
-                        <div className="font-mono text-xs text-ink truncate">{basename(n.id)}</div>
-                        <div className="font-mono text-[10px] text-ink-dim truncate">{dirname(n.id)}</div>
+                        <div className="font-mono text-sm text-ink truncate">{basename(n.id)}</div>
+                        <div className="font-mono text-xs text-ink-muted truncate">{dirname(n.id)}</div>
                       </div>
                       {n.deps > 0 && (
-                        <span className="ml-2 px-1.5 py-0.5 rounded font-mono text-[10px] font-bold flex-shrink-0" style={{ background: c.bg, color: c.fg }}>
+                        <span className="ml-2 px-1.5 py-0.5 rounded font-mono text-xs font-bold flex-shrink-0" style={{ background: c.bg, color: c.fg }}>
                           {n.deps}
                         </span>
                       )}
@@ -146,29 +146,29 @@ export default function CheckPage() {
   const RISK_WIDTH = { CRITICAL: 100, HIGH: 82, MEDIUM: 55, LOW: 25 } as Record<string, number>;
 
   return (
-    <div className="p-6 lg:p-8 max-w-2xl">
+    <div className="p-6 lg:p-8 max-w-3xl">
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-9 h-9 rounded-xl bg-heat/12 border border-heat/25 flex items-center justify-center">
             <Zap size={16} className="text-heat" />
           </div>
-          <h1 className="font-display text-xl font-bold text-ink">Blast Radius Check</h1>
+          <h1 className="font-display text-2xl font-bold text-ink">Blast Radius Check</h1>
         </div>
         <p className="font-body text-sm text-ink-muted pl-12">Select a file to see how many modules depend on it and the overall change risk.</p>
       </div>
 
-      <div className="glass rounded-2xl p-6 mb-6 space-y-4">
+      <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] p-6 mb-6 space-y-4">
         {repos.length > 0 ? (
           <div>
             <label className="font-mono text-xs text-ink-muted block mb-2">Repository</label>
             <div className="relative">
               <select value={repoId} onChange={e => { setRepoId(e.target.value); setFilePath(""); setResult(null); }}
-                className="w-full bg-surface border border-border rounded-xl px-4 py-3 font-mono text-sm text-ink focus:outline-none focus:border-brand/60 appearance-none transition-colors">
+                className="w-full bg-[var(--bg-glass)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-[20px] px-4 py-3 font-mono text-sm text-ink focus:outline-none focus:border-brand/60 appearance-none transition-colors">
                 {repos.map(r => <option key={r.id} value={r.id}>{r.fullName}</option>)}
               </select>
               <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-dim pointer-events-none" />
             </div>
-            {nodes.length > 0 && <p className="font-mono text-[11px] text-ink-dim mt-1.5">{nodes.length} files indexed</p>}
+            {nodes.length > 0 && <p className="font-mono text-xs text-ink-muted mt-1.5">{nodes.length} files indexed</p>}
           </div>
         ) : (
           <div className="flex items-center gap-2 p-3 rounded-xl border border-border text-xs font-body text-ink-muted">
@@ -185,7 +185,7 @@ export default function CheckPage() {
             ? <FilePicker nodes={nodes} value={filePath} onChange={v => { setFilePath(v); setResult(null); }} />
             : <input value={filePath} onChange={e => setFilePath(e.target.value)} onKeyDown={e => e.key === "Enter" && run()}
                 placeholder="src/auth/middleware.ts"
-                className="w-full bg-surface border border-border rounded-xl px-4 py-3 font-mono text-sm text-ink placeholder:text-ink-dim focus:outline-none focus:border-brand/60 transition-colors" />
+                className="w-full bg-[var(--bg-glass)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-[20px] px-4 py-3 font-mono text-sm text-ink placeholder:text-ink-dim focus:outline-none focus:border-brand/60 transition-colors" />
           }
         </div>
 
@@ -196,13 +196,13 @@ export default function CheckPage() {
       </div>
 
       {error && (
-        <div className="flex items-center gap-3 p-4 glass rounded-xl border border-heat/25 mb-6 text-sm font-body text-heat">
+        <div className="flex items-center gap-3 p-4 bg-[var(--bg-glass)] backdrop-blur-xl rounded-[16px] border border-heat/25 mb-6 text-sm font-body text-heat">
           <AlertTriangle size={15} className="flex-shrink-0" /> {error}
         </div>
       )}
 
       {result && (
-        <div className="glass rounded-2xl p-6 space-y-5" style={{ borderColor: `${RISK_COLOR[result.riskLevel] ?? "#5B6EFF"}25` }}>
+        <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] p-6 space-y-5" style={{ borderColor: `${RISK_COLOR[result.riskLevel] ?? "#5B6EFF"}25` }}>
           <div className="flex items-start justify-between gap-4">
             <div>
               <code className="font-mono text-sm text-ink">{result.filePath}</code>
@@ -233,7 +233,7 @@ export default function CheckPage() {
             ].map(s => (
               <div key={s.label} className="bg-surface rounded-xl p-3 text-center">
                 <div className="font-mono text-xl font-bold mb-0.5" style={{ color: s.color }}>{s.value}</div>
-                <div className="font-body text-[11px] text-ink-muted">{s.label}</div>
+                <div className="font-body text-xs text-ink-muted">{s.label}</div>
               </div>
             ))}
           </div>

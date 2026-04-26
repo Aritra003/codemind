@@ -26,20 +26,20 @@ function NodeTooltip({ node, pos }: { node: RenderNode; pos: { x: number; y: num
       <div className="font-mono text-xs font-bold text-white truncate mb-0.5">
         {node.name ?? node.id.split("/").pop()}
       </div>
-      <div className="font-mono text-[10px] text-slate-500 truncate mb-1.5">{node.id}</div>
+      <div className="font-mono text-xs text-slate-500 truncate mb-1.5">{node.id}</div>
       {sev && (
         <div className="flex items-center gap-1.5 mb-1">
           <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: sevColor }} />
-          <span className="font-mono text-[10px] font-bold" style={{ color: sevColor }}>{sev}</span>
+          <span className="font-mono text-xs font-bold" style={{ color: sevColor }}>{sev}</span>
           {!!node.errorCount && (
-            <span className="font-mono text-[10px] text-slate-500">{node.errorCount} issue{node.errorCount !== 1 ? "s" : ""}</span>
+            <span className="font-mono text-xs text-slate-500">{node.errorCount} issue{node.errorCount !== 1 ? "s" : ""}</span>
           )}
         </div>
       )}
       {node.hasCircularDep && (
-        <div className="font-mono text-[10px] text-amber-400 mb-1">↺ Circular dependency</div>
+        <div className="font-mono text-xs text-amber-400 mb-1">↺ Circular dependency</div>
       )}
-      <div className="font-mono text-[10px] text-slate-600 pt-1 border-t border-white/5">
+      <div className="font-mono text-xs text-slate-600 pt-1 border-t border-white/5">
         {node.inDeg} dependents · {node.outDeg} imports
       </div>
     </div>
@@ -52,7 +52,7 @@ function RiskTag({ inDeg, severity }: { inDeg: number; severity?: string }) {
   const label = severity ?? (inDeg >= 20 ? "HOTSPOT" : inDeg >= 10 ? "HIGH-DEP" : inDeg >= 4 ? "MED-DEP" : "LOW");
   const c = severity ? SEVERITY_COLORS[severity]! : (inDeg >= 20 ? "#EF4444" : inDeg >= 10 ? "#F97316" : inDeg >= 4 ? "#EAB308" : "#6366F1");
   return (
-    <span className="font-mono text-[10px] px-2 py-0.5 rounded" style={{ background: rgba(c, 0.15), color: c, border: `1px solid ${rgba(c, 0.35)}` }}>
+    <span className="font-mono text-xs px-2 py-0.5 rounded" style={{ background: rgba(c, 0.15), color: c, border: `1px solid ${rgba(c, 0.35)}` }}>
       {label}
     </span>
   );
@@ -90,28 +90,28 @@ function NodeInspector({ node, graphEdges, onClose }: {
 
       {/* Path */}
       <div className="px-4 py-3 border-b flex-shrink-0" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-        <p className="font-mono text-[10px] text-slate-500 mb-1 uppercase tracking-wider">Path</p>
+        <p className="font-mono text-xs text-slate-500 mb-1 uppercase tracking-wider">Path</p>
         <p className="font-mono text-xs text-slate-300 break-all leading-relaxed">{node.id}</p>
       </div>
 
       {/* Health section — only when report data is present */}
       {(sev || node.hasCircularDep) && (
         <div className="px-4 py-3 border-b flex-shrink-0" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-          <p className="font-mono text-[10px] text-slate-500 mb-2 uppercase tracking-wider">Health</p>
+          <p className="font-mono text-xs text-slate-500 mb-2 uppercase tracking-wider">Health</p>
           {sevColor && (
             <div className="flex items-center gap-2 mb-1.5">
               <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: sevColor }} />
-              <span className="font-mono text-[10px] font-bold" style={{ color: sevColor }}>{sev}</span>
+              <span className="font-mono text-xs font-bold" style={{ color: sevColor }}>{sev}</span>
               {!!node.errorCount && (
-                <span className="font-mono text-[10px] text-slate-400">{node.errorCount} error{node.errorCount !== 1 ? "s" : ""}</span>
+                <span className="font-mono text-xs text-slate-400">{node.errorCount} error{node.errorCount !== 1 ? "s" : ""}</span>
               )}
               {!!node.warningCount && (
-                <span className="font-mono text-[10px] text-slate-400">{node.warningCount} warning{node.warningCount !== 1 ? "s" : ""}</span>
+                <span className="font-mono text-xs text-slate-400">{node.warningCount} warning{node.warningCount !== 1 ? "s" : ""}</span>
               )}
             </div>
           )}
           {node.hasCircularDep && (
-            <div className="font-mono text-[10px] text-amber-400">↺ Part of a circular dependency</div>
+            <div className="font-mono text-xs text-amber-400">↺ Part of a circular dependency</div>
           )}
         </div>
       )}
@@ -120,11 +120,11 @@ function NodeInspector({ node, graphEdges, onClose }: {
       <div className="grid grid-cols-2 gap-2 p-4 flex-shrink-0">
         <div className="rounded-xl p-3 text-center" style={{ background: rgba(kc, 0.1), border: `1px solid ${rgba(kc, 0.2)}` }}>
           <div className="font-mono text-xl font-bold" style={{ color: kc }}>{node.inDeg}</div>
-          <div className="font-mono text-[10px] text-slate-500 mt-0.5">used by</div>
+          <div className="font-mono text-xs text-slate-500 mt-0.5">used by</div>
         </div>
         <div className="rounded-xl p-3 text-center" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
           <div className="font-mono text-xl font-bold text-slate-200">{node.outDeg}</div>
-          <div className="font-mono text-[10px] text-slate-500 mt-0.5">imports</div>
+          <div className="font-mono text-xs text-slate-500 mt-0.5">imports</div>
         </div>
       </div>
 
@@ -132,26 +132,26 @@ function NodeInspector({ node, graphEdges, onClose }: {
       <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4">
         {usedBy.length > 0 && (
           <div>
-            <p className="font-mono text-[10px] text-slate-500 uppercase tracking-wider mb-2">
+            <p className="font-mono text-xs text-slate-500 uppercase tracking-wider mb-2">
               Used by ({graphEdges.filter(e => e.to === node.id).length})
             </p>
             {usedBy.map(e => (
               <div key={e.from} className="flex items-center gap-1.5 py-1.5 border-b border-white/5">
                 <ChevronRight size={9} className="text-slate-600 flex-shrink-0" />
-                <span className="font-mono text-[11px] text-slate-400 truncate">{e.from.split("/").pop()}</span>
+                <span className="font-mono text-xs text-slate-400 truncate">{e.from.split("/").pop()}</span>
               </div>
             ))}
           </div>
         )}
         {imports.length > 0 && (
           <div>
-            <p className="font-mono text-[10px] text-slate-500 uppercase tracking-wider mb-2">
+            <p className="font-mono text-xs text-slate-500 uppercase tracking-wider mb-2">
               Imports ({graphEdges.filter(e => e.from === node.id).length})
             </p>
             {imports.map(e => (
               <div key={e.to} className="flex items-center gap-1.5 py-1.5 border-b border-white/5">
                 <ChevronRight size={9} className="text-slate-600 flex-shrink-0" />
-                <span className="font-mono text-[11px] text-slate-400 truncate">{e.to.split("/").pop()}</span>
+                <span className="font-mono text-xs text-slate-400 truncate">{e.to.split("/").pop()}</span>
               </div>
             ))}
           </div>
@@ -194,7 +194,7 @@ export function GraphHUD({
     <>
       {/* Stats bar — centered top */}
       {stats && (
-        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-3 px-4 py-1.5 rounded-xl font-mono text-[11px] whitespace-nowrap" style={glassStyle}>
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-3 px-4 py-1.5 rounded-xl font-mono text-xs whitespace-nowrap" style={glassStyle}>
           {simRunning && <span className="flex items-center gap-1 text-indigo-400 animate-pulse"><Activity size={9} />LIVE</span>}
           <span><span className="text-indigo-400 font-medium">{stats.nodeCount.toLocaleString()}</span> <span className="text-slate-500">nodes</span></span>
           <span className="text-slate-700">·</span>
@@ -241,7 +241,7 @@ export function GraphHUD({
 
       {/* Legend — bottom left */}
       {!hasInspector && (
-        <div className="absolute bottom-10 left-3 z-10 p-3 rounded-xl font-mono text-[10px]" style={glassStyle}>
+        <div className="absolute bottom-10 left-3 z-10 p-3 rounded-xl font-mono text-xs" style={glassStyle}>
           <p className="text-slate-600 mb-2 uppercase tracking-wider">Node health</p>
           {(["CRITICAL", "HIGH", "MEDIUM", "LOW"] as const).map(sev => (
             <div key={sev} className="flex items-center gap-2 mb-1">
@@ -268,7 +268,7 @@ export function GraphHUD({
       )}
 
       {/* Keyboard hint */}
-      <div className="absolute bottom-3 left-3 z-10 flex gap-3 font-mono text-[10px] text-slate-700">
+      <div className="absolute bottom-3 left-3 z-10 flex gap-3 font-mono text-xs text-slate-500">
         <span>drag</span><span>·</span><span>scroll to zoom</span><span>·</span>
         <span>click / Enter to inspect</span><span>·</span><span>↑↓←→ navigate</span>
       </div>

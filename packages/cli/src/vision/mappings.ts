@@ -7,7 +7,7 @@ export interface SeeMappings {
   mappings: Record<string, string>
 }
 
-const MAPPINGS_PATH = '.codemind/see-mappings.yaml'
+const MAPPINGS_PATH = '.stinkit/see-mappings.yaml'
 
 export async function loadMappings(repoRoot: string): Promise<SeeMappings | null> {
   const filePath = path.join(repoRoot, MAPPINGS_PATH)

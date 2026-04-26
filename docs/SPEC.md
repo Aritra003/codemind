@@ -1,8 +1,8 @@
-# SPEC.md — CodeMind Product Specification
+# SPEC.md — StinKit Product Specification
 # Mode: SPEC | Agent: ORACLE
-# Pipeline gate: SPEC → CRITIC → ARCHITECT (CRITIC completed: CodeMind_Critical_Review.md, April 2026)
+# Pipeline gate: SPEC → CRITIC → ARCHITECT (CRITIC completed: StinKit_Critical_Review.md, April 2026)
 # Last updated: 2026-04-23
-# Source: CodeMind_GOAT_v5.md + 14 corrections from CodeMind_Critical_Review.md
+# Source: StinKit_GOAT_v5.md + 14 corrections from StinKit_Critical_Review.md
 #         + 500K MAU non-functional requirements added
 ================================================================================
 
@@ -41,13 +41,13 @@ None combine local privacy-first graph + vision-based drift detection + MCP inte
 
 **U1: Solo Developer (primary — 70% of MAU)**
   Core need:     Know what will break before pushing. Zero friction.
-  Success signal: Runs `codemind check` habitually before every push within 7 days.
+  Success signal: Runs `stinkit check` habitually before every push within 7 days.
   Failure signal: Disables pre-commit hook within 48 hours. Tool perceived as noise.
-  Key constraint: Zero config tolerance. Must work in 60 seconds from `npx codemind`.
+  Key constraint: Zero config tolerance. Must work in 60 seconds from `npx stinkit`.
 
 **U2: Team Lead / Staff Engineer (secondary — 20% of MAU)**
   Core need:     Maintain code quality at scale. Identify high-risk files proactively.
-  Success signal: References CodeMind hotspot report in code review at least weekly.
+  Success signal: References StinKit hotspot report in code review at least weekly.
   Failure signal: Graph data contradicts what they know is true (trust broken).
   Key constraint: Needs deterministic, verifiable output. LLM speculation unacceptable.
 
@@ -59,7 +59,7 @@ None combine local privacy-first graph + vision-based drift detection + MCP inte
 
 **U4: Platform / SRE Engineer (tertiary — 2% of MAU)**
   Core need:     Fast commit identification during production incidents.
-  Success signal: `codemind trace` narrows the responsible commit in < 5 minutes.
+  Success signal: `stinkit trace` narrows the responsible commit in < 5 minutes.
   Failure signal: Tool blamed wrong commit twice → abandoned.
   Key constraint: Works in incident stress. Simple input (paste error). Clear output.
 
@@ -73,29 +73,29 @@ moments. No contradictions.
 
 ### Flow F-01: First-time setup (critical for D1 retention)
   GIVEN a developer has Node.js ≥18 installed and a git repo in the current directory
-  WHEN they run `npx codemind`
-  THEN CodeMind detects the project, begins indexing with a progress bar
+  WHEN they run `npx stinkit`
+  THEN StinKit detects the project, begins indexing with a progress bar
   AND prints "Indexed 12,847 nodes · 31,204 edges · Completeness: 83% · 417 ambiguous call sites" in < 60s
   AND suggests: "Add pre-commit hook? [Y/n]"
-  AND if Y: writes hook, confirms "Hook installed. CodeMind will run before every commit."
+  AND if Y: writes hook, confirms "Hook installed. StinKit will run before every commit."
   EDGE: repo > 200K nodes: warning printed, index proceeds (may take 2-5 min first time)
   EDGE: no git history: git warnings suppressed, index succeeds without history signals
 
 ### Flow F-02: Pre-commit check (the daily driver — U1, U2)
   GIVEN a developer has staged changes in git
-  WHEN the pre-commit hook fires (or they run `codemind check`)
-  THEN CodeMind returns in < 2 seconds with a risk classification (LOW/MEDIUM/HIGH/CRITICAL)
+  WHEN the pre-commit hook fires (or they run `stinkit check`)
+  THEN StinKit returns in < 2 seconds with a risk classification (LOW/MEDIUM/HIGH/CRITICAL)
   AND shows the blast radius table (direct dependents, depth, coverage signal)
   AND shows completeness caveat: "Graph completeness: 83% · 12 ambiguous call sites in blast zone"
   AND if risk is LOW/MEDIUM: hook exits 0, developer commits normally
-  AND if risk is HIGH/CRITICAL: hook exits 0 with warning, prints "Run codemind check --think for full analysis"
+  AND if risk is HIGH/CRITICAL: hook exits 0 with warning, prints "Run stinkit check --think for full analysis"
   EDGE: graph stale (> 7 days): warning printed, analysis proceeds with stale data + staleness flag
   EDGE: API unavailable: proceeds with offline deterministic analysis only
 
 ### Flow F-03: Deep analysis (U1, U2 — high-risk changes)
   GIVEN a developer received HIGH or CRITICAL risk in F-02
-  WHEN they run `codemind check --think`
-  THEN CodeMind sends deterministic analysis to Opus 4.7 and returns in < 30 seconds
+  WHEN they run `stinkit check --think`
+  THEN StinKit sends deterministic analysis to Opus 4.7 and returns in < 30 seconds
   AND Opus explains the blast radius in human terms
   AND suggests specific tests to write referencing file paths
   AND references git history patterns ("similar change in March caused 2-hour session timeout")
@@ -105,20 +105,20 @@ moments. No contradictions.
 
 ### Flow F-04: Architecture drift check (U2, U3 — the hero feature)
   GIVEN a developer has an architecture diagram (PNG/JPG from Miro, Lucidchart, whiteboard)
-  WHEN they run `codemind see diagram.png`
-  THEN CodeMind calls Opus Vision API to extract components + connections
+  WHEN they run `stinkit see diagram.png`
+  THEN StinKit calls Opus Vision API to extract components + connections
   AND runs entity resolution (diagram names → code entities with confidence scores)
   AND compares the matched entity graph to the actual code graph
   AND prints accuracy score + phantom connections + missing connections + intermediaries
-  AND saves corrected Mermaid diagram to .codemind/architecture.mermaid
+  AND saves corrected Mermaid diagram to .stinkit/architecture.mermaid
   EDGE: extraction fails schema validation: retries once with stricter prompt
   EDGE: extraction fails twice: prints "Could not extract architecture. Try higher-resolution export."
   EDGE: --verify flag: shows extracted components, asks for confirmation before comparing
 
 ### Flow F-05: Incident forensics (U4 — emergency)
   GIVEN a production incident is active and the developer has an error message / stack trace
-  WHEN they run `codemind trace "error message"` or `codemind trace --stack-trace error.log`
-  THEN CodeMind first classifies the error origin (CODE | INFRA | CONFIG | DEPENDENCY | DATA)
+  WHEN they run `stinkit trace "error message"` or `stinkit trace --stack-trace error.log`
+  THEN StinKit first classifies the error origin (CODE | INFRA | CONFIG | DEPENDENCY | DATA)
   AND if origin ≠ CODE: skips code trace, surfaces "Check recent config changes / dep updates"
   AND if origin = CODE: extracts affected files from stack trace, ranks recent commits by overlap
   AND calls Opus to narrate the causal chain for top 3 candidates
@@ -128,16 +128,16 @@ moments. No contradictions.
   EDGE: no git history in lookback window: returns "No relevant commits in last [N] days"
 
 ### Flow F-06: MCP integration (U1, U2 — AI-native workflow)
-  GIVEN Claude Code is open and `codemind serve` is running (or auto-started)
+  GIVEN Claude Code is open and `stinkit serve` is running (or auto-started)
   WHEN the developer asks "What will break if I change auth.ts?"
-  THEN Claude calls `codemind_check` via MCP with the file path
+  THEN Claude calls `stinkit_check` via MCP with the file path
   AND receives the full blast radius JSON
   AND responds with a human summary inline in the coding session
   EDGE: graph stale: Claude surfaces the staleness warning in its response
-  EDGE: MCP server not running: Claude suggests running `codemind serve`
+  EDGE: MCP server not running: Claude suggests running `stinkit serve`
 
 ### Flow F-07: Team dashboard (U3 — cloud tier)
-  GIVEN an engineering manager is logged into app.codemind.dev
+  GIVEN an engineering manager is logged into app.stinkit.dev
   WHEN they navigate to the team dashboard
   THEN they see a hotspot heatmap of the top 20 highest blast-radius files
   AND coverage trend lines per file over the last 30 days
@@ -195,7 +195,7 @@ moments. No contradictions.
 ================================================================================
 
   Primary:
-    Time to first insight:    < 60s from `npx codemind` to first check result
+    Time to first insight:    < 60s from `npx stinkit` to first check result
                               Baseline: N/A (new product) | Target: 55s p50, 90s p99
                               Measured by: telemetry TE-01 (indexDuration) | Timeframe: Week 1
 
@@ -223,12 +223,12 @@ moments. No contradictions.
 ================================================================================
 
   Performance:
-    codemind check (fast):        < 2s p99 (local, 50K-node graph)
-    codemind check --think:       < 30s p99 (depends on Opus API SLA)
-    codemind index (50K nodes):   < 45s p99 (local)
-    codemind index (200K nodes):  < 3 min p99 (large repo — warn user at start)
-    codemind see:                 < 20s p99 for extraction; < 5s for comparison
-    codemind trace:               < 10s p99 for ranking; < 25s with Opus narrative
+    stinkit check (fast):        < 2s p99 (local, 50K-node graph)
+    stinkit check --think:       < 30s p99 (depends on Opus API SLA)
+    stinkit index (50K nodes):   < 45s p99 (local)
+    stinkit index (200K nodes):  < 3 min p99 (large repo — warn user at start)
+    stinkit see:                 < 20s p99 for extraction; < 5s for comparison
+    stinkit trace:               < 10s p99 for ranking; < 25s with Opus narrative
     MCP tool response:            < 5s p99 (fast tier, local graph query)
     CLI startup time:             < 200ms (binary startup, no warm-up needed)
     Cloud API (auth endpoints):   < 200ms p99
@@ -341,7 +341,7 @@ Event categories summary:
 ## CRITIC Pass Status
 ================================================================================
 
-CRITIC output: CodeMind_Critical_Review.md (April 2026) — 14 gaps identified and corrected.
+CRITIC output: StinKit_Critical_Review.md (April 2026) — 14 gaps identified and corrected.
 All 14 corrections from the Critical Review are incorporated into this SPEC and the v5 BRD.
 Status: CRITIC PASS ACCEPTED. Proceeding to ARCHITECT.
 
@@ -356,7 +356,7 @@ Key corrections confirmed integrated:
   [8] Offline mode for Graph/Analysis/Forensics (INV-006)
   [9] connections.yaml for runtime connections (out of scope for Day 1; Sprint 1 Day 5)
   [10] UI scoped to Drift view only (DESIGNER gate)
-  [11] CodemindResult<T> error handling (BUILDER gate — implementation detail)
+  [11] StinKitResult<T> error handling (BUILDER gate — implementation detail)
   [12] Renamed --managed to --think (Flow F-03)
   [13] --verify step for Drift (Flow F-04)
   [14] Opus prompt changed to "explain the analysis" not "predict failures" (INV-003)

@@ -8,6 +8,8 @@ export type SecurityFinding = {
   severity: Severity;
   language: string;
   snippet?: string;
+  description?: string;
+  remediation?: string;
 };
 
 export type ActionPriority = "P0" | "P1" | "P2";
@@ -153,7 +155,7 @@ function scanSecurity(files: FileEntry[]): SecurityFinding[] {
     for (const { re, issue, severity } of patterns) {
       re.lastIndex = 0;
       const m = re.exec(f.content);
-      if (m) findings.push({ file: f.path, issue, severity, language: f.language, snippet: m[0].slice(0, 80) });
+      if (m) findings.push({ file: f.path, issue, severity, language: f.language, snippet: m[0].slice(0, 80), description: FIX_GUIDE[issue]?.why, remediation: FIX_GUIDE[issue]?.fix });
     }
   }
   return findings;

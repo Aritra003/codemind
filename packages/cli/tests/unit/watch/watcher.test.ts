@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import type { CodeGraph, GraphNode, GraphEdge } from '@codemind/shared'
+import type { CodeGraph, GraphNode, GraphEdge } from '@stinkit/shared'
 import { shouldWatchFile, patchGraph } from '../../../src/watch/watcher'
 
 // ── shouldWatchFile ──────────────────────────────────────────────────────────
@@ -14,8 +14,8 @@ describe('shouldWatchFile', () => {
     expect(shouldWatchFile('/repo/node_modules/lodash/index.ts')).toBe(false))
   it('rejects .git',        () =>
     expect(shouldWatchFile('/repo/.git/hooks/pre-commit')).toBe(false))
-  it('rejects .codemind',   () =>
-    expect(shouldWatchFile('/repo/.codemind/graph.msgpack')).toBe(false))
+  it('rejects .stinkit',   () =>
+    expect(shouldWatchFile('/repo/.stinkit/graph.msgpack')).toBe(false))
   it('rejects dist/',       () =>
     expect(shouldWatchFile('/repo/dist/index.js')).toBe(false))
   it('rejects build/',      () =>

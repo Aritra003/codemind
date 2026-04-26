@@ -26,7 +26,7 @@ export async function extractDiagramEntities(
     return { ...result, retries: 1 }
   } catch {
     // second failure — return partial, never crash (POL-07)
-    process.stderr.write('[codemind] vision extraction failed after 1 retry (D-02)\n')
+    process.stderr.write('[stinkit] vision extraction failed after 1 retry (D-02)\n')
     return { entities: [], confidence: 0, retries: 1, partial: true }
   }
 }

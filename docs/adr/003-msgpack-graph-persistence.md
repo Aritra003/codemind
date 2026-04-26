@@ -15,7 +15,7 @@ target — any format slower than ~200ms to deserialize at 50K nodes blocks the 
 
 ## Decision
 **MessagePack** (`@msgpack/msgpack` npm package) for all local graph persistence.
-File: `.codemind/graph.msgpack`. No fallback formats.
+File: `.stinkit/graph.msgpack`. No fallback formats.
 
 ## Alternatives Rejected
 1. **JSON** — rejected because: at 50K nodes, JSON produces a 50-100MB file.
@@ -41,8 +41,8 @@ Positive:
 - Zero schema definition overhead
 
 Negative (tradeoffs accepted):
-- Binary format: not human-readable. `cat .codemind/graph.msgpack` is not useful.
-  (Mitigation: `codemind graph --export json` always available for inspection)
+- Binary format: not human-readable. `cat .stinkit/graph.msgpack` is not useful.
+  (Mitigation: `stinkit graph --export json` always available for inspection)
 - msgpack does not self-describe: schema changes require a version field + migration logic
   (Mitigation: graph.msgpack includes a `version` field; on version mismatch, re-index)
 

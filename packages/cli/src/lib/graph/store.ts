@@ -1,4 +1,4 @@
-import type { CodeGraph } from '@codemind/shared'
+import type { CodeGraph } from '@stinkit/shared'
 import { saveGraph, loadGraph } from '../../graph/persist'
 
 export class GraphStore {

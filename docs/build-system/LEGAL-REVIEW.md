@@ -1,4 +1,4 @@
-# LEGAL-REVIEW.md — CodeMind Legal + Compliance Review
+# LEGAL-REVIEW.md — StinKit Legal + Compliance Review
 # Mode: COMPLIANCE-LEGAL | Agent: COUNSEL
 # Input: GDPR-REGISTER.md · INFRASTRUCTURE.md · API-DESIGN.md · ANALYTICS-SCHEMA.md · THREAT-MODEL.md
 # Last updated: 2026-04-23
@@ -86,7 +86,7 @@ Status:     OPEN
 ### COUNSEL FINDING CV-002 — DPAs Required with All Data Processors [HIGH]
 ```
 Finding:    GDPR Article 28 requires a Data Processing Agreement with every third-party
-            processor that handles EU personal data on CodeMind's behalf.
+            processor that handles EU personal data on StinKit's behalf.
 
 Required DPAs:
   1. AWS (Amazon Web Services)
@@ -165,23 +165,23 @@ Log:        COUNSEL VETO: AWAITING HUMAN LAWYER — CV-003 Anthropic function na
 ### Checklist Results
 
 [x] Training data sourcing: no custom model trained — using Anthropic Claude API only.
-    → PASS: CodeMind does not train models. Uses Anthropic Claude API exclusively.
+    → PASS: StinKit does not train models. Uses Anthropic Claude API exclusively.
 
 [ ] AI output disclaimer: is it clear to users when content is AI-generated?
-    → CONDITIONAL: CLI outputs from `codemind check --think` and `codemind trace` are
+    → CONDITIONAL: CLI outputs from `stinkit check --think` and `stinkit trace` are
       AI-enriched. Users must be informed which parts of the output are AI-generated.
     → Filed as CV-004 below.
 
 [x] AI decisions affecting users: no consequential automated decisions.
-    → PASS: CodeMind analysis is advisory only. Pre-commit hook exits 0 always (INV-001).
+    → PASS: StinKit analysis is advisory only. Pre-commit hook exits 0 always (INV-001).
       No automated blocking decisions. Confidence capped at 80% (INV-004). No GDPR
       Article 22 automated decision-making obligation applies.
 
 [x] Anthropic ToS reviewed:
     → KEY RESTRICTION: Outputs from Claude API cannot be used to train a competing AI model.
-      CodeMind does not train models — PASS.
+      StinKit does not train models — PASS.
     → USAGE RESTRICTION: Anthropic ToS prohibits use cases that could harm people or
-      violate laws. CodeMind's use case (code analysis, diagram comparison) is clearly
+      violate laws. StinKit's use case (code analysis, diagram comparison) is clearly
       within permitted use.
     → CONFIRMED: No Anthropic ToS violation in current product design.
 
@@ -262,7 +262,7 @@ Icons:      Use Lucide React (ISC License — permissive, commercial use OK) or
             Heroicons (MIT). Do NOT use Font Awesome free tier (mixed licensing).
 Fonts:      Use system font stack or Inter (Open Font License — permissive, commercial OK).
             Do NOT use any font without confirming commercial license.
-Images:     All images must be owned by CodeMind or licensed for commercial use.
+Images:     All images must be owned by StinKit or licensed for commercial use.
             No stock images without a commercial stock license verified.
 ```
 
@@ -313,7 +313,7 @@ US users:       CCPA compliance required for California residents.
                 CCPA obligation threshold: > $25M revenue OR > 100K consumers' data annually.
                 At 500K MAU: CCPA compliance required.
                 CCPA additions needed: "Do Not Sell My Personal Information" link (even if
-                CodeMind does not sell data — the link is required).
+                StinKit does not sell data — the link is required).
 Status:         [HUMAN LAWYER REQUIRED] for jurisdiction selection and CCPA readiness review.
 ```
 
@@ -326,7 +326,7 @@ Status:         [HUMAN LAWYER REQUIRED] for jurisdiction selection and CCPA read
 Status:     REQUIRED — not drafted yet.
 Deadline:   Must exist before any user creates an account in production.
 Content requirements (GDPR Article 13):
-  - Identity of data controller (CodeMind, Inc. / [legal entity])
+  - Identity of data controller (StinKit, Inc. / [legal entity])
   - Categories of personal data collected
   - Legal basis for each processing activity (from GDPR-REGISTER.md)
   - Retention periods for each data category
@@ -351,8 +351,8 @@ Key clauses:
   - AI output disclaimer (CV-004 — content is AI-assisted, not professional advice)
   - Limitation of liability for CLI analysis results
   - Subscription terms (auto-renewal, cancellation, refund policy)
-  - IP ownership: user owns their code; CodeMind owns the analysis tool
-  - Data usage: CodeMind may use anonymous telemetry (opt-in) for product improvement
+  - IP ownership: user owns their code; StinKit owns the analysis tool
+  - Data usage: StinKit may use anonymous telemetry (opt-in) for product improvement
   - No training on user code content: explicit commitment (INV-005)
   - DMCA / notice and takedown procedure
   - Governing law and dispute resolution
@@ -365,7 +365,7 @@ Owner:      [HUMAN LAWYER REQUIRED] — ToS has material liability implications.
 Status:     REQUIRED for any enterprise/team customer who is an EU data controller.
             At v1 (individual developers): may not be immediately required.
             At Team/Enterprise tier: B2B customers processing their employees' data
-            through CodeMind → CodeMind acts as a processor → DPA required.
+            through StinKit → StinKit acts as a processor → DPA required.
 Deadline:   Before any Team/Enterprise customer onboarded who is an EU business.
 Owner:      [HUMAN LAWYER REQUIRED] — standard DPA template needed.
 ```

@@ -1,4 +1,4 @@
-# CodeMind Integration Test Results — Cap Repository
+# StinKit Integration Test Results — Cap Repository
 # Date: 2026-04-24 | Tester: automated integration run
 # Repo: https://github.com/CapSoftware/Cap (depth=50 shallow clone)
 ================================================================================
@@ -59,12 +59,12 @@ Budget: $5.00 remaining.
 
 **BUG-2: Completeness 15% on a real monorepo (expected 60-95%)**
 - Severity: Blocker (the product metric is wrong, and every check shows a scary warning)
-- Root cause: `computeCompleteness` counts UNRESOLVED edges as incomplete. In a pnpm monorepo, cross-package imports like `from '@codemind/shared'` resolve to `UNRESOLVED::functionName` because the resolver only matches by name within the current parse, not cross-package. 3033 nodes but only ~15% of call edges resolve.
+- Root cause: `computeCompleteness` counts UNRESOLVED edges as incomplete. In a pnpm monorepo, cross-package imports like `from '@stinkit/shared'` resolve to `UNRESOLVED::functionName` because the resolver only matches by name within the current parse, not cross-package. 3033 nodes but only ~15% of call edges resolve.
 - Fix: Improve edge resolver to handle workspace package imports; use `LANG_MAP` + package.json parsing to map cross-package imports.
 
 ### MAJOR
 
-**BUG-3: `codemind` with no args shows help, not status dashboard**
+**BUG-3: `stinkit` with no args shows help, not status dashboard**
 - Severity: Major (first-run experience is broken)
 - File: `src/index.ts` — needs default action showing graph status
 - Fix: Add a default action that calls `runGraph({ hotspots: true })` or a dedicated status view
@@ -116,7 +116,7 @@ Budget: $5.00 remaining.
 **BUG-13: Node.js punycode deprecation warning on every invocation**
 - Every command prints `[DEP0040] DeprecationWarning: The 'punycode' module is deprecated`
 - Root cause: One of the bundled dependencies uses `punycode` (likely `uuid` or `pino`)
-- Fix: `NODE_OPTIONS=--no-deprecation` in bin/codemind.js, or upgrade the offending dep
+- Fix: `NODE_OPTIONS=--no-deprecation` in bin/stinkit.js, or upgrade the offending dep
 
 ---
 
@@ -128,7 +128,7 @@ What looks great:
 - Risk badge symbols (● CRITICAL, ◐ MEDIUM) with chalk colors are visually distinct
 - Hotspot ranking with dependent counts is clean and scannable
 - Separator lines and consistent indentation give professional CLI feel
-- The `codemind index` success message with node/edge count is satisfying
+- The `stinkit index` success message with node/edge count is satisfying
 
 What needs polish before demo:
 - The 15% completeness warning appears on EVERY command output — it dominates the screen and signals "something is wrong" before showing results. For a demo this is a blocker.
@@ -192,4 +192,4 @@ Priority order for hackathon polish:
 5. **BUG-5/6** — `--file` flag + `--export mermaid`
 
 ================================================================================
-Generated: 2026-04-24 | CodeMind v0.1.0 | Cap repo: 3033 nodes / 28718 edges
+Generated: 2026-04-24 | StinKit v0.1.0 | Cap repo: 3033 nodes / 28718 edges

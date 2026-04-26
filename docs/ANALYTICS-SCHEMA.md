@@ -1,4 +1,4 @@
-# ANALYTICS-SCHEMA.md — CodeMind Event Catalogue
+# ANALYTICS-SCHEMA.md — StinKit Event Catalogue
 # Mode: SPEC (ORACLE) | Protocol: .claude/reference/ANALYTICS-PROTOCOL.md → Section A
 # Last updated: 2026-04-23
 # Owner: ORACLE — no analytics event may be implemented without an entry here.
@@ -15,16 +15,16 @@
 
   K-01  install_completed
     Category:   KEY_EVENT
-    Trigger:    First successful `npx codemind` or `npm install -g codemind` — index completes
+    Trigger:    First successful `npx stinkit` or `npm install -g stinkit` — index completes
     Properties: { node_version: string, os_platform: string, index_node_count: number,
                   index_duration_ms: number, completeness_pct: number,
                   git_history_available: boolean, coverage_files_found: boolean }
     PII risk:   none
-    Notes:      One-time per install. Install ID = random UUID stored in ~/.codemind/id.
+    Notes:      One-time per install. Install ID = random UUID stored in ~/.stinkit/id.
 
   K-02  index_completed
     Category:   KEY_EVENT
-    Trigger:    `codemind index` completes successfully (including re-indexes)
+    Trigger:    `stinkit index` completes successfully (including re-indexes)
     Properties: { node_count: number, edge_count: number, languages: string[],
                   static_resolution_rate: number, ambiguous_call_sites: number,
                   duration_ms: number, is_incremental: boolean, repo_size_kb: number }
@@ -33,7 +33,7 @@
 
   K-03  check_fast_completed
     Category:   KEY_EVENT
-    Trigger:    `codemind check` (fast tier) returns result
+    Trigger:    `stinkit check` (fast tier) returns result
     Properties: { risk_level: 'LOW'|'MEDIUM'|'HIGH'|'CRITICAL', direct_dependents: number,
                   transitive_dependents: number, coverage_gaps: number,
                   has_incident_history: boolean, duration_ms: number,
@@ -43,14 +43,14 @@
 
   K-04  check_deep_completed
     Category:   KEY_EVENT
-    Trigger:    `codemind check --think` returns result (Opus call completed)
+    Trigger:    `stinkit check --think` returns result (Opus call completed)
     Properties: { base_risk_level: string, opus_tokens_used: number,
                   opus_latency_ms: number, duration_ms: number }
     PII risk:   none
 
   K-05  see_completed
     Category:   KEY_EVENT
-    Trigger:    `codemind see` full pipeline completes (comparison + output written)
+    Trigger:    `stinkit see` full pipeline completes (comparison + output written)
     Properties: { accuracy_pct: number, phantom_count: number, missing_count: number,
                   intermediary_count: number, entity_mapping_confidence_avg: number,
                   extraction_retries: number, duration_ms: number }
@@ -58,7 +58,7 @@
 
   K-06  trace_completed
     Category:   KEY_EVENT
-    Trigger:    `codemind trace` returns result
+    Trigger:    `stinkit trace` returns result
     Properties: { origin_classification: string, code_trace_ran: boolean,
                   commits_ranked: number, opus_narrative_generated: boolean,
                   duration_ms: number, lookback_days: number }
@@ -66,9 +66,9 @@
 
   K-07  mcp_tool_invoked
     Category:   KEY_EVENT
-    Trigger:    Any codemind_* MCP tool called from Claude Code
-    Properties: { tool_name: 'codemind_check'|'codemind_see'|'codemind_trace'|
-                             'codemind_graph'|'codemind_status',
+    Trigger:    Any stinkit_* MCP tool called from Claude Code
+    Properties: { tool_name: 'stinkit_check'|'stinkit_see'|'stinkit_trace'|
+                             'stinkit_graph'|'stinkit_status',
                   response_status: 'success'|'partial'|'failed',
                   duration_ms: number }
     PII risk:   none
@@ -85,32 +85,32 @@
 
   E-02  report_generated
     Category:   ENGAGEMENT
-    Trigger:    `codemind check --report` or `codemind trace --report` produces HTML
+    Trigger:    `stinkit check --report` or `stinkit trace --report` produces HTML
     Properties: { command: 'check'|'trace', file_size_kb: number }
     PII risk:   none
 
   E-03  see_ui_opened
     Category:   ENGAGEMENT
-    Trigger:    `codemind see --ui` opens the browser side-by-side view
+    Trigger:    `stinkit see --ui` opens the browser side-by-side view
     Properties: { accuracy_pct: number }
     PII risk:   none
 
   E-04  hotspot_viewed
     Category:   ENGAGEMENT
-    Trigger:    `codemind graph --hotspots` output rendered
+    Trigger:    `stinkit graph --hotspots` output rendered
     Properties: { top_node_blast_radius: number, top_20_nodes_with_no_coverage: number }
     PII risk:   none
 
   E-05  connections_yaml_added
     Category:   ENGAGEMENT
-    Trigger:    New entry added to .codemind/connections.yaml
+    Trigger:    New entry added to .stinkit/connections.yaml
     Properties: { via_type: 'EventBus'|'RabbitMQ'|'Kafka'|'DI'|'other',
                   total_declared_connections: number }
     PII risk:   none
 
   E-06  team_dashboard_viewed  [Cloud tier — deferred to post-v1]
     Category:   ENGAGEMENT
-    Trigger:    User views team dashboard on app.codemind.dev
+    Trigger:    User views team dashboard on app.stinkit.dev
     Properties: { team_size: number, active_repos: number }
     PII risk:   none
 
@@ -196,14 +196,14 @@
 ================================================================================
 
   Opt-in:         Telemetry is opt-in. Prompt at first run:
-                  "Help improve CodeMind? Send anonymous usage data. [Y/n]"
+                  "Help improve StinKit? Send anonymous usage data. [Y/n]"
                   If N: no events emitted. TelemetryClient.emit() is a no-op.
-                  Setting stored in ~/.codemind/config.yaml → telemetry: false
+                  Setting stored in ~/.stinkit/config.yaml → telemetry: false
 
   Batching:       Events batched locally and flushed every 60 seconds or on CLI exit.
                   Batch size: max 50 events. Never block CLI path.
 
-  Endpoint:       POST https://telemetry.codemind.dev/v1/events
+  Endpoint:       POST https://telemetry.stinkit.dev/v1/events
                   Auth: install_id (UUID, no personal identity)
                   Payload: { install_id, events: TelemetryEvent[], client_version }
 

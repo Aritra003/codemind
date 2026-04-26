@@ -5,13 +5,13 @@ import { startWatch }  from './watcher'
 import type { WatchOptions } from './watcher'
 
 export async function runWatch(opts: Record<string, unknown>): Promise<void> {
-  const storeDir = path.join(process.cwd(), '.codemind')
+  const storeDir = path.join(process.cwd(), '.stinkit')
 
   try {
     await fs.access(path.join(storeDir, 'graph.msgpack'))
   } catch {
     process.stderr.write(
-      formatError('NO_GRAPH', 'No graph found.', 'Run `codemind index` first.') + '\n',
+      formatError('NO_GRAPH', 'No graph found.', 'Run `stinkit index` first.') + '\n',
     )
     process.exit(1)
   }

@@ -1,6 +1,6 @@
 import ora  from 'ora'
 import chalk from 'chalk'
-import type { UserConfig } from '@codemind/shared'
+import type { UserConfig } from '@stinkit/shared'
 import type { AuditOptions }   from './audit'
 import type { AuditThinkResult } from '../report/report-types'
 import { GraphStore }              from '../lib/graph/store'
@@ -17,7 +17,7 @@ import { TelemetryClient }         from '../lib/telemetry/client'
 
 export async function runAudit(opts: AuditOptions, config: UserConfig): Promise<void> {
   const repoRoot  = process.cwd()
-  const store     = new GraphStore(`${repoRoot}/.codemind`)
+  const store     = new GraphStore(`${repoRoot}/.stinkit`)
   const telemetry = new TelemetryClient(config.telemetry)
   const spinner   = ora('Loading graph…').start()
 
@@ -25,7 +25,7 @@ export async function runAudit(opts: AuditOptions, config: UserConfig): Promise<
     const graph = await store.load()
     if (!graph) {
       spinner.fail('No graph found.')
-      process.stderr.write(formatError('NO_GRAPH', 'Run `codemind index` first to build the code graph.') + '\n')
+      process.stderr.write(formatError('NO_GRAPH', 'Run `stinkit index` first to build the code graph.') + '\n')
       process.exit(1)
     }
     spinner.text = 'Scanning repository…'
@@ -48,7 +48,7 @@ export async function runAudit(opts: AuditOptions, config: UserConfig): Promise<
     let thinkResult: AuditThinkResult | undefined
     if (opts.think) {
       if (!config.anthropic_api_key && !process.env['ANTHROPIC_API_KEY']) {
-        process.stderr.write(formatError('NO_API_KEY', 'Deep analysis requires an Anthropic API key.', 'Set ANTHROPIC_API_KEY in ~/.codemind/config.yaml') + '\n')
+        process.stderr.write(formatError('NO_API_KEY', 'Deep analysis requires an Anthropic API key.', 'Set ANTHROPIC_API_KEY in ~/.stinkit/config.yaml') + '\n')
         process.exit(1)
       }
       const thinkSpinner = ora('Generating AI narrative (Claude Opus 4.7)…').start()

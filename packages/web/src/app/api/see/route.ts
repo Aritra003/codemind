@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
   if (CLI_ONLY_TYPES.has(mimeType)) {
     const fmt = mimeType === "application/pdf" ? "PDF" : "Mermaid";
     return NextResponse.json({
-      error: `${fmt} analysis requires the CLI: \`codemind see ${file.name}\``,
+      error: `${fmt} analysis requires the CLI: \`stinkit see ${file.name}\``,
     }, { status: 422 });
   }
 

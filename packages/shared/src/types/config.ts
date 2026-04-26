@@ -1,6 +1,6 @@
-/** ~/.codemind/config.yaml shape. Parsed with js-yaml at CLI startup. */
+/** ~/.stinkit/config.yaml shape. Parsed with js-yaml at CLI startup. */
 export interface UserConfig {
-  /** User's own Anthropic API key — never logged, never sent to CodeMind servers. */
+  /** User's own Anthropic API key — never logged, never sent to StinKit servers. */
   anthropic_api_key?: string
 
   telemetry: TelemetryConfig

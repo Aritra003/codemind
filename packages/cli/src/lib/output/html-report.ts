@@ -1,10 +1,10 @@
 import * as fs   from 'fs/promises'
 import * as path from 'path'
-import type { CodemindResult, BlastRadius } from '@codemind/shared'
+import type { StinKitResult, BlastRadius } from '@stinkit/shared'
 import type { DriftReport }    from '../../commands/see'
 import type { ForensicsTrace } from '../../commands/trace'
 
-const REPORTS_DIR = '.codemind/reports'
+const REPORTS_DIR = '.stinkit/reports'
 
 async function writeReport(filename: string, html: string, repoRoot: string): Promise<string> {
   const dir      = path.join(repoRoot, REPORTS_DIR)
@@ -34,7 +34,7 @@ function jsonBlock(data: unknown): string {
 }
 
 export async function writeCheckReport(
-  result: CodemindResult<BlastRadius>,
+  result: StinKitResult<BlastRadius>,
   repoRoot: string,
 ): Promise<string> {
   const filename = `check-${stamp()}-${Date.now()}.html`
@@ -45,11 +45,11 @@ export async function writeCheckReport(
        <p>Transitive dependents: ${result.data.transitive_dependents.length}</p>
        <p>Coverage gaps: ${result.data.coverage_gaps.length}</p>
        ${jsonBlock(result.data)}`
-  return writeReport(filename, wrapHtml('CodeMind — Check Report', body), repoRoot)
+  return writeReport(filename, wrapHtml('StinKit — Check Report', body), repoRoot)
 }
 
 export async function writeSeeReport(
-  result: CodemindResult<DriftReport>,
+  result: StinKitResult<DriftReport>,
   repoRoot: string,
 ): Promise<string> {
   const filename = `see-${stamp()}-${Date.now()}.html`
@@ -59,11 +59,11 @@ export async function writeSeeReport(
        <p>Accuracy: ${result.data.accuracy_pct}%</p>
        <p>Phantom: ${result.data.phantom_count} | Missing: ${result.data.missing_count}</p>
        ${jsonBlock(result.data)}`
-  return writeReport(filename, wrapHtml('CodeMind — See Report', body), repoRoot)
+  return writeReport(filename, wrapHtml('StinKit — See Report', body), repoRoot)
 }
 
 export async function writeTraceReport(
-  result: CodemindResult<ForensicsTrace>,
+  result: StinKitResult<ForensicsTrace>,
   repoRoot: string,
 ): Promise<string> {
   const filename = `trace-${stamp()}-${Date.now()}.html`
@@ -73,5 +73,5 @@ export async function writeTraceReport(
        <p>Top commit: ${result.data.ranked_commits[0]?.hash ?? 'none'}</p>
        <p>Paths found: ${result.data.code_paths.length}</p>
        ${jsonBlock(result.data)}`
-  return writeReport(filename, wrapHtml('CodeMind — Trace Report', body), repoRoot)
+  return writeReport(filename, wrapHtml('StinKit — Trace Report', body), repoRoot)
 }

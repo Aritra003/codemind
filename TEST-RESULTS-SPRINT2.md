@@ -1,7 +1,7 @@
-# CodeMind CLI — Bug Fix Sprint 2 Results
+# StinKit CLI — Bug Fix Sprint 2 Results
 **Date:** 2026-04-24  
 **Tester:** Claude Code (automated)  
-**CodeMind version:** 0.1.0  
+**StinKit version:** 0.1.0  
 **Node.js:** v22.22.2 (via nvm)
 
 ---
@@ -16,7 +16,7 @@
 | BUG-4 | MAJOR    | Barrel re-exports not traced | **FIXED** | 0 dependents → 1 direct dependent found |
 | BUG-5 | MINOR    | Dynamic imports silently dropped | **FIXED** | 100% (false) → 0% with ambiguous_local=1 |
 | BUG-6 | MINOR    | CommonJS `require()` not indexed | **FIXED** | `require()` creates IMPORTS edges; handler.ts detected as dependent of validator.ts |
-| BUG-7 | MINOR    | Skill file not generated | **FIXED** | No file → `.claude/skills/codemind.md` created on first index |
+| BUG-7 | MINOR    | Skill file not generated | **FIXED** | No file → `.claude/skills/stinkit.md` created on first index |
 | BUG-8 | COSMETIC | Pure CJS repos show 0% (div-by-zero) | **FIXED** | Zero-division safeguard in place; passport shows 0% (2 true ambiguous calls, not div-by-zero) |
 
 **Sprint result: 8/8 bugs fixed.**
@@ -28,7 +28,7 @@
 ### FIX 1: MCP Server Keepalive — FIXED ✓
 
 ```
-codemind serve & sleep 3; kill -0 $PID → PASS: Server stayed alive for 3 seconds
+stinkit serve & sleep 3; kill -0 $PID → PASS: Server stayed alive for 3 seconds
 ```
 
 **Root cause:** After `server.connect(transport)` resolved, no event-loop reference kept the process alive. In non-TTY environments (Claude Code shell, CI), stdin is at EOF immediately.
@@ -42,13 +42,13 @@ codemind serve & sleep 3; kill -0 $PID → PASS: Server stayed alive for 3 secon
 ### FIX 2: `--json` Flag Propagation — FIXED ✓
 
 ```
-codemind check --file source/core/options.ts --json → PASS: Valid JSON, keys: ['status', 'data', 'meta']
-codemind graph --hotspots --json                    → PASS: Valid JSON
-codemind --json                                     → PASS: Valid JSON, keys: ['status', 'node_count', ...]
+stinkit check --file source/core/options.ts --json → PASS: Valid JSON, keys: ['status', 'data', 'meta']
+stinkit graph --hotspots --json                    → PASS: Valid JSON
+stinkit --json                                     → PASS: Valid JSON, keys: ['status', 'node_count', ...]
 ANSI code check                                     → PASS: No ANSI codes in JSON output
 ```
 
-**Root cause:** `--json` was defined on the root program only. When specified as a subcommand option (`codemind check --json`), Commander treated it as unknown.
+**Root cause:** `--json` was defined on the root program only. When specified as a subcommand option (`stinkit check --json`), Commander treated it as unknown.
 
 **Fix:** Added `--json` as an explicit option to `check` and `graph` subcommands. Updated action callbacks to read from local opts first, then fall back to parent opts. Added JSON support to `status-runner.ts` (was entirely missing).
 
@@ -57,9 +57,9 @@ ANSI code check                                     → PASS: No ANSI codes in J
 ### FIX 3: Nonexistent File — FIXED ✓
 
 ```
-codemind check --file nonexistent.ts   → "File not found: nonexistent.ts" + exit code 1 — PASS
-codemind check --file README.md        → "README.md exists but has no indexed nodes." + exit code 1 — PASS
-codemind check --file source/core/options.ts → normal analysis, exit code 0 — PASS
+stinkit check --file nonexistent.ts   → "File not found: nonexistent.ts" + exit code 1 — PASS
+stinkit check --file README.md        → "README.md exists but has no indexed nodes." + exit code 1 — PASS
+stinkit check --file source/core/options.ts → normal analysis, exit code 0 — PASS
 ```
 
 **Root cause:** No pre-flight file validation before analysis. The blast radius returned LOW for files with 0 changed nodes.
@@ -72,7 +72,7 @@ codemind check --file source/core/options.ts → normal analysis, exit code 0 �
 
 ```
 cd ~/test-repos/barrel
-codemind check --file utils/logger.ts
+stinkit check --file utils/logger.ts
 → Direct: 1 dependent — PASS (app.ts detected as dependent of utils/logger.ts)
 ```
 
@@ -88,7 +88,7 @@ codemind check --file utils/logger.ts
 
 ```
 cd ~/test-repos/dynamic
-codemind index → "⚠ Local completeness: 0% · 0 external excluded · 1 ambiguous local" — PASS
+stinkit index → "⚠ Local completeness: 0% · 0 external excluded · 1 ambiguous local" — PASS
 ```
 
 **Root cause:** `import(\`./plugins/${name}\`)` is a tree-sitter `call_expression` where `fnNode.type === 'import'`. The original code only handled `fnNode.type === 'identifier'`, so dynamic imports were silently dropped.
@@ -103,11 +103,11 @@ codemind index → "⚠ Local completeness: 0% · 0 external excluded · 1 ambig
 
 ```
 cd ~/test-repos/mixed
-codemind index → 3 nodes, 4 edges, 100% local completeness
-codemind check --file validator.ts → Direct: 1 dependent (handler.ts) — PASS
+stinkit index → 3 nodes, 4 edges, 100% local completeness
+stinkit check --file validator.ts → Direct: 1 dependent (handler.ts) — PASS
 
 cd ~/test-repos/passport
-codemind index → 66 nodes, 2392 edges, 0% completeness (2 ambiguous local, 19 external excluded) — PASS
+stinkit index → 66 nodes, 2392 edges, 0% completeness (2 ambiguous local, 19 external excluded) — PASS
 ```
 
 **Root cause:** Parser only handled ESM `import` statements. `require('./module')` in `.js` files was treated as a regular call to a function named `require`.
@@ -122,15 +122,15 @@ codemind index → 66 nodes, 2392 edges, 0% completeness (2 ambiguous local, 19 
 
 ```
 cd ~/test-repos/got
-rm -rf .codemind .claude && codemind index
-→ "✓ Created Claude Code skill file at .claude/skills/codemind.md" — PASS
-test -f .claude/skills/codemind.md → PASS
+rm -rf .stinkit .claude && stinkit index
+→ "✓ Created Claude Code skill file at .claude/skills/stinkit.md" — PASS
+test -f .claude/skills/stinkit.md → PASS
 
-codemind index (second run) → no duplicate creation — PASS
-wc -l .claude/skills/codemind.md → 41 lines (stable)
+stinkit index (second run) → no duplicate creation — PASS
+wc -l .claude/skills/stinkit.md → 41 lines (stable)
 ```
 
-**Fix:** At the end of `runIndex()`, after saving the graph, check if `.claude/skills/codemind.md` exists. If not, create the directory and write the embedded skill file content. Uses `fs.access()` to check existence before creating.
+**Fix:** At the end of `runIndex()`, after saving the graph, check if `.claude/skills/stinkit.md` exists. If not, create the directory and write the embedded skill file content. Uses `fs.access()` to check existence before creating.
 
 ---
 
@@ -146,9 +146,9 @@ The zero-division safeguard `localTotal === 0 ? 100 : Math.round((resolved / loc
 
 ```
 cd ~/test-repos/cap
-codemind index → 4,180 nodes, 25,649 edges
+stinkit index → 4,180 nodes, 25,649 edges
 Local completeness: 74% · 9,333 external excluded · 1,252 ambiguous local
-codemind check --file packages/database/index.ts → CRITICAL, 3 changed nodes, 182 direct, 130 transitive
+stinkit check --file packages/database/index.ts → CRITICAL, 3 changed nodes, 182 direct, 130 transitive
 Check time: 0.63s user — sub-2s ✓
 ```
 
@@ -197,4 +197,4 @@ Check time: 0.63s user — sub-2s ✓
 
 **Open items:**
 - Cap completeness 74% (was 75%; accurately reflects 27 dynamic imports now tracked — not a regression)
-- `codemind serve` immediately exits when stdin is EOF at startup with no client (expected: MCP requires a connected client)
+- `stinkit serve` immediately exits when stdin is EOF at startup with no client (expected: MCP requires a connected client)

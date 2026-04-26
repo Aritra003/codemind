@@ -1,5 +1,5 @@
 import type { Command } from 'commander'
-import type { UserConfig, CodemindResult } from '@codemind/shared'
+import type { UserConfig, StinKitResult } from '@stinkit/shared'
 import { GraphStore }      from '../lib/graph/store'
 import { GraphTraversal }  from '../lib/graph/traversal'
 import { AIClient }        from '../lib/ai/client'
@@ -76,9 +76,9 @@ Answer the question using ONLY the structural data provided above. Reference spe
 export async function runAskCore(
   question: string,
   config:   UserConfig,
-): Promise<CodemindResult<AskResult>> {
+): Promise<StinKitResult<AskResult>> {
   const repoRoot = process.cwd()
-  const store    = new GraphStore(`${repoRoot}/.codemind`)
+  const store    = new GraphStore(`${repoRoot}/.stinkit`)
   const startMs  = Date.now()
 
   const graph = await store.load()
@@ -86,7 +86,7 @@ export async function runAskCore(
     return {
       status: 'failed', data: null,
       meta:   { completeness_pct: 0, duration_ms: Date.now() - startMs },
-      error:  { code: 'GRAPH_NOT_FOUND', message: 'No graph found. Run `codemind index` first.' },
+      error:  { code: 'GRAPH_NOT_FOUND', message: 'No graph found. Run `stinkit index` first.' },
     }
   }
 

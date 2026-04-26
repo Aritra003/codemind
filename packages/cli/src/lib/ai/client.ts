@@ -6,10 +6,10 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { selectModel } from './models'
 import { safeParseJson } from './utils'
-import type { UserConfig, BlastRadius } from '@codemind/shared'
+import type { UserConfig, BlastRadius } from '@stinkit/shared'
 import type { ForensicsTrace } from '../../commands/trace'
 import type { Theme, HealthScore, PositiveSignal, AuditThinkResult } from '../../report/report-types'
-import type { CodeGraph } from '@codemind/shared'
+import type { CodeGraph } from '@stinkit/shared'
 import { AITimeoutError } from '../errors'
 
 const TIMEOUT_MS = 30_000
@@ -21,7 +21,7 @@ export class AIClient {
 
   constructor(private readonly config: UserConfig) {
     const apiKey = config.anthropic_api_key ?? process.env['ANTHROPIC_API_KEY']
-    if (!apiKey) throw new AITimeoutError('Anthropic API key required. Set ANTHROPIC_API_KEY or run: codemind config set anthropic_api_key sk-ant-...')
+    if (!apiKey) throw new AITimeoutError('Anthropic API key required. Set ANTHROPIC_API_KEY or run: stinkit config set anthropic_api_key sk-ant-...')
     this.client    = new Anthropic({ apiKey })
     this.maxRetries = config.ai.max_retries
   }

@@ -1,4 +1,4 @@
-# TECH-DEBT.md — CodeMind
+# TECH-DEBT.md — StinKit
 # Owner: SCHOLAR | Updated: 2026-04-24
 # All items scored: Priority (P0–P3), Effort (S/M/L), Risk (HIGH/MED/LOW)
 ================================================================================

@@ -1,4 +1,4 @@
-import type { UserConfig } from '@codemind/shared'
+import type { UserConfig } from '@stinkit/shared'
 import { Server } from '@modelcontextprotocol/sdk/server'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio'
 import { ListToolsRequestSchema, CallToolRequestSchema } from '@modelcontextprotocol/sdk/types'
@@ -15,7 +15,7 @@ const ALL_TOOLS = [checkTool, seeTool, traceTool, graphTool, statusTool, watchSt
 
 export async function startMcpServer(config: UserConfig): Promise<void> {
   const server = new Server(
-    { name: 'codemind', version: '0.1.0' },
+    { name: 'stinkit', version: '0.1.0' },
     { capabilities: { tools: {} } },
   )
 

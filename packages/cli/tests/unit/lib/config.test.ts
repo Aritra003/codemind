@@ -7,7 +7,7 @@ import * as os   from 'os'
 let tmpHome: string
 
 beforeEach(async () => {
-  tmpHome = await fs.mkdtemp(path.join(os.tmpdir(), 'codemind-home-'))
+  tmpHome = await fs.mkdtemp(path.join(os.tmpdir(), 'stinkit-home-'))
   vi.stubEnv('HOME', tmpHome)
   vi.stubEnv('ANTHROPIC_API_KEY', '')
 })
@@ -40,7 +40,7 @@ describe('loadConfig', () => {
   })
 
   it('parses a valid config.yaml', async () => {
-    const configDir = path.join(tmpHome, '.codemind')
+    const configDir = path.join(tmpHome, '.stinkit')
     await fs.mkdir(configDir, { recursive: true })
     const yaml = `anthropic_api_key: sk-ant-from-file\ntelemetry:\n  enabled: true\n  install_id: test-uuid\nai:\n  monthly_token_budget: 100000\n  max_retries: 3\nlimits:\n  ai_context_max_nodes: 100\n`
     await fs.writeFile(path.join(configDir, 'config.yaml'), yaml)
@@ -53,7 +53,7 @@ describe('loadConfig', () => {
 
   it('env var overrides file value for anthropic_api_key', async () => {
     vi.stubEnv('ANTHROPIC_API_KEY', 'sk-ant-env-wins')
-    const configDir = path.join(tmpHome, '.codemind')
+    const configDir = path.join(tmpHome, '.stinkit')
     await fs.mkdir(configDir, { recursive: true })
     const yaml = `anthropic_api_key: sk-ant-from-file\ntelemetry:\n  enabled: false\n  install_id: x\nai:\n  monthly_token_budget: 500000\n  max_retries: 2\nlimits:\n  ai_context_max_nodes: 200\n`
     await fs.writeFile(path.join(configDir, 'config.yaml'), yaml)

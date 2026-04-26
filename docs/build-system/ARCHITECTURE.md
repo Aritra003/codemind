@@ -1,4 +1,4 @@
-# ARCHITECTURE.md — CodeMind
+# ARCHITECTURE.md — StinKit
 # Mode: ARCHITECT | Agent: TITAN
 # Input: docs/EVENT-STORM.md + docs/SPEC.md (CRITIC passed: April 2026)
 # Last updated: 2026-04-23
@@ -32,19 +32,19 @@ Until then: modular monolith. The module boundaries defined in EVENT-STORM.md ar
 
 ```mermaid
 C4Context
-  title CodeMind — System Context (v1, April 2026)
+  title StinKit — System Context (v1, April 2026)
 
   Person(dev, "Developer", "Solo dev, Team Lead, SRE (U1/U2/U4). Uses CLI locally.")
   Person(mgr, "Engineering Manager", "Uses web dashboard for risk visibility (U3).")
 
-  System(cli, "CodeMind CLI", "Local npm package. Offline-first. Code graph + blast radius + drift + forensics.")
-  System(cloud, "CodeMind Cloud", "API server + web dashboard. Identity, billing, team features, telemetry.")
+  System(cli, "StinKit CLI", "Local npm package. Offline-first. Code graph + blast radius + drift + forensics.")
+  System(cloud, "StinKit Cloud", "API server + web dashboard. Identity, billing, team features, telemetry.")
 
   System_Ext(anthropic, "Anthropic API (Opus 4.7)", "Optional enrichment. --think, see, trace narrative. Never required for core offline path.")
   System_Ext(git, "Git (local)", "Commit history, author attribution. Read-only. Never mutated.")
   System_Ext(stripe, "Stripe", "Subscription billing and payment processing.")
   System_Ext(github_oauth, "GitHub / Google OAuth", "Developer authentication for cloud tier.")
-  System_Ext(npm_reg, "npm Registry", "CLI package distribution. npx codemind entry point.")
+  System_Ext(npm_reg, "npm Registry", "CLI package distribution. npx stinkit entry point.")
   System_Ext(resend, "Resend (Email)", "Transactional emails: invites, receipts, alerts.")
 
   Rel(dev, cli, "Uses", "Terminal / Claude Code MCP")
@@ -65,17 +65,17 @@ C4Context
 
 ```mermaid
 C4Container
-  title CodeMind — Container Diagram (v1, April 2026)
+  title StinKit — Container Diagram (v1, April 2026)
 
   Person(dev, "Developer (U1/U2/U4)")
   Person(mgr, "Engineering Manager (U3)")
 
   Boundary(local_b, "Developer Machine (offline-first)") {
-    Container(cli_bin, "CodeMind CLI Binary", "Node.js 18+ / TypeScript", "Single entry point. Six commands: index, check, see, trace, graph, serve. Embeds all local modules.")
-    ContainerDb(local_fs, "Local Store (.codemind/)", "MessagePack + YAML", "graph.msgpack · config.yaml · see-mappings.yaml · connections.yaml")
+    Container(cli_bin, "StinKit CLI Binary", "Node.js 18+ / TypeScript", "Single entry point. Six commands: index, check, see, trace, graph, serve. Embeds all local modules.")
+    ContainerDb(local_fs, "Local Store (.stinkit/)", "MessagePack + YAML", "graph.msgpack · config.yaml · see-mappings.yaml · connections.yaml")
   }
 
-  Boundary(cloud_b, "CodeMind Cloud (AWS — us-east-1 + eu-west-1)") {
+  Boundary(cloud_b, "StinKit Cloud (AWS — us-east-1 + eu-west-1)") {
     Container(api_srv, "API Server", "Fastify 5 / Node.js 20 LTS / TypeScript", "Identity, billing, telemetry ingestion. Route→Service→Repository layer. Stateless — horizontally scalable.")
     Container(web_app, "Web Dashboard", "Next.js 15 / React 19", "Team hotspot view, risk trends, settings. Deployed as serverless (Vercel or AWS Lambda@Edge).")
     ContainerDb(pg, "PostgreSQL 16", "identity schema · billing schema", "User accounts, API keys, teams, subscriptions, invoices. RDS Multi-AZ.")
@@ -89,7 +89,7 @@ C4Container
   Rel(dev, cli_bin, "Runs commands / invokes via MCP", "Local process")
   Rel(mgr, web_app, "Browses dashboard", "HTTPS / Browser")
   Rel(cli_bin, local_fs, "Reads/writes graph + config", "Local filesystem")
-  Rel(cli_bin, anthropic_e, "--think / see / trace (optional)", "HTTPS REST · API key from ~/.codemind/config.yaml")
+  Rel(cli_bin, anthropic_e, "--think / see / trace (optional)", "HTTPS REST · API key from ~/.stinkit/config.yaml")
   Rel(cli_bin, api_srv, "Auth token validation + opt-in telemetry", "HTTPS REST")
   Rel(web_app, api_srv, "All dashboard requests", "HTTPS REST")
   Rel(api_srv, pg, "Identity + billing queries", "TCP 5432 · Prisma ORM")
@@ -104,19 +104,19 @@ C4Container
 
 ```mermaid
 C4Component
-  title CodeMind CLI — Component Detail
+  title StinKit CLI — Component Detail
 
-  Boundary(cli_b, "CodeMind CLI Process") {
+  Boundary(cli_b, "StinKit CLI Process") {
     Component(cmd_router, "Command Router", "commander.js", "Parses argv, routes to command handlers. No logic.")
     Component(graph_mod, "Graph Module", "BC-01", "Walker + tree-sitter parser + git loader + coverage detector + msgpack store + completeness metric.")
     Component(analysis_mod, "Analysis Module", "BC-02", "BFS blast radius + transparent risk rules + coverage gap detector + incident correlator.")
     Component(vision_mod, "Vision Module", "BC-03", "Opus Vision extraction + entity resolver + structural comparator + Mermaid generator.")
     Component(forensics_mod, "Forensics Module", "BC-04", "Origin triage + backward traversal + commit ranker + Opus narrative (capped 80%).")
-    Component(mcp_srv, "MCP Server", "BC-05 · @modelcontextprotocol/sdk", "Exposes 5 tools: codemind_check, codemind_see, codemind_trace, codemind_graph, codemind_status.")
+    Component(mcp_srv, "MCP Server", "BC-05 · @modelcontextprotocol/sdk", "Exposes 5 tools: stinkit_check, stinkit_see, stinkit_trace, stinkit_graph, stinkit_status.")
     Component(output_layer, "Output Layer", "Ink / chalk", "Screenshot-worthy terminal rendering. Box-drawing. No-color-only-info (INV accessibility).")
     Component(ai_client, "AI Client", "lib/ai.ts", "Single Anthropic SDK abstraction. Task-based model routing. Prompt caching enabled.")
     Component(telemetry_cl, "Telemetry Client", "lib/telemetry.ts", "Fire-and-forget. 100ms timeout. Batch + flush. No-op when opt-out.")
-    Component(config_reader, "Config Reader", "lib/config.ts", "Reads ~/.codemind/config.yaml. API key, telemetry opt-in, thresholds.")
+    Component(config_reader, "Config Reader", "lib/config.ts", "Reads ~/.stinkit/config.yaml. API key, telemetry opt-in, thresholds.")
   }
 
   Rel(cmd_router, graph_mod, "index / graph commands")
@@ -130,9 +130,9 @@ C4Component
   Rel(vision_mod, ai_client, "extraction + entity resolution")
   Rel(forensics_mod, ai_client, "triage + narrative")
   Rel(analysis_mod, ai_client, "--think enrichment")
-  Rel(mcp_srv, analysis_mod, "codemind_check tool")
-  Rel(mcp_srv, vision_mod, "codemind_see tool")
-  Rel(mcp_srv, forensics_mod, "codemind_trace tool")
+  Rel(mcp_srv, analysis_mod, "stinkit_check tool")
+  Rel(mcp_srv, vision_mod, "stinkit_see tool")
+  Rel(mcp_srv, forensics_mod, "stinkit_trace tool")
   Rel(cmd_router, telemetry_cl, "emit on every command")
   Rel(cmd_router, config_reader, "read at startup")
 ```
@@ -185,7 +185,7 @@ echo "Fitness check passed."
 ================================================================================
 
 ```
-codemind/                              # monorepo root (pnpm workspaces + Turborepo)
+stinkit/                              # monorepo root (pnpm workspaces + Turborepo)
 ├── CLAUDE.md | CONTEXT.md | ARCHITECTURE.md | SPEC.md etc.
 ├── docs/
 │   ├── EVENT-STORM.md | SPEC.md | ANALYTICS-SCHEMA.md
@@ -207,18 +207,18 @@ codemind/                              # monorepo root (pnpm workspaces + Turbor
 │   │       ├── drift.ts               # DriftAnalysis, EntityMatch, DiagramComponent
 │   │       ├── forensics.ts           # ForensicsTrace, OriginClass, CommitCandidate
 │   │       ├── api.ts                 # REST API request/response shapes
-│   │       └── result.ts              # CodemindResult<T> — success | partial | failed
+│   │       └── result.ts              # StinKitResult<T> — success | partial | failed
 │   │
-│   ├── cli/                           # npm package: codemind
+│   ├── cli/                           # npm package: stinkit
 │   │   ├── src/
 │   │   │   ├── commands/              # one file per CLI verb (< 150 lines each)
 │   │   │   │   ├── index.ts           # commander setup + version + default handler
-│   │   │   │   ├── index-cmd.ts       # codemind index
-│   │   │   │   ├── check.ts           # codemind check
-│   │   │   │   ├── see.ts             # codemind see
-│   │   │   │   ├── trace.ts           # codemind trace
-│   │   │   │   ├── graph-cmd.ts       # codemind graph (reserved name conflict avoided)
-│   │   │   │   └── serve.ts           # codemind serve → MCP server
+│   │   │   │   ├── index-cmd.ts       # stinkit index
+│   │   │   │   ├── check.ts           # stinkit check
+│   │   │   │   ├── see.ts             # stinkit see
+│   │   │   │   ├── trace.ts           # stinkit trace
+│   │   │   │   ├── graph-cmd.ts       # stinkit graph (reserved name conflict avoided)
+│   │   │   │   └── serve.ts           # stinkit serve → MCP server
 │   │   │   ├── graph/                 # BC-01: Graph Context
 │   │   │   │   ├── index.ts           # GraphRepository interface (port)
 │   │   │   │   ├── walker.ts          # recursive fs walk, language detection, gitignore
@@ -250,20 +250,20 @@ codemind/                              # monorepo root (pnpm workspaces + Turbor
 │   │   │   ├── mcp/                   # BC-05: Integration (MCP surface)
 │   │   │   │   ├── server.ts          # MCP server factory
 │   │   │   │   └── tools/
-│   │   │   │       ├── check.ts       # codemind_check MCP tool
-│   │   │   │       ├── see.ts         # codemind_see MCP tool
-│   │   │   │       ├── trace.ts       # codemind_trace MCP tool
-│   │   │   │       ├── graph.ts       # codemind_graph MCP tool
-│   │   │   │       └── status.ts      # codemind_status MCP tool
+│   │   │   │       ├── check.ts       # stinkit_check MCP tool
+│   │   │   │       ├── see.ts         # stinkit_see MCP tool
+│   │   │   │       ├── trace.ts       # stinkit_trace MCP tool
+│   │   │   │       ├── graph.ts       # stinkit_graph MCP tool
+│   │   │   │       └── status.ts      # stinkit_status MCP tool
 │   │   │   ├── output/                # presentation layer (terminal + HTML)
 │   │   │   │   ├── renderer.ts        # box-drawing, color+label (WCAG: no color-only)
 │   │   │   │   ├── html-report.ts     # static HTML report generator
 │   │   │   │   └── themes.ts          # color constants (never inline)
 │   │   │   └── lib/                   # cross-cutting infrastructure
 │   │   │       ├── ai.ts              # ONLY Anthropic SDK import — task-based model router
-│   │   │       ├── config.ts          # ~/.codemind/config.yaml reader
-│   │   │       ├── errors.ts          # CodemindResult<T>, error classes, retry
-│   │   │       ├── connections.ts     # .codemind/connections.yaml reader
+│   │   │       ├── config.ts          # ~/.stinkit/config.yaml reader
+│   │   │       ├── errors.ts          # StinKitResult<T>, error classes, retry
+│   │   │       ├── connections.ts     # .stinkit/connections.yaml reader
 │   │   │       └── telemetry.ts       # fire-and-forget TelemetryClient
 │   │   └── tests/
 │   │       ├── unit/                  # per-module pure function tests
@@ -313,7 +313,7 @@ codemind/                              # monorepo root (pnpm workspaces + Turbor
 │       │       └── settings/          # team management, billing, API keys
 │       ├── components/
 │       │   ├── ui/                    # shadcn/ui primitives (< 80 lines each)
-│       │   ├── features/              # CodeMind-specific components (< 120 lines)
+│       │   ├── features/              # StinKit-specific components (< 120 lines)
 │       │   └── charts/                # Recharts wrappers
 │       └── lib/
 │           ├── api.ts                 # type-safe API client (fetch wrapper)
@@ -447,7 +447,7 @@ CREATE TABLE billing.invoices (
 CREATE DATABASE telemetry;
 
 CREATE TABLE telemetry.events (
-  install_id    String,                          -- random UUID from ~/.codemind/id
+  install_id    String,                          -- random UUID from ~/.stinkit/id
   event_name    LowCardinality(String),
   properties    String,                          -- JSON blob (parsed at query time)
   client_version String,
@@ -537,7 +537,7 @@ forensics-narrate:      claude-opus-4-7   maxTokens: 2048   caching: system prom
           Source: ADR-002. Enforced by hygiene-check.ts.
           Review trigger: A new bounded context needs to be added.
 
-  DL-007  MessagePack for local graph persistence (.codemind/graph.msgpack).
+  DL-007  MessagePack for local graph persistence (.stinkit/graph.msgpack).
           No JSON. No SQLite in v1.
           Source: ADR-003.
           Review trigger: graph.msgpack exceeds 150MB for p99 repo OR startup > 3s.

@@ -1,5 +1,5 @@
 import type { Command } from 'commander'
-import type { UserConfig } from '@codemind/shared'
+import type { UserConfig } from '@stinkit/shared'
 
 export function registerServeCommand(program: Command, config: UserConfig): void {
   program

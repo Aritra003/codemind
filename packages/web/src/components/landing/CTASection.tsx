@@ -7,7 +7,7 @@ import { Check, Copy, ArrowRight } from "lucide-react";
 export function CTASection() {
   const [copied, setCopied] = useState(false);
   const copy = () => {
-    navigator.clipboard?.writeText("npx codemind");
+    navigator.clipboard?.writeText("npx stinkit");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -35,7 +35,7 @@ export function CTASection() {
             <button onClick={copy}
               className="group inline-flex items-center gap-3 bg-surface-raised border border-border hover:border-brand/40 rounded-2xl px-6 py-4 transition-all duration-300 hover:shadow-brand-glow/20 w-full sm:w-auto justify-center">
               <span className="font-mono text-lg text-neon">▸</span>
-              <code className="font-mono text-base text-ink">npx codemind</code>
+              <code className="font-mono text-base text-ink">npx stinkit</code>
               <span className="font-mono text-xs text-ink-dim bg-surface px-2 py-0.5 rounded ml-1 group-hover:text-brand transition-colors">
                 {copied ? <><Check size={11} className="inline" /> copied</> : <><Copy size={11} className="inline" /> copy</>}
               </span>
@@ -54,7 +54,7 @@ export function CTASection() {
             <span className="hidden sm:block">·</span>
             <span>MIT License</span>
             <span className="hidden sm:block">·</span>
-            <a href="https://github.com/Aritra003/codemind" target="_blank" rel="noreferrer"
+            <a href="https://github.com/Aritra003/stinkit" target="_blank" rel="noreferrer"
               className="hover:text-ink-muted transition-colors">⭐ Star on GitHub</a>
           </div>
         </motion.div>
