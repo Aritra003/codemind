@@ -7,7 +7,7 @@ const nextConfig = {
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
     ],
   },
-  transpilePackages: ["@codemind/shared"],
+  transpilePackages: ["@stinkit/shared"],
   experimental: {
     serverComponentsExternalPackages: ["tree-sitter", "tree-sitter-typescript", "tree-sitter-javascript"],
   },
