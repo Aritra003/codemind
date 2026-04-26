@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Aritra003/codemind/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-22C55E?style=flat-square" alt="MIT" /></a>
+  <a href="https://github.com/Aritra003/stinkit/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-22C55E?style=flat-square" alt="MIT" /></a>
   <img src="https://img.shields.io/badge/Tests-407_passing-22C55E?style=flat-square" />
   <img src="https://img.shields.io/badge/Languages-11-6366F1?style=flat-square" />
   <img src="https://img.shields.io/badge/API_Routes-17-6366F1?style=flat-square" />
@@ -49,8 +49,8 @@ npx stinkit
 cd your-project && stinkit index
 
 # Web Dashboard — full UI with GitHub integration
-git clone https://github.com/Aritra003/codemind.git
-cd codemind/packages/web
+git clone https://github.com/Aritra003/stinkit.git
+cd stinkit/packages/web
 npm install && npm run dev
 # → http://localhost:3000
 ```
@@ -406,8 +406,8 @@ Other tools claim 100%. We show you the real number.
 Pull requests welcome. MIT licensed — use for anything, including commercial.
 
 ```bash
-git clone https://github.com/Aritra003/codemind.git
-cd codemind
+git clone https://github.com/Aritra003/stinkit.git
+cd stinkit
 npm install
 npm test
 ```
