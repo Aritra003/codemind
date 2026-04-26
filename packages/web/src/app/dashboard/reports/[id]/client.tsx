@@ -1,9 +1,9 @@
 "use client";
-import type { ReportData, Severity, SecurityFinding, HealthArea } from "@/lib/reporter";
+import type { ReportData, Severity, ActionItem, ActionCategory, HealthArea } from "@/lib/reporter";
 import { Download, CheckCircle, RefreshCw, ChevronDown, ChevronRight, AlertTriangle } from "lucide-react";
 import { useState } from "react";
 
-// ─── Severity palette (matches StinKit design tokens) ───────────────────────
+// ── Severity palette ──────────────────────────────────────────────────────────
 const SEV: Record<Severity, { c: string; bg: string; bd: string; name: string; prob: string; impact: string }> = {
   CRITICAL: { c: "#FF6B6B", bg: "rgba(255,107,107,0.08)", bd: "rgba(255,107,107,0.22)", name: "Critical", prob: "Very Likely", impact: "Critical" },
   HIGH:     { c: "#FF8C42", bg: "rgba(255,140,66,0.08)",  bd: "rgba(255,140,66,0.22)",  name: "High",     prob: "Likely",      impact: "High"     },
@@ -11,7 +11,28 @@ const SEV: Record<Severity, { c: string; bg: string; bd: string; name: string; p
   LOW:      { c: "#00F5D4", bg: "rgba(0,245,212,0.08)",   bd: "rgba(0,245,212,0.22)",   name: "Low",      prob: "Rare",        impact: "Low"      },
 };
 
-// ─── Utility components ───────────────────────────────────────────────────────
+// ── Finding ID scheme: SK-SEC-001, SK-ARC-001, etc. ──────────────────────────
+const CAT_PFX: Record<ActionCategory, string> = {
+  security: "SEC", architecture: "ARC", coupling: "CPL", testing: "TST", cleanup: "CLN",
+};
+const P_SEV:   Record<string, Severity> = { P0: "CRITICAL", P1: "HIGH", P2: "LOW" };
+const P_LABEL: Record<string, string>   = { P0: "Fix today", P1: "Fix this sprint", P2: "Improve later" };
+const P_COLOR: Record<string, string>   = { P0: "#FF6B6B", P1: "#FF8C42", P2: "#00F5D4" };
+
+// ── Severity Framework matrix ─────────────────────────────────────────────────
+const IMPACT_ROWS = ["Low", "Medium", "High", "Critical"] as const;
+const PROB_COLS   = ["Rare", "Unlikely", "Likely", "Very Likely"] as const;
+const MATRIX: Record<string, Record<string, string>> = {
+  Low:      { Rare: "Low",    Unlikely: "Low",    Likely: "Medium",   "Very Likely": "Medium"   },
+  Medium:   { Rare: "Low",    Unlikely: "Medium", Likely: "Medium",   "Very Likely": "High"     },
+  High:     { Rare: "Medium", Unlikely: "Medium", Likely: "High",     "Very Likely": "Critical" },
+  Critical: { Rare: "Medium", Unlikely: "High",   Likely: "Critical", "Very Likely": "Critical" },
+};
+const MAT_CLR: Record<string, string> = {
+  Critical: "#FF6B6B", High: "#FF8C42", Medium: "#FFB347", Low: "#00F5D4",
+};
+
+// ── Atoms ─────────────────────────────────────────────────────────────────────
 function SectionHead({ n, title }: { n: string; title: string }) {
   return (
     <div className="flex items-center gap-3 mb-5">
@@ -21,17 +42,19 @@ function SectionHead({ n, title }: { n: string; title: string }) {
     </div>
   );
 }
-
 function Lbl({ children, neon }: { children: React.ReactNode; neon?: boolean }) {
-  return <p className={`font-mono text-xs uppercase tracking-[0.1em] mb-2 ${neon ? "text-neon" : "text-ink-dim"}`}>{children}</p>;
+  return (
+    <p className={`font-mono text-xs uppercase tracking-[0.1em] mb-2 ${neon ? "text-neon" : "text-ink-dim"}`}>
+      {children}
+    </p>
+  );
 }
 
-// ─── SVG Donut chart ─────────────────────────────────────────────────────────
+// ── Donut chart ───────────────────────────────────────────────────────────────
 function polarXY(cx: number, cy: number, r: number, deg: number) {
   const rad = ((deg - 90) * Math.PI) / 180;
   return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
 }
-
 function donutArc(cx: number, cy: number, R: number, w: number, a1: number, a2: number) {
   if (a2 - a1 >= 360) a2 = a1 + 359.99;
   const ir = R - w, lg = a2 - a1 > 180 ? 1 : 0;
@@ -39,7 +62,6 @@ function donutArc(cx: number, cy: number, R: number, w: number, a1: number, a2: 
   const s = polarXY(cx, cy, ir, a2), t = polarXY(cx, cy, ir, a1);
   return `M${p.x},${p.y}A${R},${R},0,${lg},1,${q.x},${q.y}L${s.x},${s.y}A${ir},${ir},0,${lg},0,${t.x},${t.y}Z`;
 }
-
 function Donut({ segs, total, size = 132, ring = 24 }: {
   segs: { value: number; color: string; label: string }[];
   total: number; size?: number; ring?: number;
@@ -77,26 +99,59 @@ function Donut({ segs, total, size = 132, ring = 24 }: {
   );
 }
 
-// ─── Individual finding card (ANQ-style) ─────────────────────────────────────
-function FindingCard({ f, num }: { f: SecurityFinding; num: number }) {
-  const [open, setOpen] = useState(false);
-  const m = SEV[f.severity];
-  const id = `CM-${String(num).padStart(3, "0")}`;
-
+// ── Collapsible file list ─────────────────────────────────────────────────────
+function FileList({ files }: { files: string[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const shown = expanded ? files : files.slice(0, 5);
   return (
-    <div id={`f-${num}`} className="rounded-2xl border overflow-hidden mb-3 last:mb-0" style={{ borderColor: m.bd, background: m.bg }}>
+    <div className="bg-[#05050B]/60 rounded-lg px-3 py-2.5 border border-border">
+      <div className="space-y-1">
+        {shown.map(f => (
+          <code key={f} className="font-mono text-xs text-ink-muted block truncate">{f}</code>
+        ))}
+      </div>
+      {files.length > 5 && (
+        <button
+          type="button"
+          onClick={() => setExpanded(e => !e)}
+          className="font-mono text-xs text-brand mt-2 hover:underline block"
+        >
+          {expanded ? `Show less ▴` : `Show all ${files.length} files ▾`}
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ── Grouped finding card (one card per issue type, N files inside) ────────────
+function GroupedFindingCard({ action, id }: { action: ActionItem; id: string }) {
+  const [open, setOpen] = useState(false);
+  const sev = P_SEV[action.priority] ?? "LOW";
+  const m = SEV[sev];
+  return (
+    <div
+      id={`f-${id}`}
+      className="rounded-2xl border overflow-hidden mb-3 last:mb-0"
+      style={{ borderLeftWidth: 4, borderLeftColor: m.c, borderColor: m.bd, background: m.bg }}
+    >
+      {/* Header row */}
       <button type="button" onClick={() => setOpen(o => !o)} className="w-full text-left px-5 py-4">
         <div className="flex items-start gap-3">
-          <span className="font-mono text-xs font-semibold text-ink-dim mt-[3px] flex-shrink-0 pt-px">{id}</span>
+          <span className="font-mono text-xs font-semibold text-ink-dim mt-[3px] flex-shrink-0">{id}</span>
           <div className="flex-1 min-w-0">
-            <p className="font-body text-sm font-semibold text-ink leading-snug">{f.issue}</p>
-            <code className="font-mono text-xs text-ink-dim mt-0.5 block truncate">{f.file}</code>
+            <p className="font-body text-sm font-semibold text-ink leading-snug">{action.title}</p>
+            <span className="font-mono text-xs text-ink-dim mt-0.5 block">
+              {action.files.length} file{action.files.length !== 1 ? "s" : ""} affected
+            </span>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-            <span className="font-mono text-xs font-bold px-2.5 py-0.5 rounded-full"
-              style={{ color: m.c, background: m.bg, border: `1px solid ${m.bd}` }}>
+            <span
+              className="font-mono text-xs font-bold px-2.5 py-0.5 rounded-full"
+              style={{ color: m.c, background: m.bg, border: `1px solid ${m.bd}` }}
+            >
               {m.name}
             </span>
+            <span className="font-mono text-xs text-ink-dim px-2 py-0.5 rounded-full border border-border">Open</span>
             {open ? <ChevronDown size={13} className="text-ink-dim" /> : <ChevronRight size={13} className="text-ink-dim" />}
           </div>
         </div>
@@ -118,44 +173,44 @@ function FindingCard({ f, num }: { f: SecurityFinding; num: number }) {
             ))}
           </div>
 
-          {/* Path */}
+          {/* Description */}
           <div>
-            <Lbl>Path</Lbl>
-            <code className="font-mono text-xs text-ink-muted bg-[#05050B]/60 rounded-lg px-3 py-2 block border border-border break-all leading-relaxed">{f.file}</code>
+            <Lbl>Description</Lbl>
+            <p className="font-body text-sm text-ink-muted leading-relaxed">{action.whyItMatters}</p>
           </div>
 
-          {/* Description */}
-          {f.description && (
-            <div>
-              <Lbl>Description</Lbl>
-              <p className="font-body text-sm text-ink-muted leading-relaxed">{f.description}</p>
-            </div>
-          )}
+          {/* Finding detail */}
+          <div>
+            <Lbl>Finding</Lbl>
+            <p className="font-body text-sm text-ink-muted leading-relaxed">{action.whatIsWrong}</p>
+          </div>
 
-          {/* Code snippet */}
-          {f.snippet && (
-            <div>
-              <Lbl>Code</Lbl>
-              <pre className="font-mono text-xs text-[#93C5FD] bg-[#05050B]/80 rounded-lg px-3 py-2.5 border border-border overflow-x-auto whitespace-pre-wrap break-all">
-                <code>{f.snippet}</code>
-              </pre>
-            </div>
-          )}
+          {/* Affected files — collapsible */}
+          <div>
+            <Lbl>Affected Files ({action.files.length})</Lbl>
+            <FileList files={action.files} />
+          </div>
 
           {/* Remediation */}
-          {f.remediation && (
-            <div className="rounded-xl px-4 py-3 border" style={{ background: "rgba(0,245,212,0.04)", borderColor: "rgba(0,245,212,0.15)" }}>
-              <Lbl neon>Remediation</Lbl>
-              <p className="font-body text-sm text-ink-muted leading-relaxed">{f.remediation}</p>
-            </div>
-          )}
+          <div className="rounded-xl px-4 py-3 border" style={{ background: "rgba(0,245,212,0.04)", borderColor: "rgba(0,245,212,0.15)" }}>
+            <Lbl neon>Remediation</Lbl>
+            <p className="font-body text-sm text-ink-muted leading-relaxed whitespace-pre-line">{action.howToFix}</p>
+          </div>
+
+          {/* Priority footer */}
+          <div className="flex items-center gap-4 pt-1 border-t border-border">
+            <span className="font-mono text-xs font-bold" style={{ color: P_COLOR[action.priority] }}>
+              {P_LABEL[action.priority]}
+            </span>
+            <span className="font-mono text-xs text-ink-dim">Priority: {action.priority}</span>
+          </div>
         </div>
       )}
     </div>
   );
 }
 
-// ─── Executive summary narrative ─────────────────────────────────────────────
+// ── Executive summary narrative ───────────────────────────────────────────────
 function buildNarrative(data: ReportData, p0: number, p1: number): string {
   const { totalFiles, totalEdges, languages, criticalCount: crit, highCount: high, mediumCount: med, lowCount: low } = data.summary;
   const total = crit + high + med + low;
@@ -165,16 +220,19 @@ function buildNarrative(data: ReportData, p0: number, p1: number): string {
     : [crit > 0 && `${crit} critical`, high > 0 && `${high} high`, med > 0 && `${med} medium`, low > 0 && `${low} low`]
         .filter(Boolean).join(", ") + ` severit${total === 1 ? "y" : "ies"} finding${total > 1 ? "s" : ""} identified.`;
   const cycles = data.dataFlow.circularDependencies.length;
-  const archStr = cycles > 0 ? `${cycles} circular dependenc${cycles > 1 ? "ies" : "y"} detected.` : "No circular dependencies detected.";
+  const archStr = cycles > 0
+    ? `${cycles} circular dependenc${cycles > 1 ? "ies" : "y"} detected.`
+    : "No circular dependencies detected.";
   const verdict = p0 > 0
     ? "Immediate action is required on critical findings before the next deployment."
-    : p1 > 0 ? "Improvements should be addressed before the next release." : "The codebase demonstrates a strong security posture.";
+    : p1 > 0 ? "Improvements should be addressed before the next release."
+    : "The codebase demonstrates a strong security posture.";
   return `This audit covers ${data.repoName}, analyzed across ${totalFiles} files with ${totalEdges} import edges spanning ${langStr || "multiple languages"}. ${issueStr} ${archStr} ${verdict}`;
 }
 
-// ─── Main export ─────────────────────────────────────────────────────────────
+// ── Main export ───────────────────────────────────────────────────────────────
 export function ReportClient({ data, createdAt }: { data: ReportData; createdAt: string }) {
-  const { summary, security, actions, healthyAreas, performance, dataFlow, inefficiencies, coverage } = data;
+  const { summary, actions, healthyAreas, performance, dataFlow, inefficiencies, coverage } = data;
   const acts = actions ?? [];
   const score = summary.securityScore;
   const scoreColor = score >= 80 ? "#00F5D4" : score >= 60 ? "#FFB347" : "#FF6B6B";
@@ -186,37 +244,53 @@ export function ReportClient({ data, createdAt }: { data: ReportData; createdAt:
   const narrative = buildNarrative(data, p0, p1);
   const healthy: HealthArea[] = healthyAreas ?? [];
 
+  // Pre-compute SK-XXX-NNN IDs (sequential per category)
+  const catCounts: Partial<Record<string, number>> = {};
+  const actsWithIds = acts.map(action => {
+    const pfx = CAT_PFX[action.category] ?? "SEC";
+    catCounts[pfx] = (catCounts[pfx] ?? 0) + 1;
+    return { action, id: `SK-${pfx}-${String(catCounts[pfx]).padStart(3, "0")}` };
+  });
+
   const TOC = [
     { n: "1", label: "Executive Summary",     href: "#s1" },
     { n: "2", label: "Review Scope",          href: "#s2" },
     { n: "3", label: "Findings Summary",      href: "#s3" },
-    { n: "4", label: "Security Findings",     href: "#s4" },
-    { n: "5", label: "Architecture Analysis", href: "#s5" },
-    { n: "6", label: "Test Coverage",         href: "#s6" },
+    { n: "4", label: "Detailed Findings",     href: "#s4" },
+    { n: "5", label: "Severity Framework",    href: "#s5" },
+    { n: "6", label: "Architecture Analysis", href: "#s6" },
+    { n: "7", label: "Remediation Roadmap",   href: "#s7" },
+    { n: "8", label: "Test Coverage",         href: "#s8" },
   ];
 
   return (
     <div className="p-6 lg:p-8 max-w-4xl">
 
-      {/* ── Report header ─────────────────────────────────────────────── */}
+      {/* ── Report header ──────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between gap-4 mb-10 pb-8 border-b border-border">
         <div>
           <span className="font-mono text-xs tracking-[0.18em] text-ink-dim uppercase">Codebase Audit Report</span>
           <h1 className="font-display text-2xl font-bold text-ink mt-1.5 mb-2 leading-tight">{data.repoName}</h1>
           <div className="flex items-center gap-3 flex-wrap">
             <span className="font-mono text-xs text-ink-dim">Generated {new Date(createdAt).toLocaleString()}</span>
-            <span className="font-mono text-xs font-bold px-2.5 py-0.5 rounded-full" style={{ color: scoreColor, background: `${scoreColor}15` }}>
+            <span
+              className="font-mono text-xs font-bold px-2.5 py-0.5 rounded-full"
+              style={{ color: scoreColor, background: `${scoreColor}15` }}
+            >
               {verdict}
             </span>
           </div>
         </div>
-        <button type="button" onClick={() => window.print()}
-          className="print:hidden flex items-center gap-2 px-4 py-2.5 text-sm font-body font-medium rounded-xl border border-border hover:border-brand/60 text-ink-muted hover:text-ink transition-all flex-shrink-0 whitespace-nowrap">
+        <button
+          type="button"
+          onClick={() => window.print()}
+          className="print:hidden flex items-center gap-2 px-4 py-2.5 text-sm font-body font-medium rounded-xl border border-border hover:border-brand/60 text-ink-muted hover:text-ink transition-all flex-shrink-0 whitespace-nowrap"
+        >
           <Download size={14} /> Export PDF
         </button>
       </div>
 
-      {/* ── Table of Contents ─────────────────────────────────────────── */}
+      {/* ── Table of Contents ──────────────────────────────────────────────── */}
       <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] px-6 py-5 mb-8 print:hidden">
         <p className="font-mono text-xs uppercase tracking-[0.14em] text-ink-dim mb-3">Table of Contents</p>
         <ul>
@@ -232,13 +306,18 @@ export function ReportClient({ data, createdAt }: { data: ReportData; createdAt:
         </ul>
       </div>
 
-      {/* ── 1. Executive Summary ────────────────────────────────────────── */}
+      {/* ── 1. Executive Summary ────────────────────────────────────────────── */}
       <section id="s1" className="mb-8">
         <SectionHead n="1" title="Executive Summary" />
         <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] p-6">
           <p className="font-body text-sm text-ink-muted leading-relaxed mb-6">{narrative}</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {([["Critical", crit, "#FF6B6B"], ["High", high, "#FF8C42"], ["Medium", med, "#FFB347"], ["Low", low, "#00F5D4"]] as [string, number, string][]).map(([label, count, color]) => (
+            {([
+              ["Critical", crit, "#FF6B6B"],
+              ["High",     high, "#FF8C42"],
+              ["Medium",   med,  "#FFB347"],
+              ["Low",      low,  "#00F5D4"],
+            ] as [string, number, string][]).map(([label, count, color]) => (
               <div key={label} className="rounded-xl border py-3.5 text-center" style={{ borderColor: `${color}25`, background: `${color}08` }}>
                 <div className="font-mono text-2xl font-bold leading-none mb-1" style={{ color }}>{count}</div>
                 <div className="font-mono text-xs text-ink-dim">{label}</div>
@@ -248,7 +327,7 @@ export function ReportClient({ data, createdAt }: { data: ReportData; createdAt:
         </div>
       </section>
 
-      {/* ── 2. Review Scope ─────────────────────────────────────────────── */}
+      {/* ── 2. Review Scope ─────────────────────────────────────────────────── */}
       <section id="s2" className="mb-8">
         <SectionHead n="2" title="Review Scope" />
         <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] p-6">
@@ -276,7 +355,7 @@ export function ReportClient({ data, createdAt }: { data: ReportData; createdAt:
         </div>
       </section>
 
-      {/* ── 3. Findings Summary ─────────────────────────────────────────── */}
+      {/* ── 3. Findings Summary ─────────────────────────────────────────────── */}
       <section id="s3" className="mb-8">
         <SectionHead n="3" title="Findings Summary" />
         <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] p-6">
@@ -324,7 +403,6 @@ export function ReportClient({ data, createdAt }: { data: ReportData; createdAt:
             </div>
           </div>
 
-          {/* Healthy areas */}
           {healthy.length > 0 && (
             <div className="mt-6 pt-5 border-t border-border">
               <Lbl>What&apos;s Healthy — {healthy.length} items</Lbl>
@@ -344,33 +422,104 @@ export function ReportClient({ data, createdAt }: { data: ReportData; createdAt:
         </div>
       </section>
 
-      {/* ── 4. Security Findings ─────────────────────────────────────────── */}
+      {/* ── 4. Detailed Findings — grouped by issue type ────────────────────── */}
       <section id="s4" className="mb-8">
-        <SectionHead n="4" title={`Security Findings — ${security.findings.length} item${security.findings.length !== 1 ? "s" : ""}`} />
-        {security.findings.length === 0 ? (
+        <SectionHead
+          n="4"
+          title={`Detailed Findings — ${actsWithIds.length} grouped finding${actsWithIds.length !== 1 ? "s" : ""}`}
+        />
+        {actsWithIds.length === 0 ? (
           <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] p-8 flex items-center gap-3">
             <CheckCircle size={16} className="text-neon" />
-            <span className="font-body text-sm text-ink-muted">No security vulnerabilities detected across all scanned files.</span>
+            <span className="font-body text-sm text-ink-muted">No findings detected across all scanned files.</span>
           </div>
         ) : (
           <div>
-            {security.findings.map((f, i) => <FindingCard key={i} f={f} num={i + 1} />)}
+            {actsWithIds.map(({ action, id }) => (
+              <GroupedFindingCard key={id} action={action} id={id} />
+            ))}
           </div>
         )}
       </section>
 
-      {/* ── 5. Architecture Analysis ─────────────────────────────────────── */}
+      {/* ── 5. Severity Framework — Impact × Probability matrix ─────────────── */}
       <section id="s5" className="mb-8">
-        <SectionHead n="5" title="Architecture Analysis" />
+        <SectionHead n="5" title="Severity Framework" />
+        <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] p-6">
+          <p className="font-body text-xs text-ink-muted mb-5">
+            Severity is determined from two dimensions: Impact (what breaks if exploited) and Probability (how likely exploitation is).
+            Top-right cell = fix first.
+          </p>
+          <div className="overflow-x-auto mb-6">
+            <table className="w-full font-mono text-xs border-collapse">
+              <thead>
+                <tr>
+                  <th className="text-left py-2 pr-4 text-ink-dim font-medium w-24">Impact ↓ / Prob →</th>
+                  {PROB_COLS.map(p => (
+                    <th key={p} className="py-2 px-3 text-center text-ink-dim font-medium">{p}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {IMPACT_ROWS.map(impact => (
+                  <tr key={impact} className="border-t border-border/40">
+                    <td className="py-2.5 pr-4 font-bold text-ink">{impact}</td>
+                    {PROB_COLS.map(prob => {
+                      const sev = MATRIX[impact]?.[prob] ?? "Low";
+                      return (
+                        <td key={prob} className="py-2.5 px-3 text-center">
+                          <span
+                            className="px-2 py-0.5 rounded text-xs font-bold"
+                            style={{ color: MAT_CLR[sev], background: `${MAT_CLR[sev]}15` }}
+                          >
+                            {sev}
+                          </span>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="space-y-3 pt-4 border-t border-border">
+            {([
+              ["Critical", "#FF6B6B", "Exploitation is highly likely. Could lead to data loss, unauthorized access, or system compromise."],
+              ["High",     "#FF8C42", "Likely to be exploited. Significant operational or security impact."],
+              ["Medium",   "#FFB347", "Exploitable under specific conditions. Moderate impact without direct profit to attacker."],
+              ["Low",      "#00F5D4", "Low exploitation likelihood. Affects code quality or efficiency, not security directly."],
+            ] as [string, string, string][]).map(([sev, color, desc]) => (
+              <div key={sev} className="flex items-start gap-3">
+                <span
+                  className="font-mono text-xs font-bold px-2 py-0.5 rounded flex-shrink-0 mt-0.5 whitespace-nowrap"
+                  style={{ color, background: `${color}15` }}
+                >
+                  {sev}
+                </span>
+                <p className="font-body text-xs text-ink-muted leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 6. Architecture Analysis ─────────────────────────────────────────── */}
+      <section id="s6" className="mb-8">
+        <SectionHead n="6" title="Architecture Analysis" />
         <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] p-6 space-y-6">
 
           <div>
             <Lbl>Circular Dependencies</Lbl>
             {dataFlow.circularDependencies.length === 0 ? (
-              <div className="flex items-center gap-2 text-neon font-body text-sm"><CheckCircle size={13} /> None detected — the graph is acyclic.</div>
+              <div className="flex items-center gap-2 text-neon font-body text-sm">
+                <CheckCircle size={13} /> None detected — the graph is acyclic.
+              </div>
             ) : dataFlow.circularDependencies.map((cycle, i) => (
-              <div key={i} className="font-mono text-xs rounded-lg px-3 py-2.5 mb-2 text-[#FF9393] break-all"
-                style={{ background: "rgba(255,107,107,0.06)", border: "1px solid rgba(255,107,107,0.2)" }}>
+              <div
+                key={i}
+                className="font-mono text-xs rounded-lg px-3 py-2.5 mb-2 text-[#FF9393] break-all"
+                style={{ background: "rgba(255,107,107,0.06)", border: "1px solid rgba(255,107,107,0.2)" }}
+              >
                 {cycle.join(" → ")} → (cycle)
               </div>
             ))}
@@ -380,9 +529,9 @@ export function ReportClient({ data, createdAt }: { data: ReportData; createdAt:
             <Lbl>Blast Radius Hotspots</Lbl>
             <div className="grid grid-cols-3 gap-2 mb-4">
               {[
-                { label: "Avg Blast Radius", value: performance.avgBlastRadius,          color: "#4361EE" },
-                { label: "Max Blast Radius", value: performance.maxBlastRadius,          color: "#FF6B6B" },
-                { label: "Orphaned Files",   value: performance.orphanedFiles.length,    color: "#FFB347" },
+                { label: "Avg Blast Radius", value: performance.avgBlastRadius,       color: "#4361EE" },
+                { label: "Max Blast Radius", value: performance.maxBlastRadius,       color: "#FF6B6B" },
+                { label: "Orphaned Files",   value: performance.orphanedFiles.length, color: "#FFB347" },
               ].map(s => (
                 <div key={s.label} className="bg-surface rounded-xl p-3 text-center border border-border">
                   <div className="font-mono text-xl font-bold mb-0.5" style={{ color: s.color }}>{s.value}</div>
@@ -393,12 +542,20 @@ export function ReportClient({ data, createdAt }: { data: ReportData; createdAt:
             <div>
               {performance.hotspots.slice(0, 10).map((h, i) => (
                 <div key={i} className="flex items-center gap-3 py-2 border-b border-border/40 last:border-0">
-                  <div className="w-5 h-5 rounded flex items-center justify-center text-xs font-mono font-bold flex-shrink-0"
-                    style={{ background: SEV[h.riskLevel].bg, color: SEV[h.riskLevel].c }}>{i + 1}</div>
+                  <div
+                    className="w-5 h-5 rounded flex items-center justify-center text-xs font-mono font-bold flex-shrink-0"
+                    style={{ background: SEV[h.riskLevel].bg, color: SEV[h.riskLevel].c }}
+                  >
+                    {i + 1}
+                  </div>
                   <code className="font-mono text-xs text-ink flex-1 truncate min-w-0">{h.file}</code>
                   <span className="font-mono text-xs text-ink-dim flex-shrink-0">{h.dependents} dependents</span>
-                  <span className="font-mono text-xs font-bold px-2 py-0.5 rounded flex-shrink-0"
-                    style={{ color: SEV[h.riskLevel].c, background: SEV[h.riskLevel].bg }}>{SEV[h.riskLevel].name}</span>
+                  <span
+                    className="font-mono text-xs font-bold px-2 py-0.5 rounded flex-shrink-0"
+                    style={{ color: SEV[h.riskLevel].c, background: SEV[h.riskLevel].bg }}
+                  >
+                    {SEV[h.riskLevel].name}
+                  </span>
                 </div>
               ))}
             </div>
@@ -418,24 +575,75 @@ export function ReportClient({ data, createdAt }: { data: ReportData; createdAt:
         </div>
       </section>
 
-      {/* ── 6. Test Coverage ─────────────────────────────────────────────── */}
-      <section id="s6" className="mb-8">
-        <SectionHead n="6" title="Test Coverage Estimate" />
+      {/* ── 7. Remediation Roadmap ───────────────────────────────────────────── */}
+      <section id="s7" className="mb-8">
+        <SectionHead n="7" title="Remediation Roadmap" />
+        <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] p-6 space-y-3">
+          {(["P0", "P1", "P2"] as const).map(priority => {
+            const items = acts.filter(a => a.priority === priority);
+            if (items.length === 0) return null;
+            const cfg = {
+              P0: { label: "TODAY — 1-2 hours",      color: "#FF6B6B" },
+              P1: { label: "THIS SPRINT — 2-5 days",  color: "#FF8C42" },
+              P2: { label: "IMPROVE LATER",           color: "#00F5D4" },
+            }[priority];
+            return (
+              <div key={priority} className="rounded-xl border border-border p-4">
+                <div className="font-mono text-xs font-bold mb-3" style={{ color: cfg.color }}>{cfg.label}</div>
+                <ul className="space-y-1.5">
+                  {items.map((item, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="font-mono text-xs text-ink-dim mt-0.5 flex-shrink-0">→</span>
+                      <span className="font-body text-sm text-ink-muted">
+                        {item.title}
+                        {item.files.length > 1 && (
+                          <span className="text-ink-dim"> ({item.files.length} files)</span>
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+          <div className="rounded-xl border border-border p-4">
+            <div className="font-mono text-xs font-bold mb-3 text-neon">ONGOING</div>
+            <ul className="space-y-1.5">
+              {["Run StinKit audit on every PR", "Re-generate this report monthly", "Add stinkit check to CI/CD pipeline"].map((item, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <span className="font-mono text-xs text-ink-dim mt-0.5 flex-shrink-0">→</span>
+                  <span className="font-body text-sm text-ink-muted">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 8. Test Coverage ─────────────────────────────────────────────────── */}
+      <section id="s8" className="mb-8">
+        <SectionHead n="8" title="Test Coverage Estimate" />
         <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] p-6">
           <div className="flex items-center gap-5 mb-5">
-            <div className="w-20 h-20 rounded-2xl flex flex-col items-center justify-center border-2 flex-shrink-0"
+            <div
+              className="w-20 h-20 rounded-2xl flex flex-col items-center justify-center border-2 flex-shrink-0"
               style={{
                 borderColor: coverage.estimatedScore >= 80 ? "#00F5D4" : coverage.estimatedScore >= 60 ? "#FFB347" : "#FF6B6B",
                 background:  `${coverage.estimatedScore >= 80 ? "#00F5D4" : coverage.estimatedScore >= 60 ? "#FFB347" : "#FF6B6B"}10`,
-              }}>
-              <span className="font-mono text-2xl font-bold leading-none"
-                style={{ color: coverage.estimatedScore >= 80 ? "#00F5D4" : coverage.estimatedScore >= 60 ? "#FFB347" : "#FF6B6B" }}>
+              }}
+            >
+              <span
+                className="font-mono text-2xl font-bold leading-none"
+                style={{ color: coverage.estimatedScore >= 80 ? "#00F5D4" : coverage.estimatedScore >= 60 ? "#FFB347" : "#FF6B6B" }}
+              >
                 {coverage.estimatedScore}%
               </span>
             </div>
             <div>
               <p className="font-body text-sm font-semibold text-ink mb-1">Estimated coverage health</p>
-              <p className="font-body text-xs text-ink-muted leading-relaxed">Based on blast-radius hotspots without detected test files. Lower = more untested high-risk code.</p>
+              <p className="font-body text-xs text-ink-muted leading-relaxed">
+                Based on blast-radius hotspots without detected test files. Lower = more untested high-risk code.
+              </p>
             </div>
           </div>
           {coverage.highRiskUncovered.length > 0 && (
@@ -467,6 +675,7 @@ export function ReportClient({ data, createdAt }: { data: ReportData; createdAt:
           section { break-inside: avoid; page-break-inside: avoid; }
           h1, h2 { color: #1a1a1a !important; }
           code, pre { background: #f3f4f6 !important; color: #1e40af !important; }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
       `}</style>
     </div>
