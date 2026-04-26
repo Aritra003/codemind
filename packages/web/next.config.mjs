@@ -9,7 +9,7 @@ const nextConfig = {
   },
   transpilePackages: ["@stinkit/shared"],
   experimental: {
-    serverComponentsExternalPackages: ["tree-sitter", "tree-sitter-typescript", "tree-sitter-javascript"],
+    serverComponentsExternalPackages: ["tree-sitter", "tree-sitter-typescript", "tree-sitter-javascript", "sharp"],
   },
 };
 
