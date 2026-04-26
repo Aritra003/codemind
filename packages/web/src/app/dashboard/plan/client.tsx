@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { ListOrdered, Loader2, AlertTriangle, Info, ChevronDown, Sparkles } from "lucide-react";
+import { useTask } from "@/lib/task-manager";
 
 type Repo   = { id: string; fullName: string; graphData: unknown };
 type Result = { plan: string; tiers: number; affected: number; model: string; repoName: string };
@@ -55,6 +56,7 @@ export default function PlanClient({ hasApiKey }: { hasApiKey: boolean }) {
   const [loading, setLoading] = useState(false);
   const [result,  setResult]  = useState<Result | null>(null);
   const [error,   setError]   = useState<string | null>(null);
+  const { runTask, getResult } = useTask();
 
   useEffect(() => {
     fetch("/api/repos").then(r => r.json()).then((data: unknown) => {
@@ -65,14 +67,23 @@ export default function PlanClient({ hasApiKey }: { hasApiKey: boolean }) {
     }).catch(() => {});
   }, []);
 
+  // Restore result if task completed in background
+  useEffect(() => {
+    const cached = getResult("/dashboard/plan");
+    if (cached) setResult(cached as Result);
+  }, [getResult]);
+
   const generate = async () => {
     if (!goal.trim() || loading) return;
     setLoading(true); setError(null); setResult(null);
     try {
-      const res  = await fetch("/api/plan", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ goal: goal.trim(), repoId: repoId || undefined }) });
-      const json = await res.json() as Record<string, unknown>;
-      if (!res.ok) throw new Error((json.error as string) ?? "Plan failed");
-      setResult(json as unknown as Result);
+      const data = await runTask("Refactor plan", "/dashboard/plan", async () => {
+        const res  = await fetch("/api/plan", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ goal: goal.trim(), repoId: repoId || undefined }) });
+        const json = await res.json() as Record<string, unknown>;
+        if (!res.ok) throw new Error((json.error as string) ?? "Plan failed");
+        return json as unknown as Result;
+      });
+      setResult(data);
     } catch (e) { setError(e instanceof Error ? e.message : "Unknown error"); }
     finally { setLoading(false); }
   };

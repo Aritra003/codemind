@@ -27,8 +27,8 @@ function parseReport(raw: string): Block[] {
 
 function inline(t: string) {
   return t
-    .replace(/\*\*(.+?)\*\*/g, "<strong class='text-ink font-semibold'>$1</strong>")
-    .replace(/`(.+?)`/g, "<code class='font-mono text-brand text-xs bg-brand/8 px-1 rounded'>$1</code>");
+    .replace(/\*\*(.+?)\*\*/g, "<strong style='color:var(--ink-primary);font-weight:600'>$1</strong>")
+    .replace(/`(.+?)`/g, "<code style='font-family:monospace;font-size:13px;background:var(--accent-glow);padding:1px 5px;border-radius:4px;color:var(--accent)'>$1</code>");
 }
 
 function buildPrintHtml(filename: string, raw: string): string {
@@ -81,21 +81,25 @@ export function ReportViewer({ raw, filename, onReset }: { raw: string; filename
   };
 
   return (
-    <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] border border-border overflow-hidden">
-      {/* Report header bar */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-surface-raised/60">
+    <div className="bg-[var(--bg-glass)] backdrop-blur-xl rounded-[20px] border border-[var(--border-subtle)] overflow-hidden">
+      {/* Header bar */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)] bg-[var(--bg-elevated)]">
         <div>
-          <p className="font-mono text-xs font-bold text-brand uppercase tracking-widest mb-0.5">Architecture Analysis</p>
-          <p className="font-mono text-xs text-ink-muted truncate max-w-xs">{filename}</p>
+          <p className="font-mono font-[700] uppercase tracking-[3px] mb-0.5"
+            style={{ fontSize: "11px", color: "var(--accent)" }}>Architecture Analysis</p>
+          <p className="font-mono truncate max-w-xs"
+            style={{ fontSize: "13px", color: "var(--ink-tertiary)" }}>{filename}</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <button onClick={downloadPDF}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-body font-medium text-ink-muted border border-border rounded-lg hover:text-ink hover:border-border/80 transition-colors">
-            <Download size={11} /> PDF
+            className="flex items-center gap-1.5 px-3 rounded-[8px] border border-[var(--border-default)] hover:border-[var(--border-hover)] hover:text-[var(--ink-primary)] transition-colors min-h-0"
+            style={{ height: "36px", fontSize: "13px", color: "var(--ink-secondary)" }}>
+            <Download size={13} /> PDF
           </button>
           <button onClick={onReset}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-body font-semibold text-white bg-brand hover:bg-brand/90 rounded-lg transition-colors">
-            <RotateCcw size={11} /> Analyse Again
+            className="flex items-center gap-1.5 px-3 rounded-[8px] text-white hover:opacity-90 transition-colors min-h-0"
+            style={{ height: "36px", fontSize: "13px", fontWeight: 600, background: "var(--grad-brand)" }}>
+            <RotateCcw size={13} /> Analyse Again
           </button>
         </div>
       </div>
@@ -106,42 +110,55 @@ export function ReportViewer({ raw, filename, onReset }: { raw: string; filename
           if (b.kind === "h2") {
             secCount++;
             return (
-              <div key={i} className="flex items-center gap-3 pt-5 pb-2 first:pt-0">
-                <span className="px-1.5 py-0.5 rounded text-xs font-mono font-bold text-white bg-brand flex-shrink-0">
+              <div key={i} className="flex items-center gap-3 pt-6 pb-2 first:pt-2">
+                <span className="px-2 py-0.5 rounded font-mono font-[700] text-white flex-shrink-0"
+                  style={{ fontSize: "13px", background: "var(--accent)" }}>
                   {String(secCount).padStart(2, "0")}
                 </span>
-                <span className="font-mono text-sm font-bold text-brand uppercase tracking-widest">{b.text}</span>
-                <div className="flex-1 h-px bg-brand/20" />
+                <span className="font-mono font-[700] uppercase tracking-[2px]"
+                  style={{ fontSize: "13px", color: "var(--accent)" }}>{b.text}</span>
+                <div className="flex-1 h-px bg-[var(--accent)]/20" />
               </div>
             );
           }
           if (b.kind === "h3") return (
-            <p key={i} className="font-body text-sm font-bold text-ink pt-3 pb-1">{b.text}</p>
+            <p key={i} className="font-[700] pt-3 pb-1"
+              style={{ fontSize: "16px", color: "var(--ink-primary)" }}>{b.text}</p>
           );
           if (b.kind === "rule") return (
-            <div key={i} className="border-t border-border my-4" />
+            <div key={i} className="border-t border-[var(--border-subtle)] my-4" />
           );
           if (b.kind === "bullet") return (
             <div key={i} className="flex gap-2.5 py-0.5 pl-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-brand/50 flex-shrink-0 mt-1.5" />
-              <span className="font-body text-sm text-ink-muted leading-relaxed" dangerouslySetInnerHTML={{ __html: inline(b.text) }} />
+              <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-2"
+                style={{ background: "var(--accent)", opacity: 0.6 }} />
+              <span className="leading-relaxed" style={{ fontSize: "15px", color: "var(--ink-secondary)" }}
+                dangerouslySetInnerHTML={{ __html: inline(b.text) }} />
             </div>
           );
           if (b.kind === "numbered") return (
             <div key={i} className="flex gap-3 py-0.5 pl-2">
-              <span className="font-mono text-xs font-bold text-brand flex-shrink-0 w-5 pt-0.5">{b.n}.</span>
-              <span className="font-body text-sm text-ink-muted leading-relaxed" dangerouslySetInnerHTML={{ __html: inline(b.text) }} />
+              <span className="font-mono font-[700] flex-shrink-0 w-5 pt-0.5"
+                style={{ fontSize: "14px", color: "var(--accent)" }}>{b.n}.</span>
+              <span className="leading-relaxed" style={{ fontSize: "15px", color: "var(--ink-secondary)" }}
+                dangerouslySetInnerHTML={{ __html: inline(b.text) }} />
             </div>
           );
           return (
-            <p key={i} className="font-body text-sm text-ink-muted leading-relaxed py-0.5" dangerouslySetInnerHTML={{ __html: inline(b.text) }} />
+            <p key={i} className="leading-relaxed py-0.5"
+              style={{ fontSize: "15px", color: "var(--ink-secondary)", lineHeight: "1.75" }}
+              dangerouslySetInnerHTML={{ __html: inline(b.text) }} />
           );
         })}
       </div>
 
-      <div className="px-6 py-3 border-t border-border flex items-center justify-between">
-        <span className="font-mono text-xs text-ink-muted">StinKit · {new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</span>
-        <span className="font-mono text-xs text-ink-muted">Powered by Claude Opus</span>
+      <div className="px-6 py-3 border-t border-[var(--border-subtle)] flex items-center justify-between">
+        <span className="font-mono" style={{ fontSize: "13px", color: "var(--ink-tertiary)" }}>
+          StinKit · {new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+        </span>
+        <span className="font-mono" style={{ fontSize: "13px", color: "var(--ink-tertiary)" }}>
+          Powered by Claude Opus
+        </span>
       </div>
     </div>
   );

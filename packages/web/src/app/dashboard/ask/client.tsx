@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { MessageSquare, Loader2, AlertTriangle, Info, ChevronDown, Send } from "lucide-react";
+import { useTask } from "@/lib/task-manager";
 
 type Repo   = { id: string; fullName: string; graphData: unknown };
 type Answer = { answer: string; nodesMatched: number; model: string; repoName: string };
@@ -66,6 +67,7 @@ export default function AskClient({ hasApiKey }: { hasApiKey: boolean }) {
   const [answer,   setAnswer]   = useState<Answer | null>(null);
   const [error,    setError]    = useState<string | null>(null);
   const textRef = useRef<HTMLTextAreaElement>(null);
+  const { runTask, getResult } = useTask();
 
   useEffect(() => {
     fetch("/api/repos").then(r => r.json()).then((data: unknown) => {
@@ -76,14 +78,23 @@ export default function AskClient({ hasApiKey }: { hasApiKey: boolean }) {
     }).catch(() => {});
   }, []);
 
+  // Restore result if task completed in background
+  useEffect(() => {
+    const cached = getResult("/dashboard/ask");
+    if (cached) setAnswer(cached as Answer);
+  }, [getResult]);
+
   const ask = async () => {
     if (!question.trim() || loading) return;
     setLoading(true); setError(null); setAnswer(null);
     try {
-      const res  = await fetch("/api/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: question.trim(), repoId: repoId || undefined }) });
-      const json = await res.json() as Record<string, unknown>;
-      if (!res.ok) throw new Error((json.error as string) ?? "Ask failed");
-      setAnswer(json as unknown as Answer);
+      const data = await runTask("Ask codebase", "/dashboard/ask", async () => {
+        const res  = await fetch("/api/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: question.trim(), repoId: repoId || undefined }) });
+        const json = await res.json() as Record<string, unknown>;
+        if (!res.ok) throw new Error((json.error as string) ?? "Ask failed");
+        return json as unknown as Answer;
+      });
+      setAnswer(data);
     } catch (e) { setError(e instanceof Error ? e.message : "Unknown error"); }
     finally { setLoading(false); }
   };

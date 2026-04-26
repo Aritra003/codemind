@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { Zap, Loader2, AlertTriangle, Info, Search, ChevronDown } from "lucide-react";
+import { useTask } from "@/lib/task-manager";
 
 type Repo     = { id: string; fullName: string; graphData: unknown };
 type FileNode = { id: string; deps: number };
@@ -104,6 +105,7 @@ export default function CheckPage() {
   const [loading,  setLoading]  = useState(false);
   const [result,   setResult]   = useState<Result | null>(null);
   const [error,    setError]    = useState<string | null>(null);
+  const { runTask, getResult } = useTask();
 
   useEffect(() => {
     fetch("/api/repos").then(r => r.json()).then((data: unknown) => {
@@ -113,6 +115,12 @@ export default function CheckPage() {
       if (indexed.length > 0 && indexed[0]) setRepoId(indexed[0].id);
     }).catch(() => {});
   }, []);
+
+  // Restore result if task completed in background
+  useEffect(() => {
+    const cached = getResult("/dashboard/check");
+    if (cached) setResult(cached as Result);
+  }, [getResult]);
 
   useEffect(() => {
     if (!repoId) { setNodes([]); setFilePath(""); return; }
@@ -134,10 +142,13 @@ export default function CheckPage() {
     if (!filePath.trim()) return;
     setLoading(true); setError(null); setResult(null);
     try {
-      const res  = await fetch("/api/check", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ filePath: filePath.trim(), repoId: repoId || undefined }) });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Check failed");
-      setResult(json);
+      const data = await runTask("Blast Radius Check", "/dashboard/check", async () => {
+        const res  = await fetch("/api/check", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ filePath: filePath.trim(), repoId: repoId || undefined }) });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error ?? "Check failed");
+        return json as Result;
+      });
+      setResult(data);
     } catch (e) { setError(e instanceof Error ? e.message : "Unknown error"); }
     finally { setLoading(false); }
   };

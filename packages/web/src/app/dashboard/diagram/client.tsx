@@ -1,8 +1,13 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { GitFork, Loader2, Copy, Check, Download, ChevronDown, Info, AlertTriangle, ZoomIn, ZoomOut, RotateCcw, Maximize2 } from "lucide-react";
+import { useTask } from "@/lib/task-manager";
 type Repo   = { id: string; fullName: string; graphData: unknown };
 type Result = { diagram: string; nodeCount: number; edgeCount: number; totalCount: number; warning?: string; repoName: string };
+
+// Initialize mermaid once per page load — calling initialize() on every render
+// causes a race condition when multiple renders fire in quick succession.
+let mermaidReady = false;
 
 function useCopy(text: string) {
   const [copied, setCopied] = useState(false);
@@ -57,18 +62,21 @@ function DiagramPreview({ diagram }: { diagram: string }) {
     svgRef.current = null;
     const id = `mmd-${++renderSeq}`;
     import("mermaid").then(({ default: mermaid }) => {
-      mermaid.initialize({
-        startOnLoad: false, theme: "dark", maxTextSize: 1_000_000,
-        themeVariables: {
-          background: "#05050F", primaryColor: "#6366F1", primaryTextColor: "#E2E8F0",
-          primaryBorderColor: "#4F46E5", lineColor: "#6366F1", secondaryColor: "#10B981",
-          tertiaryColor: "#1E293B", edgeLabelBackground: "#0F0F1A",
-          fontFamily: "'JetBrains Mono', monospace", fontSize: "12px",
-          nodeBorder: "#4F46E5", clusterBkg: "#0F0F1A", clusterBorder: "#1E1E35",
-        },
-        flowchart: { curve: "basis", padding: 24, nodeSpacing: 40, rankSpacing: 56 },
-        securityLevel: "loose",
-      });
+      if (!mermaidReady) {
+        mermaid.initialize({
+          startOnLoad: false, theme: "dark", maxTextSize: 1_000_000,
+          themeVariables: {
+            background: "#05050F", primaryColor: "#6366F1", primaryTextColor: "#E2E8F0",
+            primaryBorderColor: "#4F46E5", lineColor: "#6366F1", secondaryColor: "#10B981",
+            tertiaryColor: "#1E293B", edgeLabelBackground: "#0F0F1A",
+            fontFamily: "'JetBrains Mono', monospace", fontSize: "12px",
+            nodeBorder: "#4F46E5", clusterBkg: "#0F0F1A", clusterBorder: "#1E1E35",
+          },
+          flowchart: { curve: "basis", padding: 24, nodeSpacing: 40, rankSpacing: 56 },
+          securityLevel: "loose",
+        });
+        mermaidReady = true;
+      }
       return mermaid.render(id, diagram);
     })
       .then(({ svg: svgStr }) => {
@@ -194,6 +202,7 @@ export default function DiagramClient() {
   const [result,  setResult]  = useState<Result | null>(null);
   const [error,   setError]   = useState<string | null>(null);
   const [tab,     setTab]     = useState<"preview" | "source">("preview");
+  const { runTask, getResult } = useTask();
 
   const { copied, copy } = useCopy(result?.diagram ?? "");
 
@@ -206,14 +215,23 @@ export default function DiagramClient() {
     }).catch(() => {});
   }, []);
 
+  // Restore result if task completed in background
+  useEffect(() => {
+    const cached = getResult("/dashboard/diagram");
+    if (cached) { setResult(cached as Result); setTab("preview"); }
+  }, [getResult]);
+
   const generate = async () => {
     if (loading) return;
     setLoading(true); setError(null); setResult(null);
     try {
-      const res  = await fetch("/api/see/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ repoId: repoId || undefined, scope: scope.trim() || undefined }) });
-      const json = await res.json() as Record<string, unknown>;
-      if (!res.ok) throw new Error((json.error as string) ?? "Generation failed");
-      setResult(json as unknown as Result);
+      const data = await runTask("Diagram generation", "/dashboard/diagram", async () => {
+        const res  = await fetch("/api/see/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ repoId: repoId || undefined, scope: scope.trim() || undefined }) });
+        const json = await res.json() as Record<string, unknown>;
+        if (!res.ok) throw new Error((json.error as string) ?? "Generation failed");
+        return json as unknown as Result;
+      });
+      setResult(data);
       setTab("preview");
     } catch (e) { setError(e instanceof Error ? e.message : "Unknown error"); }
     finally { setLoading(false); }
