@@ -34,10 +34,10 @@ const config: Config = {
         ink: {
           DEFAULT:   "#F0F0FA",
           primary:   "#F0F0FA",
-          secondary: "#B8B8D0",
-          tertiary:  "#7878A0",
-          muted:     "#505070",
-          dim:       "#505070",
+          secondary: "#C8C8E0",
+          tertiary:  "#A0A0C0",
+          muted:     "#9090B8",
+          dim:       "#8080A8",
         },
       },
 
